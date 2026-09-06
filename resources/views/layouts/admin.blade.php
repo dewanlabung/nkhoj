@@ -126,6 +126,7 @@
 <body class="bg-gray-100 dark:bg-gray-900 font-sans antialiased" style="font-family:Inter,system-ui,sans-serif"
     x-data="{
         dark: localStorage.getItem('adminDark') === '1',
+        sidebarOpen: false,
         toggleDark() {
             this.dark = !this.dark;
             localStorage.setItem('adminDark', this.dark ? '1' : '0');
@@ -137,11 +138,31 @@
 <div class="flex h-screen overflow-hidden">
 
     {{-- ─── SIDEBAR ─────────────────────────────────────────── --}}
-    <aside class="w-60 bg-gray-900 flex-shrink-0 flex flex-col overflow-y-auto">
+    {{-- Mobile backdrop --}}
+    <div x-show="sidebarOpen" x-cloak @click="sidebarOpen = false"
+        class="lg:hidden fixed inset-0 bg-black/50 z-40"
+        x-transition:enter="transition-opacity ease-out duration-200"
+        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+        x-transition:leave="transition-opacity ease-in duration-150"
+        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+    </div>
 
-        <div class="flex items-center gap-2.5 px-5 py-4 border-b border-white/10 flex-shrink-0">
-            <span class="text-xl font-black text-white tracking-tight">{{ $siteName }}</span>
-            <span class="text-[10px] font-semibold text-gray-400 bg-white/10 px-2 py-0.5 rounded-full uppercase tracking-wide">Admin</span>
+    <aside class="w-60 bg-gray-900 flex-shrink-0 flex flex-col overflow-y-auto
+        fixed lg:relative inset-y-0 left-0 z-50
+        -translate-x-full lg:translate-x-0 transition-transform duration-250
+        lg:!transform-none"
+        :class="sidebarOpen ? '!translate-x-0' : ''">
+
+        <div class="flex items-center justify-between gap-2.5 px-5 py-4 border-b border-white/10 flex-shrink-0">
+            <div class="flex items-center gap-2.5">
+                <span class="text-xl font-black text-white tracking-tight">{{ $siteName }}</span>
+                <span class="text-[10px] font-semibold text-gray-400 bg-white/10 px-2 py-0.5 rounded-full uppercase tracking-wide">Admin</span>
+            </div>
+            {{-- Close button (mobile only) --}}
+            <button @click="sidebarOpen = false"
+                class="lg:hidden w-7 h-7 flex items-center justify-center rounded-full bg-white/10 text-gray-400 hover:bg-white/20 transition-colors text-lg font-light flex-shrink-0">
+                ×
+            </button>
         </div>
 
         <nav class="flex-1 px-2.5 py-4 space-y-0.5 text-sm">
@@ -337,8 +358,15 @@
     <div class="flex-1 flex flex-col min-w-0">
 
         {{-- Top bar --}}
-        <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 h-14 flex items-center justify-between flex-shrink-0">
-            <div>
+        <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 h-14 flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center gap-3">
+                {{-- Mobile hamburger --}}
+                <button @click="sidebarOpen = !sidebarOpen"
+                    class="lg:hidden w-9 h-9 flex items-center justify-center rounded-lg text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
                 <h1 class="text-base font-bold text-gray-900 dark:text-white">@yield('title', 'Dashboard')</h1>
             </div>
 
