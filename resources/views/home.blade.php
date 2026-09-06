@@ -199,7 +199,7 @@
                     </div>
                     <div>
                         <p class="text-white font-semibold text-sm">{{ auth()->user()->name }}</p>
-                        <p class="text-white/60 text-xs">@{{ auth()->user()->username }}</p>
+                        <p class="text-white/60 text-xs">{{ auth()->user()->username }}</p>
                     </div>
                 </div>
                 <form method="POST" action="/logout" class="inline">
