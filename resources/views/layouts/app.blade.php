@@ -30,8 +30,56 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', $siteName){{ $taglineEn ? ' — '.$taglineEn : ($taglineNe ? ' — '.$taglineNe : '') }}</title>
-    <meta name="description" content="@yield('description', $siteDesc)">
+    @php
+        $__pageTitle = trim(View::yieldContent('title', $siteName));
+        $__fullTitle = $__pageTitle . ($taglineEn ? ' — '.$taglineEn : ($taglineNe ? ' — '.$taglineNe : ''));
+        $__desc      = strip_tags(trim(View::yieldContent('description', $siteDesc)));
+        $__ogImage   = trim(View::yieldContent('og_image', $__s['og_default_image'] ?? ''));
+        $__canonical = trim(View::yieldContent('canonical', url()->current()));
+        $__keywords  = $__s['site_keywords'] ?? '';
+        $__siteUrl   = $__s['site_url'] ?? url('/');
+        $__twitterHandle = ltrim($__s['social_twitter'] ?? '', 'https://x.com/https://twitter.com/@');
+        $__jsonLd    = $__s['enable_jsonld'] ?? true;
+    @endphp
+    <title>{{ $__fullTitle }}</title>
+    <link rel="canonical" href="{{ $__canonical }}">
+    <meta name="description" content="{{ $__desc }}">
+    @if($__keywords)
+    <meta name="keywords" content="{{ $__keywords }}">
+    @endif
+    {{-- Open Graph --}}
+    <meta property="og:site_name" content="{{ $siteName }}">
+    <meta property="og:title" content="{{ $__pageTitle }}">
+    <meta property="og:description" content="{{ $__desc }}">
+    <meta property="og:url" content="{{ $__canonical }}">
+    <meta property="og:type" content="@yield('og_type', 'website')">
+    @if($__ogImage)
+    <meta property="og:image" content="{{ $__ogImage }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    @endif
+    <meta property="og:locale" content="ne_NP">
+    {{-- Twitter Card --}}
+    <meta name="twitter:card" content="{{ $__ogImage ? 'summary_large_image' : 'summary' }}">
+    <meta name="twitter:title" content="{{ $__pageTitle }}">
+    <meta name="twitter:description" content="{{ $__desc }}">
+    @if($__ogImage)
+    <meta name="twitter:image" content="{{ $__ogImage }}">
+    @endif
+    @if($__twitterHandle)
+    <meta name="twitter:site" content="@{{ $__twitterHandle }}">
+    @endif
+    {{-- JSON-LD --}}
+    @if($__jsonLd)
+    @yield('jsonld')
+    @endif
+    {{-- Webmaster verification --}}
+    @if(!empty($__s['verify_google']))
+    <meta name="google-site-verification" content="{{ $__s['verify_google'] }}">
+    @endif
+    @if(!empty($__s['verify_bing']))
+    <meta name="msvalidate.01" content="{{ $__s['verify_bing'] }}">
+    @endif
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">

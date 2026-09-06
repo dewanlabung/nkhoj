@@ -189,6 +189,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
 
     // SEO
     Route::get('/seo',                       [AdminController::class, 'seo']);
+    Route::post('/seo/meta',                 [AdminController::class, 'updateSeoMeta']);
     Route::post('/seo/robots',               [AdminController::class, 'updateRobots']);
     Route::post('/seo/settings',             [AdminController::class, 'updateSeoSettings']);
 
