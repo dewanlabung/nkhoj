@@ -537,7 +537,7 @@
 </div>
 
 {{-- MAIN CONTENT --}}
-<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-28 lg:pb-8">
     @yield('content')
 </main>
 
@@ -589,6 +589,119 @@
         </div>
     </div>
 </footer>
+
+{{-- ═══════════════════════════════════════════════════════
+     MOBILE BOTTOM TAB BAR
+═══════════════════════════════════════════════════════ --}}
+@php
+$tabHome    = request()->is('/');
+$tabSearch  = request()->is('search*');
+$tabSaved   = request()->is('notifications*') || request()->is('bookmarks*');
+$tabMe      = request()->is('profile*') || request()->is('dashboard*') || request()->is('account*');
+@endphp
+<nav class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur border-t border-gray-100 dark:border-gray-800 flex items-end"
+    style="padding-bottom: env(safe-area-inset-bottom, 4px)">
+
+    {{-- Home --}}
+    <a href="/" class="flex-1 flex flex-col items-center gap-0.5 pt-2 pb-1 min-w-0 group">
+        <div class="w-6 h-6 flex items-center justify-center">
+            <svg class="w-6 h-6 transition-colors {{ $tabHome ? 'text-brand-600' : 'text-gray-400 dark:text-gray-500 group-active:text-brand-500' }}"
+                fill="{{ $tabHome ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            </svg>
+        </div>
+        <span class="text-[10px] font-semibold {{ $tabHome ? 'text-brand-600' : 'text-gray-400 dark:text-gray-500' }}">Home</span>
+        @if($tabHome)<span class="w-1 h-1 rounded-full bg-brand-500 mt-0.5 -mb-0.5"></span>@endif
+    </a>
+
+    {{-- Explore --}}
+    <a href="/search" class="flex-1 flex flex-col items-center gap-0.5 pt-2 pb-1 min-w-0 group">
+        <div class="w-6 h-6 flex items-center justify-center">
+            <svg class="w-6 h-6 transition-colors {{ $tabSearch ? 'text-brand-600' : 'text-gray-400 dark:text-gray-500 group-active:text-brand-500' }}"
+                fill="{{ $tabSearch ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+        </div>
+        <span class="text-[10px] font-semibold {{ $tabSearch ? 'text-brand-600' : 'text-gray-400 dark:text-gray-500' }}">Explore</span>
+        @if($tabSearch)<span class="w-1 h-1 rounded-full bg-brand-500 mt-0.5 -mb-0.5"></span>@endif
+    </a>
+
+    {{-- Write (centre — elevated) --}}
+    <div class="flex-1 flex flex-col items-center justify-end pb-1 min-w-0 -mt-4">
+        @auth
+        <button @click="formatModal = true"
+            class="w-13 h-13 rounded-full bg-brand-600 hover:bg-brand-700 active:scale-95 flex items-center justify-center shadow-lg shadow-brand-500/30 transition-all"
+            style="width:52px;height:52px" title="Write">
+            <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+            </svg>
+        </button>
+        @else
+        <a href="/register"
+            class="w-13 h-13 rounded-full bg-brand-600 hover:bg-brand-700 active:scale-95 flex items-center justify-center shadow-lg shadow-brand-500/30 transition-all"
+            style="width:52px;height:52px" title="Write">
+            <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+            </svg>
+        </a>
+        @endauth
+        <span class="text-[10px] font-semibold text-gray-400 dark:text-gray-500 mt-0.5">Write</span>
+    </div>
+
+    {{-- Saved --}}
+    @auth
+    <a href="/notifications" class="flex-1 flex flex-col items-center gap-0.5 pt-2 pb-1 min-w-0 group"
+        x-data="{ cnt: 0 }" x-init="fetch('/notifications/count').then(r=>r.json()).then(d=>cnt=d.count).catch(()=>{})">
+        <div class="w-6 h-6 flex items-center justify-center relative">
+            <svg class="w-6 h-6 transition-colors {{ $tabSaved ? 'text-brand-600' : 'text-gray-400 dark:text-gray-500 group-active:text-brand-500' }}"
+                fill="{{ $tabSaved ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+            <span x-show="cnt > 0" x-text="cnt > 9 ? '9+' : cnt"
+                class="absolute -top-1 -right-1.5 bg-red-500 text-white text-[8px] rounded-full min-w-[14px] h-3.5 flex items-center justify-center px-0.5 font-bold leading-none"></span>
+        </div>
+        <span class="text-[10px] font-semibold {{ $tabSaved ? 'text-brand-600' : 'text-gray-400 dark:text-gray-500' }}">Inbox</span>
+        @if($tabSaved)<span class="w-1 h-1 rounded-full bg-brand-500 mt-0.5 -mb-0.5"></span>@endif
+    </a>
+    @else
+    <a href="/login" class="flex-1 flex flex-col items-center gap-0.5 pt-2 pb-1 min-w-0 group">
+        <div class="w-6 h-6 flex items-center justify-center">
+            <svg class="w-6 h-6 text-gray-400 dark:text-gray-500 group-active:text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+        </div>
+        <span class="text-[10px] font-semibold text-gray-400 dark:text-gray-500">Inbox</span>
+    </a>
+    @endauth
+
+    {{-- Me --}}
+    @auth
+    <a href="/profile/{{ auth()->user()->username ?? auth()->user()->id }}" class="flex-1 flex flex-col items-center gap-0.5 pt-2 pb-1 min-w-0 group">
+        <div class="w-6 h-6 flex items-center justify-center">
+            @if(auth()->user()->avatar_url ?? false)
+            <img src="{{ auth()->user()->avatar_url }}" class="w-6 h-6 rounded-full object-cover ring-2 {{ $tabMe ? 'ring-brand-500' : 'ring-transparent' }}">
+            @else
+            <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black text-white ring-2 {{ $tabMe ? 'ring-brand-500' : 'ring-transparent' }} transition-all"
+                style="background:hsl({{ crc32(auth()->user()->name) % 360 }},60%,55%)">
+                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+            </div>
+            @endif
+        </div>
+        <span class="text-[10px] font-semibold {{ $tabMe ? 'text-brand-600' : 'text-gray-400 dark:text-gray-500' }}">Me</span>
+        @if($tabMe)<span class="w-1 h-1 rounded-full bg-brand-500 mt-0.5 -mb-0.5"></span>@endif
+    </a>
+    @else
+    <a href="/login" class="flex-1 flex flex-col items-center gap-0.5 pt-2 pb-1 min-w-0 group">
+        <div class="w-6 h-6 flex items-center justify-center">
+            <svg class="w-6 h-6 text-gray-400 dark:text-gray-500 group-active:text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+            </svg>
+        </div>
+        <span class="text-[10px] font-semibold text-gray-400 dark:text-gray-500">Sign In</span>
+    </a>
+    @endauth
+
+</nav>
 
 @stack('scripts')
 </body>
