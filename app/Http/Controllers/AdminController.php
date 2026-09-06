@@ -1236,4 +1236,77 @@ class AdminController extends Controller
         if ($bytes < 1048576) return round($bytes / 1024, 1) . ' KB';
         return round($bytes / 1048576, 2) . ' MB';
     }
+
+    public function deploy()
+    {
+        $this->requireAdmin();
+        return view('admin.deploy');
+    }
+
+    public function runDeploy(Request $request)
+    {
+        $this->requireAdmin();
+
+        $log = [];
+        $success = true;
+
+        $commands = [
+            'git pull origin master',
+            'composer install --no-dev --optimize-autoloader --no-interaction',
+            PHP_BINARY . ' artisan migrate --force',
+            PHP_BINARY . ' artisan config:cache',
+            PHP_BINARY . ' artisan view:clear',
+            PHP_BINARY . ' artisan route:cache',
+        ];
+
+        foreach ($commands as $cmd) {
+            $output = [];
+            $code = 0;
+            exec($cmd . ' 2>&1', $output, $code);
+            $log[] = [
+                'cmd'    => $cmd,
+                'output' => implode("\n", $output),
+                'ok'     => $code === 0,
+            ];
+            if ($code !== 0) {
+                $success = false;
+                break;
+            }
+        }
+
+        return response()->json(['success' => $success, 'log' => $log]);
+    }
+
+    public function webhookDeploy(Request $request)
+    {
+        $secret = config('app.deploy_secret');
+
+        if ($secret) {
+            $signature = $request->header('X-Hub-Signature-256', '');
+            $expected  = 'sha256=' . hash_hmac('sha256', $request->getContent(), $secret);
+            if (!hash_equals($expected, $signature)) {
+                return response('Unauthorized', 401);
+            }
+        }
+
+        $payload = $request->json()->all();
+        if (($payload['ref'] ?? '') !== 'refs/heads/master') {
+            return response('Skipped', 200);
+        }
+
+        $commands = [
+            'git pull origin master',
+            'composer install --no-dev --optimize-autoloader --no-interaction',
+            PHP_BINARY . ' artisan migrate --force',
+            PHP_BINARY . ' artisan config:cache',
+            PHP_BINARY . ' artisan view:clear',
+            PHP_BINARY . ' artisan route:cache',
+        ];
+
+        foreach ($commands as $cmd) {
+            exec($cmd . ' 2>&1');
+        }
+
+        return response('OK', 200);
+    }
 }
