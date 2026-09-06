@@ -739,6 +739,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'test_db') {
         $d = ['db_host'=>trim($_POST['db_host']??'127.0.0.1'),'db_port'=>trim($_POST['db_port']??'3306'),'db_name'=>trim($_POST['db_name']??''),'db_user'=>trim($_POST['db_user']??''),'db_pass'=>$_POST['db_pass']??''];
+        merge_data($d);
         $r = test_db($d);
         $_SESSION['db_test_ok'] = $r['ok'];
         $_SESSION['db_test_msg'] = $r['ok'] ? 'Connected! MySQL '.$r['version'] : $r['error'];
@@ -888,27 +889,26 @@ input:focus,select:focus{box-shadow:0 0 0 2px #6366f1;outline:none}
   <?= $_SESSION['db_test_ok']?'✓ ':'✕ ' ?><?= htmlspecialchars($_SESSION['db_test_msg']??'') ?>
 </div>
 <?php unset($_SESSION['db_test_ok'],$_SESSION['db_test_msg']); endif; ?>
-<div class="grid grid-cols-2 gap-4 mb-4">
-  <div><label class="block text-xs font-semibold text-slate-400 mb-1.5">DB Host</label>
-    <input type="text" id="db_host" name="db_host" value="<?= htmlspecialchars($d['db_host']??'127.0.0.1') ?>" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-sm text-white"></div>
-  <div><label class="block text-xs font-semibold text-slate-400 mb-1.5">Port</label>
-    <input type="number" id="db_port" name="db_port" value="<?= htmlspecialchars($d['db_port']??'3306') ?>" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-sm text-white"></div>
-  <div class="col-span-2"><label class="block text-xs font-semibold text-slate-400 mb-1.5">Database Name *</label>
-    <input type="text" id="db_name" name="db_name" value="<?= htmlspecialchars($d['db_name']??'') ?>" placeholder="e.g. alphaome_dewnkhoj" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-sm text-white"></div>
-  <div><label class="block text-xs font-semibold text-slate-400 mb-1.5">Username *</label>
-    <input type="text" id="db_user" name="db_user" value="<?= htmlspecialchars($d['db_user']??'') ?>" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-sm text-white"></div>
-  <div><label class="block text-xs font-semibold text-slate-400 mb-1.5">Password</label>
-    <input type="password" id="db_pass" name="db_pass" value="<?= htmlspecialchars($d['db_pass']??'') ?>" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-sm text-white"></div>
-</div>
-<form method="POST" class="mb-3" id="fTest"><input type="hidden" name="action" value="test_db">
-  <button onclick="sync()" type="submit" class="w-full py-2.5 border border-indigo-600 text-indigo-400 hover:bg-indigo-900/30 rounded-xl text-sm font-semibold transition-colors">Test Connection</button>
-</form>
-<form method="POST" id="f2"><input type="hidden" name="action" value="step2">
+
+<form method="POST" id="mainForm">
+  <input type="hidden" name="action" id="formAction" value="step2">
+  <div class="grid grid-cols-2 gap-4 mb-4">
+    <div><label class="block text-xs font-semibold text-slate-400 mb-1.5">DB Host</label>
+      <input type="text" name="db_host" value="<?= htmlspecialchars($d['db_host']??'localhost') ?>" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-sm text-white"></div>
+    <div><label class="block text-xs font-semibold text-slate-400 mb-1.5">Port</label>
+      <input type="number" name="db_port" value="<?= htmlspecialchars($d['db_port']??'3306') ?>" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-sm text-white"></div>
+    <div class="col-span-2"><label class="block text-xs font-semibold text-slate-400 mb-1.5">Database Name *</label>
+      <input type="text" name="db_name" value="<?= htmlspecialchars($d['db_name']??'') ?>" placeholder="e.g. alphaome_dewnkhoj" required class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-sm text-white"></div>
+    <div><label class="block text-xs font-semibold text-slate-400 mb-1.5">Username *</label>
+      <input type="text" name="db_user" value="<?= htmlspecialchars($d['db_user']??'') ?>" required class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-sm text-white"></div>
+    <div><label class="block text-xs font-semibold text-slate-400 mb-1.5">Password</label>
+      <input type="password" name="db_pass" value="<?= htmlspecialchars($d['db_pass']??'') ?>" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-sm text-white"></div>
+  </div>
+  <button type="button" onclick="testConn()" class="w-full py-2.5 mb-3 border border-indigo-600 text-indigo-400 hover:bg-indigo-900/30 rounded-xl text-sm font-semibold transition-colors">Test Connection</button>
   <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-bold">Save & Continue →</button>
 </form>
 <script>
-function sync(){['db_host','db_port','db_name','db_user','db_pass'].forEach(id=>{const v=document.getElementById(id).value;document.querySelectorAll('[name="'+id+'"]').forEach(el=>el.value=v);})}
-document.getElementById('f2').addEventListener('submit',sync);
+function testConn(){document.getElementById('formAction').value='test_db';document.getElementById('mainForm').submit();}
 </script>
 </div>
 
