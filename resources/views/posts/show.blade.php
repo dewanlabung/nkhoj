@@ -1,6 +1,36 @@
 @extends('layouts.app')
 @section('title', $post->seo_title ?? $post->title)
 @section('description', $post->seo_desc ?? $post->excerpt)
+@section('og_type', 'article')
+@if($post->thumbnail_url)
+@section('og_image', $post->thumbnail_url)
+@endif
+@section('canonical', url('/posts/'.$post->slug))
+@push('jsonld')
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    "headline": "{{ addslashes($post->seo_title ?? $post->title) }}",
+    "description": "{{ addslashes($post->seo_desc ?? $post->excerpt) }}",
+    "url": "{{ url('/posts/'.$post->slug) }}",
+    @if($post->thumbnail_url)
+    "image": ["{{ $post->thumbnail_url }}"],
+    @endif
+    "datePublished": "{{ $post->published_at->toIso8601String() }}",
+    "dateModified": "{{ $post->updated_at->toIso8601String() }}",
+    "author": {
+        "@type": "Person",
+        "name": "{{ addslashes($post->author->name) }}",
+        "url": "{{ url('/profile/'.$post->author->username) }}"
+    },
+    "publisher": {
+        "@type": "Organization",
+        "name": "{{ config('app.name', 'nkhoj') }}"
+    }
+}
+</script>
+@endpush
 
 @section('content')
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">

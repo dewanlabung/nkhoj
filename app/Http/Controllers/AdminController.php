@@ -934,6 +934,30 @@ class AdminController extends Controller
         return back()->with('success', 'robots.txt updated.');
     }
 
+    public function updateSeoMeta(Request $request)
+    {
+        $this->requireAdmin();
+        $s = $this->getSettings();
+
+        // Global meta
+        $s['site_keywords']    = $request->input('site_keywords', '');
+        $s['og_default_image'] = $request->input('og_default_image', '');
+        $s['enable_jsonld']    = $request->boolean('enable_jsonld');
+
+        // Webmaster verification
+        $s['verify_google'] = $request->input('verify_google', '');
+        $s['verify_bing']   = $request->input('verify_bing', '');
+
+        // Per-page title/description templates
+        foreach (['home', 'post', 'category', 'author', 'tag', 'search'] as $page) {
+            $s["seo_title_{$page}"]  = $request->input("seo_title_{$page}", '');
+            $s["seo_desc_{$page}"]   = $request->input("seo_desc_{$page}", '');
+        }
+
+        $this->saveSettings($s);
+        return back()->with('success', 'Meta settings saved.');
+    }
+
     public function updateSeoSettings(Request $request)
     {
         $this->requireAdmin();
@@ -943,7 +967,7 @@ class AdminController extends Controller
         $s['sitemap_frequency'] = $request->input('sitemap_frequency', 'auto');
         $s['sitemap_lastmod']   = $request->input('sitemap_lastmod', 'none');
         $s['sitemap_priority']  = $request->input('sitemap_priority', 'none');
-        File::put(storage_path('app/site_settings.json'), json_encode($s, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        $this->saveSettings($s);
         return back()->with('success', 'SEO settings saved.');
     }
 
