@@ -12,5 +12,6 @@ return [
     'cipher'      => 'AES-256-CBC',
     'key'         => env('APP_KEY'),
     'previous_keys' => array_filter(explode(',', env('APP_PREVIOUS_KEYS', ''))),
-    'maintenance' => ['driver' => 'file'],
+    'maintenance'    => ['driver' => 'file'],
+    'deploy_secret'  => env('DEPLOY_SECRET', ''),
 ];

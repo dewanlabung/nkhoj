@@ -220,6 +220,10 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('/cache/clear',              [AdminController::class, 'clearCache']);
     Route::get('/backup',                    [AdminController::class, 'backup']);
 
+    // Deploy
+    Route::get('/deploy',                    [AdminController::class, 'deploy']);
+    Route::post('/deploy/run',               [AdminController::class, 'runDeploy']);
+
     // Navigation
     Route::get('/navigation',                [\App\Http\Controllers\NavigationController::class, 'index']);
     Route::post('/navigation',               [\App\Http\Controllers\NavigationController::class, 'store']);
@@ -275,6 +279,9 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('/languages/default',        [\App\Http\Controllers\LanguageController::class, 'updateDefault']);
     Route::post('/languages/import',         [\App\Http\Controllers\LanguageController::class, 'import']);
 });
+
+// GitHub deploy webhook (no auth, verified by HMAC secret)
+Route::post('/webhook/deploy', [AdminController::class, 'webhookDeploy'])->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
 // Questions (public)
 Route::get('/questions',                      [\App\Http\Controllers\QuestionController::class, 'index']);
