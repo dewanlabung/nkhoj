@@ -22,8 +22,8 @@
 <div class="space-y-px">
 
     {{-- Site URL --}}
-    <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 first:rounded-t-xl last:rounded-b-xl px-6 py-5 flex items-start gap-8">
-        <div class="w-80 flex-shrink-0">
+    <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 first:rounded-t-xl last:rounded-b-xl px-6 py-5 flex flex-col sm:flex-row items-start gap-4 sm:gap-8">
+        <div class="w-full sm:w-80 flex-shrink-0">
             <p class="text-sm font-bold text-gray-900 dark:text-white mb-1">Site URL</p>
             <p class="text-xs text-gray-400 leading-relaxed">The primary domain for your site.</p>
             <button type="button" class="mt-2 text-xs text-brand-500 hover:underline">What is a primary site url?</button>
@@ -38,8 +38,8 @@
     </div>
 
     {{-- Site Name --}}
-    <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 first:rounded-t-xl last:rounded-b-xl px-6 py-5 flex items-start gap-8">
-        <div class="w-80 flex-shrink-0">
+    <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 first:rounded-t-xl last:rounded-b-xl px-6 py-5 flex flex-col sm:flex-row items-start gap-4 sm:gap-8">
+        <div class="w-full sm:w-80 flex-shrink-0">
             <p class="text-sm font-bold text-gray-900 dark:text-white mb-1">Site name</p>
             <p class="text-xs text-gray-400 leading-relaxed">Short name for the site that will appear in browser tabs, SEO tags, PWA app and other places.</p>
         </div>
@@ -53,8 +53,8 @@
     </div>
 
     {{-- Tagline --}}
-    <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 first:rounded-t-xl last:rounded-b-xl px-6 py-5 flex items-start gap-8">
-        <div class="w-80 flex-shrink-0">
+    <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 first:rounded-t-xl last:rounded-b-xl px-6 py-5 flex flex-col sm:flex-row items-start gap-4 sm:gap-8">
+        <div class="w-full sm:w-80 flex-shrink-0">
             <p class="text-sm font-bold text-gray-900 dark:text-white mb-1">Tagline</p>
             <p class="text-xs text-gray-400 leading-relaxed">Short tagline shown in meta descriptions and the site header.</p>
         </div>
@@ -80,8 +80,8 @@
     </div>
 
     {{-- Favicon --}}
-    <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 first:rounded-t-xl last:rounded-b-xl px-6 py-5 flex items-start gap-8">
-        <div class="w-80 flex-shrink-0">
+    <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 first:rounded-t-xl last:rounded-b-xl px-6 py-5 flex flex-col sm:flex-row items-start gap-4 sm:gap-8">
+        <div class="w-full sm:w-80 flex-shrink-0">
             <p class="text-sm font-bold text-gray-900 dark:text-white mb-1">Favicon</p>
             <p class="text-xs text-gray-400 leading-relaxed">This will generate different size favicons. Image should be at least 512×512 in size.</p>
         </div>
@@ -116,8 +116,8 @@
     </div>
 
     {{-- Dark Logo --}}
-    <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 first:rounded-t-xl last:rounded-b-xl px-6 py-5 flex items-start gap-8">
-        <div class="w-80 flex-shrink-0">
+    <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 first:rounded-t-xl last:rounded-b-xl px-6 py-5 flex flex-col sm:flex-row items-start gap-4 sm:gap-8">
+        <div class="w-full sm:w-80 flex-shrink-0">
             <p class="text-sm font-bold text-gray-900 dark:text-white mb-1">Dark logo</p>
             <p class="text-xs text-gray-400 leading-relaxed">Used when global color scheme or specific element scheme is light. Default logo is 516×117px size.</p>
         </div>
@@ -152,8 +152,8 @@
     </div>
 
     {{-- Light Logo --}}
-    <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 first:rounded-t-xl last:rounded-b-xl px-6 py-5 flex items-start gap-8">
-        <div class="w-80 flex-shrink-0">
+    <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 first:rounded-t-xl last:rounded-b-xl px-6 py-5 flex flex-col sm:flex-row items-start gap-4 sm:gap-8">
+        <div class="w-full sm:w-80 flex-shrink-0">
             <p class="text-sm font-bold text-gray-900 dark:text-white mb-1">Light logo</p>
             <p class="text-xs text-gray-400 leading-relaxed">Used when global color scheme or specific element scheme is dark. If empty, light mode logo will be used.</p>
         </div>
@@ -188,8 +188,8 @@
     </div>
 
     {{-- Compact Logos --}}
-    <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 first:rounded-t-xl last:rounded-b-xl px-6 py-5 flex items-start gap-8">
-        <div class="w-80 flex-shrink-0">
+    <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 first:rounded-t-xl last:rounded-b-xl px-6 py-5 flex flex-col sm:flex-row items-start gap-4 sm:gap-8">
+        <div class="w-full sm:w-80 flex-shrink-0">
             <p class="text-sm font-bold text-gray-900 dark:text-white mb-1">Compact logos</p>
             <p class="text-xs text-gray-400 leading-relaxed">Will show these logos if there's not enough space for regular logos. For example on mobile or when screen is too small.</p>
         </div>
@@ -242,8 +242,8 @@
     </div>
 
     {{-- Contact & Support --}}
-    <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 first:rounded-t-xl last:rounded-b-xl px-6 py-5 flex items-start gap-8">
-        <div class="w-80 flex-shrink-0">
+    <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 first:rounded-t-xl last:rounded-b-xl px-6 py-5 flex flex-col sm:flex-row items-start gap-4 sm:gap-8">
+        <div class="w-full sm:w-80 flex-shrink-0">
             <p class="text-sm font-bold text-gray-900 dark:text-white mb-1">Contact &amp; Support</p>
             <p class="text-xs text-gray-400 leading-relaxed">Contact email shown publicly and used for system notifications.</p>
         </div>
@@ -257,8 +257,8 @@
     </div>
 
     {{-- Social Links --}}
-    <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 first:rounded-t-xl last:rounded-b-xl px-6 py-5 flex items-start gap-8">
-        <div class="w-80 flex-shrink-0">
+    <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 first:rounded-t-xl last:rounded-b-xl px-6 py-5 flex flex-col sm:flex-row items-start gap-4 sm:gap-8">
+        <div class="w-full sm:w-80 flex-shrink-0">
             <p class="text-sm font-bold text-gray-900 dark:text-white mb-1">Social Links</p>
             <p class="text-xs text-gray-400 leading-relaxed">Links to your social profiles, shown in the site footer and about page.</p>
         </div>
@@ -286,8 +286,8 @@
     </div>
 
     {{-- Analytics & Integrations --}}
-    <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 first:rounded-t-xl last:rounded-b-xl px-6 py-5 flex items-start gap-8">
-        <div class="w-80 flex-shrink-0">
+    <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 first:rounded-t-xl last:rounded-b-xl px-6 py-5 flex flex-col sm:flex-row items-start gap-4 sm:gap-8">
+        <div class="w-full sm:w-80 flex-shrink-0">
             <p class="text-sm font-bold text-gray-900 dark:text-white mb-1">Analytics &amp; Integrations</p>
             <p class="text-xs text-gray-400 leading-relaxed">Connect analytics and ad networks to your site.</p>
         </div>
@@ -308,8 +308,8 @@
     </div>
 
     {{-- Content Behaviour --}}
-    <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 first:rounded-t-xl last:rounded-b-xl px-6 py-5 flex items-start gap-8">
-        <div class="w-80 flex-shrink-0">
+    <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 first:rounded-t-xl last:rounded-b-xl px-6 py-5 flex flex-col sm:flex-row items-start gap-4 sm:gap-8">
+        <div class="w-full sm:w-80 flex-shrink-0">
             <p class="text-sm font-bold text-gray-900 dark:text-white mb-1">Content Behaviour</p>
             <p class="text-xs text-gray-400 leading-relaxed">Toggle site-wide features on or off.</p>
         </div>
