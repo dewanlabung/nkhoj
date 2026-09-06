@@ -28,6 +28,10 @@
     <style>
         [x-cloak] { display: none !important; }
         html, body { height: 100%; overflow: hidden; }
+        @media (max-width: 1023px) {
+            html, body { overflow: auto; height: auto; min-height: 100%; }
+            .flex.h-screen { height: auto; min-height: 100svh; }
+        }
 
         /* ── Sidebar nav links ───────────────────────────────── */
         .sl { display:flex; align-items:center; gap:10px; padding:7px 12px; border-radius:8px; font-size:13.5px; color:#9ca3af; transition:all .15s; cursor:pointer; }
@@ -458,7 +462,7 @@
         </header>
 
         {{-- Content --}}
-        <main class="flex-1 overflow-y-auto overflow-x-hidden p-6 bg-gray-50 dark:bg-gray-900">
+        <main class="flex-1 overflow-y-auto overflow-x-hidden p-6 pb-24 lg:pb-6 bg-gray-50 dark:bg-gray-900">
             @if(session('success'))
             <div class="mb-5 p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 rounded-lg text-sm">
                 ✅ {{ session('success') }}
