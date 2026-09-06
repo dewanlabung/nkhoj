@@ -1,0 +1,45 @@
+{
+    "site_name": "NKHOJ",
+    "tagline_en": "Nepal's leading multi-blog & news platform",
+    "tagline_ne": "नेपालको अग्रणी बहु-ब्लग र समाचार प्लेटफर्म",
+    "site_description": "नेपालको अग्रणी समाचार र ब्लग प्लेटफर्म",
+    "contact_email": null,
+    "social_facebook": null,
+    "social_twitter": null,
+    "social_instagram": null,
+    "social_youtube": null,
+    "social_tiktok": null,
+    "ga_id": null,
+    "adsense_id": null,
+    "breaking_news": null,
+    "allow_guest_comments": true,
+    "require_post_approval": false,
+    "show_breaking_news": true,
+    "active_theme": "magazine",
+    "localized": {
+        "en": {
+            "app_name": "NKHOJ",
+            "date_format": "M d, Y",
+            "site_title": null,
+            "home_title": "Index",
+            "site_description": null,
+            "keywords": null,
+            "footer_about": null,
+            "post_url_button": "Click Here To See More",
+            "copyright": "Copyright 2026 nkhoj - All Rights Reserved."
+        }
+    },
+    "formats_enabled": {
+        "article": true,
+        "gallery": true,
+        "sorted_list": true,
+        "table_of_contents": true,
+        "video": true,
+        "audio": false,
+        "trivia_quiz": false,
+        "personality_quiz": false,
+        "poll": true,
+        "recipe": true,
+        "event": true
+    }
+}

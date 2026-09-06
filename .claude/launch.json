@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "OmniRoute",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "C:\\project\\nkhoj\\scripts\\start-omniroute.bat"],
+      "port": 20128,
+      "url": "http://localhost:20128"
+    },
+    {
+      "name": "nkhoj Laravel",
+      "runtimeExecutable": "C:\\xampp\\php\\php.exe",
+      "runtimeArgs": ["artisan", "serve", "--port=8000"],
+      "port": 8000,
+      "url": "http://localhost:8000"
+    }
+  ]
+}

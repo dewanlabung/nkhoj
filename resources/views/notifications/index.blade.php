@@ -1,0 +1,56 @@
+@extends('layouts.app')
+@section('title', 'सूचनाहरू — nkhoj')
+
+@section('content')
+<div class="max-w-2xl mx-auto">
+    <h1 class="text-2xl font-bold text-gray-900 mb-6 font-nepali flex items-center gap-2">
+        🔔 सूचनाहरू
+    </h1>
+
+    @if($notifications->count())
+    <div class="space-y-3">
+        @foreach($notifications as $n)
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm px-5 py-4 flex items-start gap-4 {{ $n->read_at ? 'opacity-70' : '' }}">
+            <div class="text-2xl flex-shrink-0">
+                @if($n->type === 'comment') 💬
+                @elseif($n->type === 'follow') 👥
+                @elseif($n->type === 'reaction') ❤️
+                @elseif($n->type === 'bookmark') 🔖
+                @else 🔔
+                @endif
+            </div>
+            <div class="flex-1 min-w-0">
+                @if($n->type === 'comment')
+                <p class="text-sm text-gray-800 font-nepali">
+                    <strong>{{ $n->data['commenter'] ?? 'कसैले' }}</strong> ले तपाईंको
+                    <a href="/posts/{{ $n->data['post_slug'] ?? '#' }}" class="text-brand-600 hover:underline">{{ $n->data['post_title'] ?? 'लेख' }}</a>
+                    मा टिप्पणी गर्नुभयो।
+                </p>
+                @if(!empty($n->data['excerpt']))
+                <p class="text-xs text-gray-400 mt-1 italic">"{{ $n->data['excerpt'] }}"</p>
+                @endif
+                @elseif($n->type === 'follow')
+                <p class="text-sm text-gray-800 font-nepali">
+                    <a href="/profile/{{ $n->data['username'] ?? '#' }}" class="text-brand-600 hover:underline">{{ $n->data['follower'] ?? 'कसैले' }}</a>
+                    ले तपाईंलाई फलो गर्नुभयो।
+                </p>
+                @else
+                <p class="text-sm text-gray-800">{{ json_encode($n->data) }}</p>
+                @endif
+                <p class="text-xs text-gray-400 mt-1.5">{{ $n->created_at->diffForHumans() }}</p>
+            </div>
+            @if(!$n->read_at)
+            <div class="w-2 h-2 bg-brand-500 rounded-full flex-shrink-0 mt-1.5"></div>
+            @endif
+        </div>
+        @endforeach
+    </div>
+    <div class="mt-6">{{ $notifications->links() }}</div>
+    @else
+    <div class="text-center py-20 text-gray-400">
+        <div class="text-5xl mb-4">🔔</div>
+        <p class="font-nepali">अहिलेसम्म कुनै सूचना छैन।</p>
+    </div>
+    @endif
+</div>
+@endsection

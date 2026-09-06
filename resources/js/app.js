@@ -1,0 +1,8 @@
+import Alpine from 'alpinejs';
+import axios from 'axios';
+
+window.Alpine = Alpine;
+window.axios = axios;
+axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
+Alpine.start();
