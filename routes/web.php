@@ -314,6 +314,33 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::delete('/ai-content/drafts/{post}',          [AdminController::class, 'deleteAiDraft']);
 });
 
+// ── Account Portal (account.dewanlabung.com.np OR /account/*) ──────────────
+// Subdomain routing (requires DNS + Nginx setup for the subdomain)
+Route::domain('account.' . parse_url(config('app.url'), PHP_URL_HOST))->middleware(['auth'])->group(function () {
+    Route::get('/',                  [AccountController::class, 'home']);
+    Route::get('/personal-info',     [AccountController::class, 'personalInfo']);
+    Route::patch('/personal-info',   [AccountController::class, 'updatePersonalInfo']);
+    Route::post('/avatar',           [AccountController::class, 'updateAvatar']);
+    Route::get('/security',          [AccountController::class, 'security']);
+    Route::patch('/security/password', [AccountController::class, 'changePassword']);
+    Route::get('/subscriptions',     [AccountController::class, 'subscriptions']);
+    Route::get('/privacy',           [AccountController::class, 'privacy']);
+    Route::delete('/delete',         [AccountController::class, 'deleteAccount']);
+});
+
+// Path-based fallback (always works, same server)
+Route::middleware(['auth'])->prefix('account')->group(function () {
+    Route::get('/',                    [AccountController::class, 'home']);
+    Route::get('/personal-info',       [AccountController::class, 'personalInfo']);
+    Route::patch('/personal-info',     [AccountController::class, 'updatePersonalInfo']);
+    Route::post('/avatar',             [AccountController::class, 'updateAvatar']);
+    Route::get('/security',            [AccountController::class, 'security']);
+    Route::patch('/security/password', [AccountController::class, 'changePassword']);
+    Route::get('/subscriptions',       [AccountController::class, 'subscriptions']);
+    Route::get('/privacy',             [AccountController::class, 'privacy']);
+    Route::delete('/delete',           [AccountController::class, 'deleteAccount']);
+});
+
 // Membership (frontend)
 Route::get('/membership', [MembershipController::class, 'plans']);
 Route::get('/membership/success', [MembershipController::class, 'success']);

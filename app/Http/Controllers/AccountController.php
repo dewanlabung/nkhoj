@@ -2,63 +2,103 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Subscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rules\Password;
 
 class AccountController extends Controller
 {
-    public function settings()
+    public function __construct()
     {
-        return view('account.settings');
+        $this->middleware('auth');
     }
 
-    public function updateSettings(Request $request)
+    public function home()
     {
         $user = auth()->user();
-        $data = $request->validate([
-            'name'                   => 'required|string|max:100',
-            'username'               => ['required','string','max:50', Rule::unique('users')->ignore($user->id)],
-            'email'                  => ['required','email','max:150', Rule::unique('users')->ignore($user->id)],
-            'bio'                    => 'nullable|string|max:500',
-            'website'                => 'nullable|url|max:200',
-            'social_links.twitter'   => 'nullable|string|max:100',
-            'social_links.instagram' => 'nullable|string|max:100',
-            'social_links.facebook'  => 'nullable|string|max:100',
-            'social_links.youtube'   => 'nullable|string|max:100',
-            'social_links.tiktok'    => 'nullable|string|max:100',
-        ]);
-
-        $social = array_filter($request->input('social_links', []), fn($v) => !empty(trim((string)$v)));
-        $user->update([
-            'name'         => $data['name'],
-            'username'     => $data['username'],
-            'email'        => $data['email'],
-            'bio'          => $data['bio'] ?? null,
-            'website'      => $data['website'] ?? null,
-            'social_links' => $social ?: null,
-        ]);
-        return back()->with('success', 'Profile updated successfully.');
+        $sub  = $user->activeSubscription();
+        return view('account.home', compact('user', 'sub'));
     }
 
-    public function password()
+    public function personalInfo()
     {
-        return view('account.password');
+        return view('account.personal-info', ['user' => auth()->user()]);
     }
 
-    public function updatePassword(Request $request)
+    public function updatePersonalInfo(Request $request)
     {
+        $user = auth()->user();
+        $request->validate([
+            'name'       => 'required|string|max:100',
+            'first_name' => 'nullable|string|max:60',
+            'last_name'  => 'nullable|string|max:60',
+            'username'   => 'nullable|string|max:40|alpha_dash|unique:users,username,' . $user->id,
+            'bio'        => 'nullable|string|max:500',
+            'website'    => 'nullable|url|max:200',
+        ]);
+
+        $user->update($request->only('name', 'first_name', 'last_name', 'username', 'bio', 'website'));
+
+        return back()->with('success', 'Personal info updated.');
+    }
+
+    public function updateAvatar(Request $request)
+    {
+        $request->validate(['avatar' => 'required|image|max:2048']);
+        $user = auth()->user();
+
+        $path = $request->file('avatar')->store('avatars', 'public');
+        $user->update(['avatar_url' => Storage::url($path)]);
+
+        return back()->with('success', 'Avatar updated.');
+    }
+
+    public function security()
+    {
+        return view('account.security', ['user' => auth()->user()]);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $user = auth()->user();
         $request->validate([
             'current_password' => 'required',
-            'password'         => 'required|string|min:8|confirmed',
+            'password'         => ['required', 'confirmed', Password::min(8)],
         ]);
 
-        $user = auth()->user();
         if (!Hash::check($request->current_password, $user->password)) {
             return back()->withErrors(['current_password' => 'Current password is incorrect.']);
         }
 
-        $user->update(['password' => Hash::make($request->password)]);
+        $user->update(['password' => $request->password]);
+
         return back()->with('success', 'Password changed successfully.');
+    }
+
+    public function subscriptions()
+    {
+        $user = auth()->user();
+        $subs = Subscription::with('plan')
+            ->where('user_id', $user->id)
+            ->latest()
+            ->get();
+        return view('account.subscriptions', compact('user', 'subs'));
+    }
+
+    public function privacy()
+    {
+        return view('account.privacy', ['user' => auth()->user()]);
+    }
+
+    public function deleteAccount(Request $request)
+    {
+        $request->validate(['confirm' => 'required|in:DELETE']);
+        $user = auth()->user();
+        auth()->logout();
+        $user->delete();
+
+        return redirect('/')->with('success', 'Your account has been deleted.');
     }
 }
