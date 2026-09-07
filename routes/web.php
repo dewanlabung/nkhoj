@@ -279,6 +279,24 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::delete('/languages/{id}',         [\App\Http\Controllers\LanguageController::class, 'destroy']);
     Route::post('/languages/default',        [\App\Http\Controllers\LanguageController::class, 'updateDefault']);
     Route::post('/languages/import',         [\App\Http\Controllers\LanguageController::class, 'import']);
+
+    // Support tickets (admin)
+    Route::get('/support',                              [AdminController::class, 'supportTickets']);
+    Route::get('/support/{ticket}',                     [AdminController::class, 'supportShow']);
+    Route::post('/support/{ticket}/reply',              [AdminController::class, 'supportReply']);
+    Route::post('/support/{ticket}/assign',             [AdminController::class, 'supportAssign']);
+    Route::post('/support/{ticket}/status',             [AdminController::class, 'supportStatus']);
+    Route::delete('/support/{ticket}',                  [AdminController::class, 'supportDelete']);
+});
+
+// Support Center (frontend — auth required)
+Route::middleware('auth')->prefix('support')->group(function () {
+    Route::get('/',              [\App\Http\Controllers\SupportController::class, 'index']);
+    Route::get('/create',        [\App\Http\Controllers\SupportController::class, 'create']);
+    Route::post('/',             [\App\Http\Controllers\SupportController::class, 'store']);
+    Route::get('/{ticket}',      [\App\Http\Controllers\SupportController::class, 'show']);
+    Route::post('/{ticket}/reply', [\App\Http\Controllers\SupportController::class, 'reply']);
+    Route::post('/{ticket}/close', [\App\Http\Controllers\SupportController::class, 'close']);
 });
 
 // GitHub deploy webhook (no auth, verified by HMAC secret)
