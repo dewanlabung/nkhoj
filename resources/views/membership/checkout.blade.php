@@ -48,6 +48,18 @@
                 @csrf
                 <input type="hidden" name="method" id="selected-method" value="">
 
+                @if(!$stripeEnabled && !$paypalEmail && !$bankDetails)
+                <div class="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl border border-yellow-200 dark:border-yellow-700 text-center">
+                    <p class="text-sm font-semibold text-yellow-800 dark:text-yellow-300 mb-1">No payment methods configured</p>
+                    <p class="text-xs text-yellow-700 dark:text-yellow-400">The site admin needs to set up at least one payment method (Stripe, PayPal, or Bank Transfer) in the admin panel.</p>
+                    @if(auth()->user()->role === 'admin')
+                    <a href="/admin/memberships" class="inline-block mt-3 text-xs px-3 py-1.5 bg-yellow-100 dark:bg-yellow-800/40 text-yellow-800 dark:text-yellow-300 rounded-lg font-semibold hover:bg-yellow-200">
+                        Go to Admin → Memberships →
+                    </a>
+                    @endif
+                </div>
+                @endif
+
                 <div class="space-y-3 mb-6" id="method-list">
 
                     @if($stripeEnabled)
