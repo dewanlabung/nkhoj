@@ -298,6 +298,17 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('/support/{ticket}/assign',             [AdminController::class, 'supportAssign']);
     Route::post('/support/{ticket}/status',             [AdminController::class, 'supportStatus']);
     Route::delete('/support/{ticket}',                  [AdminController::class, 'supportDelete']);
+
+    // AI Content
+    Route::get('/ai-content',                           [AdminController::class, 'aiContent']);
+    Route::post('/ai-content/topics',                   [AdminController::class, 'storeAiTopic']);
+    Route::post('/ai-content/topics/{topic}/toggle',    [AdminController::class, 'toggleAiTopic']);
+    Route::delete('/ai-content/topics/{topic}',         [AdminController::class, 'deleteAiTopic']);
+    Route::post('/ai-content/topics/{topic}/run',       [AdminController::class, 'runAiTopic']);
+    Route::post('/ai-content/run-all',                  [AdminController::class, 'runAllAiTopics']);
+    Route::post('/ai-content/settings',                 [AdminController::class, 'updateAiSettings']);
+    Route::post('/ai-content/drafts/{post}/publish',    [AdminController::class, 'publishAiDraft']);
+    Route::delete('/ai-content/drafts/{post}',          [AdminController::class, 'deleteAiDraft']);
 });
 
 // Membership (frontend)

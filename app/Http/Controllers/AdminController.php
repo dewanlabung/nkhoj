@@ -20,6 +20,8 @@ use App\Models\SupportReply;
 use App\Models\SupportTicket;
 use App\Models\Tag;
 use App\Models\User;
+use App\Models\AiPostTopic;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -1529,5 +1531,91 @@ class AdminController extends Controller
         $ticket->delete();
 
         return redirect('/admin/support')->with('success', 'Ticket deleted.');
+    }
+
+    // ── AI Content ────────────────────────────────────────
+
+    public function aiContent()
+    {
+        $this->requireAdmin();
+        $topics     = AiPostTopic::with('category')->latest()->get();
+        $categories = Category::orderBy('sort_order')->get();
+        $drafts     = Post::with(['author', 'category'])
+                        ->where('status', 'draft')
+                        ->where('sources', 'like', 'AI generated%')
+                        ->latest()
+                        ->paginate(20);
+        $s             = $this->getSettings();
+        $geminiKey     = $s['gemini_api_key'] ?? '';
+        $geminiModel   = $s['gemini_model'] ?? 'gemini-1.5-flash';
+
+        return view('admin.ai-content', compact('topics', 'categories', 'drafts', 'geminiKey', 'geminiModel'));
+    }
+
+    public function storeAiTopic(Request $request)
+    {
+        $this->requireAdmin();
+        AiPostTopic::create([
+            'keyword'     => $request->keyword,
+            'language'    => $request->language ?? 'both',
+            'category_id' => $request->category_id ?: null,
+            'rss_source'  => $request->rss_source ?: null,
+            'frequency'   => $request->frequency ?? 'daily',
+            'is_active'   => true,
+        ]);
+        return redirect('/admin/ai-content')->with('success', 'Topic added.');
+    }
+
+    public function toggleAiTopic(AiPostTopic $topic)
+    {
+        $this->requireAdmin();
+        $topic->update(['is_active' => !$topic->is_active]);
+        return back();
+    }
+
+    public function deleteAiTopic(AiPostTopic $topic)
+    {
+        $this->requireAdmin();
+        $topic->delete();
+        return redirect('/admin/ai-content')->with('success', 'Topic deleted.');
+    }
+
+    public function runAiTopic(AiPostTopic $topic)
+    {
+        $this->requireAdmin();
+        Artisan::call('ai:generate-posts', ['--topic' => $topic->id, '--force' => true]);
+        $topic->update(['last_run_at' => now()]);
+        return redirect('/admin/ai-content')->with('success', 'Post generation triggered for: ' . $topic->keyword);
+    }
+
+    public function runAllAiTopics()
+    {
+        $this->requireAdmin();
+        Artisan::call('ai:generate-posts', ['--force' => true]);
+        return redirect('/admin/ai-content')->with('success', 'Generation triggered for all active topics.');
+    }
+
+    public function updateAiSettings(Request $request)
+    {
+        $this->requireAdmin();
+        $s = $this->getSettings();
+        $s['gemini_api_key'] = $request->gemini_api_key;
+        $s['gemini_model']   = $request->gemini_model ?? 'gemini-1.5-flash';
+        file_put_contents(storage_path('app/site_settings.json'), json_encode($s, JSON_PRETTY_PRINT));
+        return redirect('/admin/ai-content')->with('success', 'AI settings saved.');
+    }
+
+    public function publishAiDraft(Post $post)
+    {
+        $this->requireAdmin();
+        $post->update(['status' => 'published', 'published_at' => now()]);
+        return back()->with('success', 'Post published.');
+    }
+
+    public function deleteAiDraft(Post $post)
+    {
+        $this->requireAdmin();
+        $post->delete();
+        return back()->with('success', 'Draft deleted.');
     }
 }
