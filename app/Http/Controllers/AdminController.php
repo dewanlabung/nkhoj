@@ -1286,9 +1286,10 @@ class AdminController extends Controller
         $log = [];
         $success = true;
 
+        $composerBin = trim(shell_exec('which composer 2>/dev/null') ?: 'composer');
         $commands = [
             'git pull origin master',
-            'composer install --no-dev --optimize-autoloader --no-interaction',
+            'HOME=/tmp ' . $composerBin . ' install --no-dev --optimize-autoloader --no-interaction',
             PHP_BINARY . ' artisan migrate --force',
             PHP_BINARY . ' artisan config:cache',
             PHP_BINARY . ' artisan view:clear',
@@ -1298,7 +1299,7 @@ class AdminController extends Controller
         foreach ($commands as $cmd) {
             $output = [];
             $code = 0;
-            exec($cmd . ' 2>&1', $output, $code);
+            exec('cd ' . base_path() . ' && ' . $cmd . ' 2>&1', $output, $code);
             $log[] = [
                 'cmd'    => $cmd,
                 'output' => implode("\n", $output),
@@ -1330,9 +1331,10 @@ class AdminController extends Controller
             return response('Skipped', 200);
         }
 
+        $composerBin = trim(shell_exec('which composer 2>/dev/null') ?: 'composer');
         $commands = [
             'git pull origin master',
-            'composer install --no-dev --optimize-autoloader --no-interaction',
+            'HOME=/tmp ' . $composerBin . ' install --no-dev --optimize-autoloader --no-interaction',
             PHP_BINARY . ' artisan migrate --force',
             PHP_BINARY . ' artisan config:cache',
             PHP_BINARY . ' artisan view:clear',
@@ -1340,7 +1342,7 @@ class AdminController extends Controller
         ];
 
         foreach ($commands as $cmd) {
-            exec($cmd . ' 2>&1');
+            exec('cd ' . base_path() . ' && ' . $cmd . ' 2>&1');
         }
 
         return response('OK', 200);
