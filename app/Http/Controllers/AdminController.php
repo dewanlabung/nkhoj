@@ -1322,16 +1322,26 @@ class AdminController extends Controller
         $secret = config('app.deploy_secret');
 
         if ($secret) {
-            $signature = $request->header('X-Hub-Signature-256', '');
-            $expected  = 'sha256=' . hash_hmac('sha256', $request->getContent(), $secret);
-            if (!hash_equals($expected, $signature)) {
+            $authorized = false;
+
+            // Accept Bearer token (simpler, used by GitHub Actions)
+            $bearer = $request->bearerToken();
+            if ($bearer && hash_equals($secret, $bearer)) {
+                $authorized = true;
+            }
+
+            // Also accept HMAC-SHA256 signature
+            if (!$authorized) {
+                $signature = $request->header('X-Hub-Signature-256', '');
+                $expected  = 'sha256=' . hash_hmac('sha256', $request->getContent(), $secret);
+                if ($signature && hash_equals($expected, $signature)) {
+                    $authorized = true;
+                }
+            }
+
+            if (!$authorized) {
                 return response('Unauthorized', 401);
             }
-        }
-
-        $payload = $request->json()->all();
-        if (($payload['ref'] ?? '') !== 'refs/heads/master') {
-            return response('Skipped', 200);
         }
 
         $composerBin = trim(shell_exec('which composer 2>/dev/null') ?: 'composer');
