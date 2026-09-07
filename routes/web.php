@@ -15,6 +15,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\PollController;
 
 // Public routes
@@ -112,6 +113,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     // Posts
     Route::get('/posts',                     [AdminController::class, 'posts']);
     Route::post('/posts/{id}/status',        [AdminController::class, 'updatePostStatus']);
+    Route::post('/posts/{id}/toggle-pro',    [AdminController::class, 'togglePostPro']);
     Route::delete('/posts/{id}',             [AdminController::class, 'deletePost']);
     Route::post('/posts/bulk',               [AdminController::class, 'bulkPostAction']);
 
@@ -279,6 +281,42 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::delete('/languages/{id}',         [\App\Http\Controllers\LanguageController::class, 'destroy']);
     Route::post('/languages/default',        [\App\Http\Controllers\LanguageController::class, 'updateDefault']);
     Route::post('/languages/import',         [\App\Http\Controllers\LanguageController::class, 'import']);
+
+    // Memberships (admin)
+    Route::get('/memberships',                                      [AdminController::class, 'memberships']);
+    Route::post('/memberships/plans',                               [AdminController::class, 'storePlan']);
+    Route::put('/memberships/plans/{plan}',                         [AdminController::class, 'updatePlan']);
+    Route::post('/memberships/plans/{plan}/toggle',                 [AdminController::class, 'togglePlan']);
+    Route::delete('/memberships/plans/{plan}',                      [AdminController::class, 'deletePlan']);
+    Route::post('/memberships/subscriptions/{subscription}/revoke', [AdminController::class, 'revokeSubscription']);
+    Route::post('/memberships/stripe-settings',                     [AdminController::class, 'updateStripeSettings']);
+
+    // Support tickets (admin)
+    Route::get('/support',                              [AdminController::class, 'supportTickets']);
+    Route::get('/support/{ticket}',                     [AdminController::class, 'supportShow']);
+    Route::post('/support/{ticket}/reply',              [AdminController::class, 'supportReply']);
+    Route::post('/support/{ticket}/assign',             [AdminController::class, 'supportAssign']);
+    Route::post('/support/{ticket}/status',             [AdminController::class, 'supportStatus']);
+    Route::delete('/support/{ticket}',                  [AdminController::class, 'supportDelete']);
+});
+
+// Membership (frontend)
+Route::get('/membership', [MembershipController::class, 'plans']);
+Route::get('/membership/success', [MembershipController::class, 'success']);
+Route::get('/membership/{plan}/checkout', [MembershipController::class, 'checkout'])->middleware('auth');
+Route::post('/membership/cancel', [MembershipController::class, 'cancel'])->middleware('auth');
+
+// Stripe webhook (no auth/csrf)
+Route::post('/webhook/stripe', [MembershipController::class, 'webhook'])->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+
+// Support Center (frontend — auth required)
+Route::middleware('auth')->prefix('support')->group(function () {
+    Route::get('/',              [\App\Http\Controllers\SupportController::class, 'index']);
+    Route::get('/create',        [\App\Http\Controllers\SupportController::class, 'create']);
+    Route::post('/',             [\App\Http\Controllers\SupportController::class, 'store']);
+    Route::get('/{ticket}',      [\App\Http\Controllers\SupportController::class, 'show']);
+    Route::post('/{ticket}/reply', [\App\Http\Controllers\SupportController::class, 'reply']);
+    Route::post('/{ticket}/close', [\App\Http\Controllers\SupportController::class, 'close']);
 });
 
 // GitHub deploy webhook (no auth, verified by HMAC secret)

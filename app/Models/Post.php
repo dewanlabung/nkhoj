@@ -12,7 +12,7 @@ class Post extends Model
     protected $fillable = [
         'uuid', 'author_id', 'category_id', 'slug',
         'title', 'excerpt', 'body', 'status',
-        'is_featured', 'view_count', 'published_at',
+        'is_featured', 'is_pro', 'view_count', 'published_at',
         'seo_title', 'seo_desc', 'thumbnail_url',
         'scheduled_at', 'post_format',
         'event_start_at', 'event_end_at', 'event_organizer', 'event_venue',
@@ -27,6 +27,7 @@ class Post extends Model
         return [
             'body'             => 'array',
             'is_featured'      => 'boolean',
+            'is_pro'           => 'boolean',
             'published_at'     => 'datetime',
             'scheduled_at'     => 'datetime',
             'event_start_at'   => 'datetime',

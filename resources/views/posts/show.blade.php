@@ -88,8 +88,17 @@
                 <p class="text-lg text-gray-600 leading-relaxed mb-6 font-medium font-nepali">{{ $post->excerpt }}</p>
                 @endif
 
-                {{-- Body --}}
-                <div class="prose prose-lg max-w-none text-gray-700 leading-relaxed font-nepali">
+                {{-- Pro badge --}}
+                @if($post->is_pro)
+                <div class="mb-4">
+                    <span class="inline-flex items-center gap-1.5 bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400 text-xs font-bold px-3 py-1.5 rounded-full border border-brand-200 dark:border-brand-700/50">
+                        ✨ Pro Content
+                    </span>
+                </div>
+                @endif
+
+                {{-- Body with content locker --}}
+                <x-content-locker :post="$post">
                     @if(is_array($post->body))
                         @foreach($post->body as $block)
                             @if(($block['type'] ?? '') === 'paragraph')
@@ -103,7 +112,7 @@
                     @else
                         {!! nl2br(e($post->body)) !!}
                     @endif
-                </div>
+                </x-content-locker>
 
                 {{-- ═══════════════════ REACTIONS ═══════════════════ --}}
                 <div class="mt-10 pt-6 border-t border-gray-100"

@@ -171,4 +171,32 @@ class User extends Authenticatable
     {
         return $this->role === 'admin';
     }
+
+    public function isMod(): bool
+    {
+        return in_array($this->role, ['admin', 'editor']);
+    }
+
+    public function subscriptions()
+    {
+        return $this->hasMany(\App\Models\Subscription::class);
+    }
+
+    public function activeSubscription(): ?\App\Models\Subscription
+    {
+        return $this->subscriptions()
+            ->where('status', 'active')
+            ->where(function ($q) {
+                $q->whereNull('ends_at')->orWhere('ends_at', '>', now());
+            })
+            ->with('plan')
+            ->latest()
+            ->first();
+    }
+
+    public function hasPro(): bool
+    {
+        if ($this->isAdmin() || $this->isEditor()) return true;
+        return $this->activeSubscription() !== null;
+    }
 }

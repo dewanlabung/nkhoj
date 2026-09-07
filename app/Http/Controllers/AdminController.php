@@ -14,6 +14,10 @@ use App\Models\Poll;
 use App\Models\PollOption;
 use App\Models\Post;
 use App\Models\Question;
+use App\Models\MembershipPlan;
+use App\Models\Subscription;
+use App\Models\SupportReply;
+use App\Models\SupportTicket;
 use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -381,6 +385,14 @@ class AdminController extends Controller
         $this->requireAdmin();
         Post::findOrFail($id)->delete();
         return back()->with('success', 'Post deleted.');
+    }
+
+    public function togglePostPro(int $id)
+    {
+        $this->requireAdmin();
+        $post = Post::findOrFail($id);
+        $post->update(['is_pro' => !$post->is_pro]);
+        return back()->with('success', $post->is_pro ? 'Post marked as Pro.' : 'Pro restriction removed.');
     }
 
     public function bulkPostAction(Request $request)
@@ -1274,9 +1286,10 @@ class AdminController extends Controller
         $log = [];
         $success = true;
 
+        $composerBin = trim(shell_exec('which composer 2>/dev/null') ?: 'composer');
         $commands = [
             'git pull origin master',
-            'composer install --no-dev --optimize-autoloader --no-interaction',
+            'HOME=/tmp ' . $composerBin . ' install --no-dev --optimize-autoloader --no-interaction',
             PHP_BINARY . ' artisan migrate --force',
             PHP_BINARY . ' artisan config:cache',
             PHP_BINARY . ' artisan view:clear',
@@ -1286,7 +1299,7 @@ class AdminController extends Controller
         foreach ($commands as $cmd) {
             $output = [];
             $code = 0;
-            exec($cmd . ' 2>&1', $output, $code);
+            exec('cd ' . base_path() . ' && ' . $cmd . ' 2>&1', $output, $code);
             $log[] = [
                 'cmd'    => $cmd,
                 'output' => implode("\n", $output),
@@ -1318,9 +1331,10 @@ class AdminController extends Controller
             return response('Skipped', 200);
         }
 
+        $composerBin = trim(shell_exec('which composer 2>/dev/null') ?: 'composer');
         $commands = [
             'git pull origin master',
-            'composer install --no-dev --optimize-autoloader --no-interaction',
+            'HOME=/tmp ' . $composerBin . ' install --no-dev --optimize-autoloader --no-interaction',
             PHP_BINARY . ' artisan migrate --force',
             PHP_BINARY . ' artisan config:cache',
             PHP_BINARY . ' artisan view:clear',
@@ -1328,9 +1342,192 @@ class AdminController extends Controller
         ];
 
         foreach ($commands as $cmd) {
-            exec($cmd . ' 2>&1');
+            exec('cd ' . base_path() . ' && ' . $cmd . ' 2>&1');
         }
 
         return response('OK', 200);
+    }
+
+    // ── Memberships ───────────────────────────────────────
+    public function memberships()
+    {
+        $this->requireAdmin();
+
+        $plans       = MembershipPlan::withCount(['subscriptions' => fn($q) => $q->where('status', 'active')])->orderBy('sort_order')->get();
+        $subscribers = Subscription::with(['user', 'plan'])->where('status', 'active')->latest()->paginate(20);
+
+        $s = $this->getSettings();
+        $stripePublicKey    = $s['stripe_public_key'] ?? '';
+        $stripeSecretKey    = $s['stripe_secret_key'] ?? '';
+        $stripeWebhookSecret = $s['stripe_webhook_secret'] ?? '';
+
+        $stats = [
+            'active'     => Subscription::where('status', 'active')->count(),
+            'revenue'    => Subscription::where('status', 'active')->join('membership_plans', 'subscriptions.plan_id', '=', 'membership_plans.id')->sum('membership_plans.price'),
+            'this_month' => Subscription::where('status', 'active')->whereMonth('created_at', now()->month)->count(),
+            'plans'      => MembershipPlan::count(),
+        ];
+
+        return view('admin.memberships', compact('plans', 'subscribers', 'stats', 'stripePublicKey', 'stripeSecretKey', 'stripeWebhookSecret'));
+    }
+
+    public function storePlan(Request $request)
+    {
+        $this->requireAdmin();
+        $request->validate(['name' => 'required', 'price' => 'required|integer|min:0', 'billing_cycle' => 'in:monthly,yearly,lifetime']);
+
+        $features = array_filter(array_map('trim', explode("\n", $request->input('features_text', ''))));
+
+        MembershipPlan::create([
+            'name'             => $request->name,
+            'slug'             => \Illuminate\Support\Str::slug($request->name),
+            'description'      => $request->description,
+            'price'            => (int) $request->price,
+            'billing_cycle'    => $request->billing_cycle ?? 'monthly',
+            'features'         => array_values($features) ?: null,
+            'stripe_price_id'  => $request->stripe_price_id ?: null,
+            'is_active'        => true,
+        ]);
+
+        return back()->with('success', 'Plan created.');
+    }
+
+    public function updatePlan(Request $request, MembershipPlan $plan)
+    {
+        $this->requireAdmin();
+        $request->validate(['name' => 'required', 'price' => 'required|integer|min:0']);
+
+        $features = array_filter(array_map('trim', explode("\n", $request->input('features_text', ''))));
+
+        $plan->update([
+            'name'             => $request->name,
+            'description'      => $request->description,
+            'price'            => (int) $request->price,
+            'billing_cycle'    => $request->billing_cycle,
+            'features'         => array_values($features) ?: null,
+            'stripe_price_id'  => $request->stripe_price_id ?: null,
+        ]);
+
+        return back()->with('success', 'Plan updated.');
+    }
+
+    public function togglePlan(MembershipPlan $plan)
+    {
+        $this->requireAdmin();
+        $plan->update(['is_active' => !$plan->is_active]);
+
+        return back()->with('success', 'Plan updated.');
+    }
+
+    public function deletePlan(MembershipPlan $plan)
+    {
+        $this->requireAdmin();
+        $plan->delete();
+
+        return back()->with('success', 'Plan deleted.');
+    }
+
+    public function revokeSubscription(Subscription $subscription)
+    {
+        $this->requireAdmin();
+        $subscription->update(['status' => 'cancelled']);
+
+        return back()->with('success', 'Subscription revoked.');
+    }
+
+    public function updateStripeSettings(Request $request)
+    {
+        $this->requireAdmin();
+        $s = $this->getSettings();
+        $s['stripe_public_key']     = $request->input('stripe_public_key', '');
+        $s['stripe_secret_key']     = $request->input('stripe_secret_key', '');
+        $s['stripe_webhook_secret'] = $request->input('stripe_webhook_secret', '');
+        $this->saveSettings($s);
+
+        return back()->with('success', 'Stripe settings saved.');
+    }
+
+    // ── Support Tickets ───────────────────────────────────
+    public function supportTickets(Request $request)
+    {
+        $this->requireAdmin();
+        $status = $request->query('status', 'all');
+
+        $query = SupportTicket::with(['requester', 'agent'])
+            ->withCount('replies');
+
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        $tickets = $query->latest()->paginate(20);
+
+        $counts = [
+            'all'         => SupportTicket::count(),
+            'open'        => SupportTicket::where('status', 'open')->count(),
+            'in_progress' => SupportTicket::where('status', 'in_progress')->count(),
+            'pending'     => SupportTicket::where('status', 'pending')->count(),
+            'solved'      => SupportTicket::where('status', 'solved')->count(),
+            'closed'      => SupportTicket::where('status', 'closed')->count(),
+        ];
+
+        $open = $counts['open'];
+
+        return view('admin.support', compact('tickets', 'counts', 'open', 'status'))->with('currentStatus', $status);
+    }
+
+    public function supportShow(SupportTicket $ticket)
+    {
+        $this->requireAdmin();
+        $ticket->load(['requester', 'agent', 'replies.user']);
+        $agents = User::whereIn('role', ['admin', 'moderator'])->orderBy('name')->get();
+
+        return view('admin.support-show', compact('ticket', 'agents'));
+    }
+
+    public function supportReply(Request $request, SupportTicket $ticket)
+    {
+        $this->requireAdmin();
+        $request->validate(['body' => 'required|string|max:5000']);
+
+        SupportReply::create([
+            'ticket_id' => $ticket->id,
+            'user_id'   => auth()->id(),
+            'body'      => $request->body,
+            'is_staff'  => true,
+        ]);
+
+        if ($request->input('action') === 'reply_solve') {
+            $ticket->update(['status' => 'solved']);
+        } elseif ($ticket->status === 'open') {
+            $ticket->update(['status' => 'in_progress']);
+        }
+
+        return back()->with('success', 'Reply sent.');
+    }
+
+    public function supportAssign(Request $request, SupportTicket $ticket)
+    {
+        $this->requireAdmin();
+        $ticket->update(['agent_id' => $request->input('agent_id') ?: null]);
+
+        return back()->with('success', 'Agent updated.');
+    }
+
+    public function supportStatus(Request $request, SupportTicket $ticket)
+    {
+        $this->requireAdmin();
+        $request->validate(['status' => 'required|in:open,pending,in_progress,solved,closed']);
+        $ticket->update(['status' => $request->status]);
+
+        return back()->with('success', 'Status updated.');
+    }
+
+    public function supportDelete(SupportTicket $ticket)
+    {
+        $this->requireAdmin();
+        $ticket->delete();
+
+        return redirect('/admin/support')->with('success', 'Ticket deleted.');
     }
 }
