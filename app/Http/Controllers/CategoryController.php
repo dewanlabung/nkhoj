@@ -24,6 +24,10 @@ class CategoryController extends Controller
             ->latest()
             ->paginate(10, ['*'], 'qpage');
 
+        if (request()->ajax() || request('ajax')) {
+            return view('partials.posts-feed', compact('posts'));
+        }
+
         return view('categories.show', compact('category', 'posts', 'questions'));
     }
 }

@@ -36,16 +36,48 @@
 </div>
 @endif
 
-{{-- ══ CATEGORY PILLS (below hero like Naver) ══ --}}
-<div class="flex items-center gap-1.5 overflow-x-auto py-2 mb-6 border-b border-gray-200 scrollbar-hide">
-    <a href="/" class="whitespace-nowrap px-4 py-1.5 text-sm font-semibold rounded-full {{ request()->is('/') && !request('cat') ? 'bg-brand-500 text-white' : 'text-gray-600 hover:bg-gray-100' }} transition-colors">
-        सम्पूर्ण
-    </a>
-    @foreach(\App\Models\Category::orderBy('sort_order')->get() as $cat)
-    <a href="/category/{{ $cat->slug }}" class="whitespace-nowrap px-4 py-1.5 text-sm font-medium rounded-full {{ request()->is('category/'.$cat->slug) ? 'bg-brand-500 text-white' : 'text-gray-600 hover:bg-gray-100' }} transition-colors font-nepali">
-        {{ $cat->name_ne ?? $cat->name_en }}
-    </a>
-    @endforeach
+{{-- ══ CATEGORY PILLS (AJAX tab switching) ══ --}}
+<div x-data="{
+        activeTab: '/',
+        loading: false,
+        async switchTab(url, el) {
+            if (this.activeTab === url) return;
+            this.activeTab = url;
+            this.loading = true;
+            try {
+                const res = await fetch(url + (url.includes('?') ? '&' : '?') + 'ajax=1', {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const html = await res.text();
+                document.getElementById('posts-feed').innerHTML = html;
+                window.scrollTo({ top: document.getElementById('posts-feed').offsetTop - 120, behavior: 'smooth' });
+            } catch(e) {
+                window.location.href = url;
+            }
+            this.loading = false;
+        }
+    }"
+    class="relative">
+
+    <div class="flex items-center gap-1.5 overflow-x-auto py-2 mb-6 border-b border-gray-200 dark:border-gray-700 scrollbar-hide">
+        <button @click="switchTab('/', $el)"
+            :class="activeTab === '/' ? 'bg-brand-500 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
+            class="whitespace-nowrap px-4 py-1.5 text-sm font-semibold rounded-full transition-colors">
+            सम्पूर्ण
+        </button>
+        @foreach(\App\Models\Category::orderBy('sort_order')->get() as $cat)
+        <button @click="switchTab('/category/{{ $cat->slug }}', $el)"
+            :class="activeTab === '/category/{{ $cat->slug }}' ? 'bg-brand-500 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
+            class="whitespace-nowrap px-4 py-1.5 text-sm font-medium rounded-full transition-colors font-nepali">
+            {{ $cat->name_ne ?? $cat->name_en }}
+        </button>
+        @endforeach
+    </div>
+
+    {{-- Loading bar --}}
+    <div x-show="loading" x-cloak class="absolute top-0 left-0 right-0 h-0.5 bg-gray-100 dark:bg-gray-700 overflow-hidden rounded">
+        <div class="h-full bg-brand-500 animate-pulse w-2/3"></div>
+    </div>
 </div>
 
 {{-- ══ MAIN TWO-PANEL LAYOUT ══ --}}
@@ -92,98 +124,17 @@
         </div>
         @endif
 
-        {{-- ══ Google Plus-style card grid ══ --}}
+        {{-- ══ Posts feed (AJAX-swappable) ══ --}}
         <div class="flex items-center gap-2 mb-4">
-            <h2 class="text-sm font-bold text-gray-700 uppercase tracking-widest">नवीनतम</h2>
-            <div class="flex-1 h-px bg-gray-100"></div>
+            <h2 class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest">नवीनतम</h2>
+            <div class="flex-1 h-px bg-gray-100 dark:bg-gray-700"></div>
             <span class="text-xs text-gray-400">Latest posts</span>
         </div>
 
-        {{-- Card grid: 2 columns --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            @forelse($posts as $post)
-            <article class="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden group flex flex-col">
-
-                {{-- Card image (Google Plus style — image at top) --}}
-                <a href="/posts/{{ $post->slug }}" class="block relative overflow-hidden flex-shrink-0" style="aspect-ratio:16/9;">
-                    @if($post->thumbnail_url)
-                    <img src="{{ $post->thumbnail_url }}" alt="{{ $post->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                    @else
-                    <div class="w-full h-full bg-gradient-to-br from-brand-50 via-indigo-50 to-brand-100 flex items-center justify-center">
-                        <span class="text-4xl font-black text-brand-200/80">{{ strtoupper(substr($post->title,0,1)) }}</span>
-                    </div>
-                    @endif
-                    <div class="absolute top-3 left-3">
-                        <a href="/category/{{ $post->category->slug }}"
-                            class="text-xs px-2.5 py-1 bg-brand-500 text-white rounded-full font-bold hover:bg-brand-600 transition-colors">
-                            {{ $post->category->name_ne ?? $post->category->name_en }}
-                        </a>
-                    </div>
-                </a>
-
-                {{-- Card content --}}
-                <div class="p-4 flex-1 flex flex-col">
-                    {{-- Author row + Follow (Naver style inline) --}}
-                    <div class="flex items-center gap-2 mb-2">
-                        <a href="/profile/{{ $post->author->username }}" class="w-7 h-7 rounded-full bg-brand-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 hover:ring-2 hover:ring-brand-300 transition-all">
-                            {{ strtoupper(substr($post->author->name,0,1)) }}
-                        </a>
-                        <div class="flex-1 min-w-0">
-                            <a href="/profile/{{ $post->author->username }}" class="text-xs font-semibold text-gray-700 hover:text-brand-600 transition-colors">{{ $post->author->name }}</a>
-                            <div class="text-xs text-gray-400">{{ $post->published_at->diffForHumans() }}</div>
-                        </div>
-                        @auth
-                        @if(auth()->id() !== $post->author_id)
-                        <button onclick="toggleFollow(this, {{ $post->author_id }})"
-                            class="text-xs px-2 py-1 border border-gray-200 rounded-full text-gray-500 hover:border-brand-400 hover:text-brand-600 transition-colors flex-shrink-0"
-                            data-following="false">
-                            + Add
-                        </button>
-                        @endif
-                        @endauth
-                    </div>
-
-                    {{-- Title --}}
-                    <h3 class="font-bold text-gray-900 group-hover:text-brand-600 transition-colors line-clamp-2 text-sm leading-snug font-nepali flex-1 mb-2">
-                        <a href="/posts/{{ $post->slug }}">{{ $post->title }}</a>
-                    </h3>
-
-                    {{-- Excerpt --}}
-                    @if($post->excerpt)
-                    <p class="text-xs text-gray-500 line-clamp-2 mb-3 font-nepali leading-relaxed">{{ $post->excerpt }}</p>
-                    @endif
-
-                    {{-- Tags + views footer --}}
-                    <div class="flex items-center justify-between pt-2 border-t border-gray-50">
-                        <div class="flex gap-1">
-                            @foreach($post->tags->take(2) as $tag)
-                            <a href="/tag/{{ $tag->slug }}" class="text-xs text-brand-500 hover:text-brand-700 font-medium">#{{ $tag->name_en }}</a>
-                            @endforeach
-                        </div>
-                        <div class="flex items-center gap-2 text-xs text-gray-400">
-                            <span>{{ $post->readingTimeMinutes() }}min</span>
-                            <span>·</span>
-                            <span>{{ number_format($post->view_count) }} views</span>
-                        </div>
-                    </div>
-                </div>
-            </article>
-            @empty
-            <div class="col-span-2 text-center py-16 bg-white rounded-xl border border-gray-100">
-                <div class="text-5xl mb-4">📰</div>
-                <p class="text-gray-500 font-nepali">अहिलेसम्म कुनै लेख छैन।</p>
-                @auth
-                <a href="/dashboard/posts/create" class="mt-4 inline-block px-4 py-2 bg-brand-500 text-white text-sm rounded-lg hover:bg-brand-600">
-                    पहिलो लेख लेख्नुहोस्
-                </a>
-                @endauth
-            </div>
-            @endforelse
+        <div id="posts-feed">
+            @include('partials.posts-feed')
         </div>
 
-        @if($posts->hasPages())
-        <div class="flex justify-center mt-8">{{ $posts->links() }}</div>
-        @endif
     </div>
 
     {{-- ══ RIGHT SIDEBAR ══ --}}

@@ -65,6 +65,10 @@ class HomeController extends Controller
                 ? (json_decode(File::get($path), true) ?? []) : [];
         }
 
+        if (request()->ajax() || request('ajax')) {
+            return view('partials.posts-feed', compact('posts'));
+        }
+
         return view('home', compact(
             'heroStrip', 'editorsPick', 'posts',
             'trending', 'categories',
