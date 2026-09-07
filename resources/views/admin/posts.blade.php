@@ -70,8 +70,14 @@
                     </form>
                 </td>
                 <td class="px-5 py-3">
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 flex-wrap">
                         <a href="/dashboard/posts/{{ $post->id }}/edit" class="text-xs text-blue-500 hover:text-blue-700">Edit</a>
+                        <form method="POST" action="/admin/posts/{{ $post->id }}/toggle-pro" title="{{ $post->is_pro ? 'Remove Pro lock' : 'Mark as Pro-only' }}">
+                            @csrf
+                            <button class="text-xs font-semibold {{ $post->is_pro ? 'text-brand-600 bg-brand-50 dark:bg-brand-900/20' : 'text-gray-400 hover:text-brand-600' }} px-1.5 py-0.5 rounded transition-colors">
+                                {{ $post->is_pro ? '✨Pro' : 'Pro?' }}
+                            </button>
+                        </form>
                         <form method="POST" action="/admin/posts/{{ $post->id }}" onsubmit="return confirm('Delete permanently?')">
                             @csrf @method('DELETE')
                             <button class="text-xs text-red-400 hover:text-red-600">Delete</button>

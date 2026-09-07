@@ -265,6 +265,11 @@
                 Ad Spaces
             </a>
 
+            <a href="/admin/memberships" class="sl {{ request()->is('admin/memberships*') ? 'on' : '' }}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3l14 9-14 9V3z"/></svg>
+                Memberships
+            </a>
+
             <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-widest px-3 pt-4 pb-1.5">Community</p>
             <a href="/admin/comments" class="sl {{ request()->is('admin/comments*') ? 'on' : '' }}">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>

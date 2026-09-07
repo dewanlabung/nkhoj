@@ -14,6 +14,8 @@ use App\Models\Poll;
 use App\Models\PollOption;
 use App\Models\Post;
 use App\Models\Question;
+use App\Models\MembershipPlan;
+use App\Models\Subscription;
 use App\Models\SupportReply;
 use App\Models\SupportTicket;
 use App\Models\Tag;
@@ -383,6 +385,14 @@ class AdminController extends Controller
         $this->requireAdmin();
         Post::findOrFail($id)->delete();
         return back()->with('success', 'Post deleted.');
+    }
+
+    public function togglePostPro(int $id)
+    {
+        $this->requireAdmin();
+        $post = Post::findOrFail($id);
+        $post->update(['is_pro' => !$post->is_pro]);
+        return back()->with('success', $post->is_pro ? 'Post marked as Pro.' : 'Pro restriction removed.');
     }
 
     public function bulkPostAction(Request $request)
@@ -1334,6 +1344,105 @@ class AdminController extends Controller
         }
 
         return response('OK', 200);
+    }
+
+    // ── Memberships ───────────────────────────────────────
+    public function memberships()
+    {
+        $this->requireAdmin();
+
+        $plans       = MembershipPlan::withCount(['subscriptions' => fn($q) => $q->where('status', 'active')])->orderBy('sort_order')->get();
+        $subscribers = Subscription::with(['user', 'plan'])->where('status', 'active')->latest()->paginate(20);
+
+        $s = $this->getSettings();
+        $stripePublicKey    = $s['stripe_public_key'] ?? '';
+        $stripeSecretKey    = $s['stripe_secret_key'] ?? '';
+        $stripeWebhookSecret = $s['stripe_webhook_secret'] ?? '';
+
+        $stats = [
+            'active'     => Subscription::where('status', 'active')->count(),
+            'revenue'    => Subscription::where('status', 'active')->join('membership_plans', 'subscriptions.plan_id', '=', 'membership_plans.id')->sum('membership_plans.price'),
+            'this_month' => Subscription::where('status', 'active')->whereMonth('created_at', now()->month)->count(),
+            'plans'      => MembershipPlan::count(),
+        ];
+
+        return view('admin.memberships', compact('plans', 'subscribers', 'stats', 'stripePublicKey', 'stripeSecretKey', 'stripeWebhookSecret'));
+    }
+
+    public function storePlan(Request $request)
+    {
+        $this->requireAdmin();
+        $request->validate(['name' => 'required', 'price' => 'required|integer|min:0', 'billing_cycle' => 'in:monthly,yearly,lifetime']);
+
+        $features = array_filter(array_map('trim', explode("\n", $request->input('features_text', ''))));
+
+        MembershipPlan::create([
+            'name'             => $request->name,
+            'slug'             => \Illuminate\Support\Str::slug($request->name),
+            'description'      => $request->description,
+            'price'            => (int) $request->price,
+            'billing_cycle'    => $request->billing_cycle ?? 'monthly',
+            'features'         => array_values($features) ?: null,
+            'stripe_price_id'  => $request->stripe_price_id ?: null,
+            'is_active'        => true,
+        ]);
+
+        return back()->with('success', 'Plan created.');
+    }
+
+    public function updatePlan(Request $request, MembershipPlan $plan)
+    {
+        $this->requireAdmin();
+        $request->validate(['name' => 'required', 'price' => 'required|integer|min:0']);
+
+        $features = array_filter(array_map('trim', explode("\n", $request->input('features_text', ''))));
+
+        $plan->update([
+            'name'             => $request->name,
+            'description'      => $request->description,
+            'price'            => (int) $request->price,
+            'billing_cycle'    => $request->billing_cycle,
+            'features'         => array_values($features) ?: null,
+            'stripe_price_id'  => $request->stripe_price_id ?: null,
+        ]);
+
+        return back()->with('success', 'Plan updated.');
+    }
+
+    public function togglePlan(MembershipPlan $plan)
+    {
+        $this->requireAdmin();
+        $plan->update(['is_active' => !$plan->is_active]);
+
+        return back()->with('success', 'Plan updated.');
+    }
+
+    public function deletePlan(MembershipPlan $plan)
+    {
+        $this->requireAdmin();
+        $plan->delete();
+
+        return back()->with('success', 'Plan deleted.');
+    }
+
+    public function revokeSubscription(Subscription $subscription)
+    {
+        $this->requireAdmin();
+        $subscription->update(['status' => 'cancelled']);
+
+        return back()->with('success', 'Subscription revoked.');
+    }
+
+    public function updateStripeSettings(Request $request)
+    {
+        $this->requireAdmin();
+        $s = $this->getSettings();
+        $s['stripe_public_key']     = $request->input('stripe_public_key', '');
+        $s['stripe_secret_key']     = $request->input('stripe_secret_key', '');
+        $s['stripe_webhook_secret'] = $request->input('stripe_webhook_secret', '');
+        $this->saveSettings($s);
+
+        return back()->with('success', 'Stripe settings saved.');
     }
 
     // ── Support Tickets ───────────────────────────────────
