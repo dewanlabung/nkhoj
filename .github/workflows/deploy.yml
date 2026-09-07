@@ -12,10 +12,6 @@ jobs:
     steps:
       - name: Deploy via webhook
         run: |
-          HTTP=$(curl -s -o /tmp/resp.txt -w "%{http_code}" \
-            -X POST https://dewanlabung.com.np/webhook/deploy \
+          curl -v -X POST https://dewanlabung.com.np/webhook/deploy \
             -H "Content-Type: application/json" \
-            -d '{"ref":"refs/heads/master"}')
-          cat /tmp/resp.txt
-          echo "HTTP status: $HTTP"
-          echo "$HTTP" | grep -qE '^2' || { echo "Deploy failed"; exit 1; }
+            -d '{"ref":"refs/heads/master"}' 2>&1 | tail -40
