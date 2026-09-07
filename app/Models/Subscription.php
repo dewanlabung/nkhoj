@@ -9,7 +9,7 @@ class Subscription extends Model
 {
     protected $fillable = [
         'user_id', 'plan_id', 'stripe_subscription_id', 'stripe_customer_id',
-        'stripe_session_id', 'status', 'starts_at', 'ends_at',
+        'stripe_session_id', 'payment_method', 'status', 'starts_at', 'ends_at',
     ];
 
     protected $casts = [

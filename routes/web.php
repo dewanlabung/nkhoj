@@ -288,8 +288,12 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::put('/memberships/plans/{plan}',                         [AdminController::class, 'updatePlan']);
     Route::post('/memberships/plans/{plan}/toggle',                 [AdminController::class, 'togglePlan']);
     Route::delete('/memberships/plans/{plan}',                      [AdminController::class, 'deletePlan']);
-    Route::post('/memberships/subscriptions/{subscription}/revoke', [AdminController::class, 'revokeSubscription']);
-    Route::post('/memberships/stripe-settings',                     [AdminController::class, 'updateStripeSettings']);
+    Route::post('/memberships/subscriptions/{subscription}/revoke',   [AdminController::class, 'revokeSubscription']);
+    Route::post('/memberships/subscriptions/{subscription}/activate', [AdminController::class, 'activateSubscription']);
+    Route::post('/memberships/stripe-settings',                       [AdminController::class, 'updateStripeSettings']);
+    Route::post('/memberships/paypal-settings',                       [AdminController::class, 'updatePaypalSettings']);
+    Route::post('/memberships/bank-settings',                         [AdminController::class, 'updateBankSettings']);
+    Route::post('/memberships/premium-settings',                      [AdminController::class, 'updatePremiumSettings']);
 
     // Support tickets (admin)
     Route::get('/support',                              [AdminController::class, 'supportTickets']);
@@ -306,15 +310,44 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::delete('/ai-content/topics/{topic}',         [AdminController::class, 'deleteAiTopic']);
     Route::post('/ai-content/topics/{topic}/run',       [AdminController::class, 'runAiTopic']);
     Route::post('/ai-content/run-all',                  [AdminController::class, 'runAllAiTopics']);
-    Route::post('/ai-content/settings',                 [AdminController::class, 'updateAiSettings']);
+    Route::post('/ai-content/settings',                 [AdminController::class, 'updateGeminiSettings']);
     Route::post('/ai-content/drafts/{post}/publish',    [AdminController::class, 'publishAiDraft']);
     Route::delete('/ai-content/drafts/{post}',          [AdminController::class, 'deleteAiDraft']);
+});
+
+// ── Account Portal (account.dewanlabung.com.np OR /account/*) ──────────────
+// Subdomain routing (requires DNS + Nginx setup for the subdomain)
+Route::domain('account.' . parse_url(config('app.url'), PHP_URL_HOST))->middleware(['auth'])->group(function () {
+    Route::get('/',                  [AccountController::class, 'home']);
+    Route::get('/personal-info',     [AccountController::class, 'personalInfo']);
+    Route::patch('/personal-info',   [AccountController::class, 'updatePersonalInfo']);
+    Route::post('/avatar',           [AccountController::class, 'updateAvatar']);
+    Route::get('/security',          [AccountController::class, 'security']);
+    Route::patch('/security/password', [AccountController::class, 'changePassword']);
+    Route::get('/subscriptions',     [AccountController::class, 'subscriptions']);
+    Route::get('/privacy',           [AccountController::class, 'privacy']);
+    Route::delete('/delete',         [AccountController::class, 'deleteAccount']);
+});
+
+// Path-based fallback (always works, same server)
+Route::middleware(['auth'])->prefix('account')->group(function () {
+    Route::get('/',                    [AccountController::class, 'home']);
+    Route::get('/personal-info',       [AccountController::class, 'personalInfo']);
+    Route::patch('/personal-info',     [AccountController::class, 'updatePersonalInfo']);
+    Route::post('/avatar',             [AccountController::class, 'updateAvatar']);
+    Route::get('/security',            [AccountController::class, 'security']);
+    Route::patch('/security/password', [AccountController::class, 'changePassword']);
+    Route::get('/subscriptions',       [AccountController::class, 'subscriptions']);
+    Route::get('/privacy',             [AccountController::class, 'privacy']);
+    Route::delete('/delete',           [AccountController::class, 'deleteAccount']);
 });
 
 // Membership (frontend)
 Route::get('/membership', [MembershipController::class, 'plans']);
 Route::get('/membership/success', [MembershipController::class, 'success']);
+Route::get('/membership/pending', [MembershipController::class, 'pending'])->middleware('auth');
 Route::get('/membership/{plan}/checkout', [MembershipController::class, 'checkout'])->middleware('auth');
+Route::post('/membership/{plan}/process', [MembershipController::class, 'processCheckout'])->middleware('auth');
 Route::post('/membership/cancel', [MembershipController::class, 'cancel'])->middleware('auth');
 
 // Stripe webhook (no auth/csrf)

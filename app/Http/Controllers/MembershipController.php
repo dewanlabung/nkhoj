@@ -39,32 +39,80 @@ class MembershipController extends Controller
         return view('membership.plans', compact('plans', 'activeSub'));
     }
 
+    private function getSettings(): array
+    {
+        $path = storage_path('app/site_settings.json');
+        return File::exists($path) ? (json_decode(File::get($path), true) ?? []) : [];
+    }
+
     public function checkout(MembershipPlan $plan)
     {
         if (!auth()->check()) {
             return redirect('/login?next=/membership/' . $plan->id . '/checkout');
         }
 
-        $secretKey = $this->stripeKey();
+        $s = $this->getSettings();
+        $stripeEnabled = !empty($this->stripeKey());
+        $paypalEmail   = $s['paypal_email'] ?? null;
+        $paypalMe      = $s['paypal_me'] ?? null;
 
-        if (!$secretKey) {
-            return redirect('/membership')->with('error', 'Payment system not configured yet. Please contact support.');
+        $rawBank = [
+            'Bank Name'      => $s['bank_name'] ?? null,
+            'Account Name'   => $s['bank_account_name'] ?? null,
+            'Account Number' => $s['bank_account_number'] ?? null,
+            'Routing/SWIFT'  => $s['bank_routing'] ?? null,
+        ];
+        $bankDetails = array_filter($rawBank) ?: null;
+
+        return view('membership.checkout', compact('plan', 'stripeEnabled', 'paypalEmail', 'paypalMe', 'bankDetails'));
+    }
+
+    public function processCheckout(Request $request, MembershipPlan $plan)
+    {
+        if (!auth()->check()) {
+            return redirect('/login?next=/membership/' . $plan->id . '/checkout');
         }
 
-        if ($plan->price === 0) {
-            // Free plan — activate immediately
-            $this->activateFreeSubscription(auth()->user(), $plan);
+        $method = $request->input('method');
+        $user   = auth()->user();
+
+        if ($plan->price === 0 || $method === 'free') {
+            $this->activateFreeSubscription($user, $plan);
             return redirect('/membership/success?free=1');
         }
 
-        // Create Stripe Checkout Session via HTTP
-        $user = auth()->user();
-        $appUrl = config('app.url', url('/'));
+        if ($method === 'stripe') {
+            return $this->stripeRedirect($plan, $user);
+        }
 
+        if (in_array($method, ['paypal', 'bank'])) {
+            Subscription::updateOrCreate(
+                ['user_id' => $user->id, 'plan_id' => $plan->id, 'status' => 'pending_manual'],
+                [
+                    'payment_method' => $method,
+                    'status'         => 'pending_manual',
+                    'starts_at'      => null,
+                    'ends_at'        => null,
+                ]
+            );
+            return redirect('/membership/pending')->with('method', $method);
+        }
+
+        return redirect('/membership/' . $plan->id . '/checkout')->with('error', 'Please select a payment method.');
+    }
+
+    private function stripeRedirect(MembershipPlan $plan, $user)
+    {
+        $secretKey = $this->stripeKey();
+        if (!$secretKey) {
+            return redirect('/membership')->with('error', 'Card payment is not configured. Please choose another method.');
+        }
+
+        $appUrl = config('app.url', url('/'));
         $body = http_build_query([
             'payment_method_types[]'       => 'card',
-            'line_items[0][price_data][currency]'         => strtolower($plan->currency),
-            'line_items[0][price_data][unit_amount]'      => $plan->price,
+            'line_items[0][price_data][currency]'           => strtolower($plan->currency),
+            'line_items[0][price_data][unit_amount]'        => $plan->price,
             'line_items[0][price_data][product_data][name]' => $plan->name,
             'line_items[0][quantity]'       => 1,
             'mode'                          => 'payment',
@@ -84,27 +132,27 @@ class MembershipController extends Controller
             CURLOPT_HTTPHEADER     => ['Content-Type: application/x-www-form-urlencoded'],
         ]);
         $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
         $session = json_decode($response, true);
 
         if ($httpCode !== 200 || empty($session['url'])) {
             Log::error('Stripe checkout failed', ['response' => $response]);
-            return redirect('/membership')->with('error', 'Payment session could not be created. Please try again.');
+            return redirect('/membership')->with('error', 'Card payment session could not be created. Please try again or choose another method.');
         }
 
-        // Store pending subscription
         Subscription::updateOrCreate(
             ['user_id' => $user->id, 'stripe_session_id' => $session['id']],
-            [
-                'plan_id'           => $plan->id,
-                'stripe_session_id' => $session['id'],
-                'status'            => 'pending',
-            ]
+            ['plan_id' => $plan->id, 'stripe_session_id' => $session['id'], 'status' => 'pending']
         );
 
         return redirect($session['url']);
+    }
+
+    public function pending()
+    {
+        return view('membership.pending');
     }
 
     public function success(Request $request)

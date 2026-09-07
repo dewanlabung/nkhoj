@@ -1356,12 +1356,30 @@ class AdminController extends Controller
         $this->requireAdmin();
 
         $plans       = MembershipPlan::withCount(['subscriptions' => fn($q) => $q->where('status', 'active')])->orderBy('sort_order')->get();
-        $subscribers = Subscription::with(['user', 'plan'])->where('status', 'active')->latest()->paginate(20);
+        $subscribers = Subscription::with(['user', 'plan'])
+            ->whereIn('status', ['active', 'pending_manual'])
+            ->latest()->paginate(20);
 
         $s = $this->getSettings();
         $stripePublicKey    = $s['stripe_public_key'] ?? '';
         $stripeSecretKey    = $s['stripe_secret_key'] ?? '';
         $stripeWebhookSecret = $s['stripe_webhook_secret'] ?? '';
+        $paypalEmail        = $s['paypal_email'] ?? '';
+        $paypalMe           = $s['paypal_me'] ?? '';
+        $bankName           = $s['bank_name'] ?? '';
+        $bankAccountName    = $s['bank_account_name'] ?? '';
+        $bankAccountNumber  = $s['bank_account_number'] ?? '';
+        $bankRouting        = $s['bank_routing'] ?? '';
+
+        $premiumEnabled              = (bool) ($s['premium_enabled'] ?? false);
+        $premiumContentMode          = $s['premium_content_mode'] ?? 'selected';
+        $premiumHideMethod           = $s['premium_hide_method'] ?? 'preview';
+        $premiumSingleSales          = (bool) ($s['premium_single_sales'] ?? false);
+        $premiumDefaultPrice         = $s['premium_default_price'] ?? 5;
+        $premiumSubscribeBtnVisible  = (bool) ($s['premium_subscribe_btn_visible'] ?? true);
+        $premiumSubscribeBtnColor    = $s['premium_subscribe_btn_color'] ?? '#6366f1';
+        $premiumBadgeVisible         = (bool) ($s['premium_badge_visible'] ?? true);
+        $premiumBadgeLabel           = $s['premium_badge_label'] ?? 'Premium';
 
         $stats = [
             'active'     => Subscription::where('status', 'active')->count(),
@@ -1370,7 +1388,16 @@ class AdminController extends Controller
             'plans'      => MembershipPlan::count(),
         ];
 
-        return view('admin.memberships', compact('plans', 'subscribers', 'stats', 'stripePublicKey', 'stripeSecretKey', 'stripeWebhookSecret'));
+        return view('admin.memberships', compact(
+            'plans', 'subscribers', 'stats',
+            'stripePublicKey', 'stripeSecretKey', 'stripeWebhookSecret',
+            'paypalEmail', 'paypalMe',
+            'bankName', 'bankAccountName', 'bankAccountNumber', 'bankRouting',
+            'premiumEnabled', 'premiumContentMode', 'premiumHideMethod',
+            'premiumSingleSales', 'premiumDefaultPrice',
+            'premiumSubscribeBtnVisible', 'premiumSubscribeBtnColor',
+            'premiumBadgeVisible', 'premiumBadgeLabel'
+        ));
     }
 
     public function storePlan(Request $request)
@@ -1447,6 +1474,67 @@ class AdminController extends Controller
         $this->saveSettings($s);
 
         return back()->with('success', 'Stripe settings saved.');
+    }
+
+    public function updatePaypalSettings(Request $request)
+    {
+        $this->requireAdmin();
+        $s = $this->getSettings();
+        $s['paypal_email'] = $request->input('paypal_email', '');
+        $s['paypal_me']    = $request->input('paypal_me', '');
+        $this->saveSettings($s);
+
+        return back()->with('success', 'PayPal settings saved.');
+    }
+
+    public function updateBankSettings(Request $request)
+    {
+        $this->requireAdmin();
+        $s = $this->getSettings();
+        $s['bank_name']           = $request->input('bank_name', '');
+        $s['bank_account_name']   = $request->input('bank_account_name', '');
+        $s['bank_account_number'] = $request->input('bank_account_number', '');
+        $s['bank_routing']        = $request->input('bank_routing', '');
+        $this->saveSettings($s);
+
+        return back()->with('success', 'Bank transfer settings saved.');
+    }
+
+    public function updatePremiumSettings(Request $request)
+    {
+        $this->requireAdmin();
+        $s = $this->getSettings();
+        $s['premium_enabled']              = $request->boolean('premium_enabled');
+        $s['premium_content_mode']         = $request->input('premium_content_mode', 'selected');
+        $s['premium_hide_method']          = $request->input('premium_hide_method', 'preview');
+        $s['premium_single_sales']         = $request->boolean('premium_single_sales');
+        $s['premium_default_price']        = (float) $request->input('premium_default_price', 5);
+        $s['premium_subscribe_btn_visible'] = $request->boolean('premium_subscribe_btn_visible');
+        $s['premium_subscribe_btn_color']  = $request->input('premium_subscribe_btn_color', '#6366f1');
+        $s['premium_badge_visible']        = $request->boolean('premium_badge_visible');
+        $s['premium_badge_label']          = $request->input('premium_badge_label', 'Premium');
+        $this->saveSettings($s);
+
+        return back()->with('success', 'Premium membership settings saved.');
+    }
+
+    public function activateSubscription(Subscription $subscription)
+    {
+        $this->requireAdmin();
+        $plan = $subscription->plan;
+        $ends = match($plan->billing_cycle ?? 'monthly') {
+            'monthly'  => now()->addMonth(),
+            'yearly'   => now()->addYear(),
+            'lifetime' => null,
+            default    => now()->addMonth(),
+        };
+        $subscription->update([
+            'status'    => 'active',
+            'starts_at' => now(),
+            'ends_at'   => $ends,
+        ]);
+
+        return back()->with('success', 'Subscription activated for ' . $subscription->user->name . '.');
     }
 
     // ── Support Tickets ───────────────────────────────────
@@ -1583,9 +1671,17 @@ class AdminController extends Controller
     public function runAiTopic(AiPostTopic $topic)
     {
         $this->requireAdmin();
-        Artisan::call('ai:generate-posts', ['--topic' => $topic->id, '--force' => true]);
+        $exitCode = Artisan::call('ai:generate-posts', ['--topic' => $topic->id, '--force' => true]);
+        $output   = trim(Artisan::output());
+
+        if ($exitCode !== 0) {
+            $error = $output ?: 'Generation failed. Check your Gemini API key in AI Content settings.';
+            return redirect('/admin/ai-content')->with('error', $error);
+        }
+
         $topic->update(['last_run_at' => now()]);
-        return redirect('/admin/ai-content')->with('success', 'Post generation triggered for: ' . $topic->keyword);
+        $msg = $output ?: 'Posts generated for: ' . $topic->keyword;
+        return redirect('/admin/ai-content')->with('success', $msg);
     }
 
     public function runAllAiTopics()
@@ -1595,13 +1691,13 @@ class AdminController extends Controller
         return redirect('/admin/ai-content')->with('success', 'Generation triggered for all active topics.');
     }
 
-    public function updateAiSettings(Request $request)
+    public function updateGeminiSettings(Request $request)
     {
         $this->requireAdmin();
         $s = $this->getSettings();
         $s['gemini_api_key'] = $request->gemini_api_key;
         $s['gemini_model']   = $request->gemini_model ?? 'gemini-1.5-flash';
-        file_put_contents(storage_path('app/site_settings.json'), json_encode($s, JSON_PRETTY_PRINT));
+        File::put(storage_path('app/site_settings.json'), json_encode($s, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         return redirect('/admin/ai-content')->with('success', 'AI settings saved.');
     }
 
