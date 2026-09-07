@@ -17,7 +17,7 @@
 
 <form method="POST" action="/admin/storage">
 @csrf
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6" x-data="{ activeTab: '{{ $s['active_storage'] !== 'local' ? $s['active_storage'] : 's3' }}' }">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6" x-data="{ activeTab: '{{ ($s['active_storage'] ?? 'local') !== 'local' ? ($s['active_storage'] ?? 's3') : 's3' }}' }">
 
     {{-- Left: Active Storage selector --}}
     <div class="lg:col-span-1">
