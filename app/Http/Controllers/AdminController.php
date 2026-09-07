@@ -1371,6 +1371,16 @@ class AdminController extends Controller
         $bankAccountNumber  = $s['bank_account_number'] ?? '';
         $bankRouting        = $s['bank_routing'] ?? '';
 
+        $premiumEnabled              = (bool) ($s['premium_enabled'] ?? false);
+        $premiumContentMode          = $s['premium_content_mode'] ?? 'selected';
+        $premiumHideMethod           = $s['premium_hide_method'] ?? 'preview';
+        $premiumSingleSales          = (bool) ($s['premium_single_sales'] ?? false);
+        $premiumDefaultPrice         = $s['premium_default_price'] ?? 5;
+        $premiumSubscribeBtnVisible  = (bool) ($s['premium_subscribe_btn_visible'] ?? true);
+        $premiumSubscribeBtnColor    = $s['premium_subscribe_btn_color'] ?? '#6366f1';
+        $premiumBadgeVisible         = (bool) ($s['premium_badge_visible'] ?? true);
+        $premiumBadgeLabel           = $s['premium_badge_label'] ?? 'Premium';
+
         $stats = [
             'active'     => Subscription::where('status', 'active')->count(),
             'revenue'    => Subscription::where('status', 'active')->join('membership_plans', 'subscriptions.plan_id', '=', 'membership_plans.id')->sum('membership_plans.price'),
@@ -1382,7 +1392,11 @@ class AdminController extends Controller
             'plans', 'subscribers', 'stats',
             'stripePublicKey', 'stripeSecretKey', 'stripeWebhookSecret',
             'paypalEmail', 'paypalMe',
-            'bankName', 'bankAccountName', 'bankAccountNumber', 'bankRouting'
+            'bankName', 'bankAccountName', 'bankAccountNumber', 'bankRouting',
+            'premiumEnabled', 'premiumContentMode', 'premiumHideMethod',
+            'premiumSingleSales', 'premiumDefaultPrice',
+            'premiumSubscribeBtnVisible', 'premiumSubscribeBtnColor',
+            'premiumBadgeVisible', 'premiumBadgeLabel'
         ));
     }
 
@@ -1484,6 +1498,24 @@ class AdminController extends Controller
         $this->saveSettings($s);
 
         return back()->with('success', 'Bank transfer settings saved.');
+    }
+
+    public function updatePremiumSettings(Request $request)
+    {
+        $this->requireAdmin();
+        $s = $this->getSettings();
+        $s['premium_enabled']              = $request->boolean('premium_enabled');
+        $s['premium_content_mode']         = $request->input('premium_content_mode', 'selected');
+        $s['premium_hide_method']          = $request->input('premium_hide_method', 'preview');
+        $s['premium_single_sales']         = $request->boolean('premium_single_sales');
+        $s['premium_default_price']        = (float) $request->input('premium_default_price', 5);
+        $s['premium_subscribe_btn_visible'] = $request->boolean('premium_subscribe_btn_visible');
+        $s['premium_subscribe_btn_color']  = $request->input('premium_subscribe_btn_color', '#6366f1');
+        $s['premium_badge_visible']        = $request->boolean('premium_badge_visible');
+        $s['premium_badge_label']          = $request->input('premium_badge_label', 'Premium');
+        $this->saveSettings($s);
+
+        return back()->with('success', 'Premium membership settings saved.');
     }
 
     public function activateSubscription(Subscription $subscription)

@@ -293,6 +293,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('/memberships/stripe-settings',                       [AdminController::class, 'updateStripeSettings']);
     Route::post('/memberships/paypal-settings',                       [AdminController::class, 'updatePaypalSettings']);
     Route::post('/memberships/bank-settings',                         [AdminController::class, 'updateBankSettings']);
+    Route::post('/memberships/premium-settings',                      [AdminController::class, 'updatePremiumSettings']);
 
     // Support tickets (admin)
     Route::get('/support',                              [AdminController::class, 'supportTickets']);
