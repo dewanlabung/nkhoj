@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Trigger webhook deploy
+      - name: Deploy via webhook
         env:
           DEPLOY_SECRET: ${{ secrets.DEPLOY_SECRET }}
         run: |
