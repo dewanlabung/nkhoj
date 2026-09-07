@@ -306,7 +306,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::delete('/ai-content/topics/{topic}',         [AdminController::class, 'deleteAiTopic']);
     Route::post('/ai-content/topics/{topic}/run',       [AdminController::class, 'runAiTopic']);
     Route::post('/ai-content/run-all',                  [AdminController::class, 'runAllAiTopics']);
-    Route::post('/ai-content/settings',                 [AdminController::class, 'updateAiSettings']);
+    Route::post('/ai-content/settings',                 [AdminController::class, 'updateGeminiSettings']);
     Route::post('/ai-content/drafts/{post}/publish',    [AdminController::class, 'publishAiDraft']);
     Route::delete('/ai-content/drafts/{post}',          [AdminController::class, 'deleteAiDraft']);
 });

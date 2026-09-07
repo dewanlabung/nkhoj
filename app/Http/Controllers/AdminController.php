@@ -1595,13 +1595,13 @@ class AdminController extends Controller
         return redirect('/admin/ai-content')->with('success', 'Generation triggered for all active topics.');
     }
 
-    public function updateAiSettings(Request $request)
+    public function updateGeminiSettings(Request $request)
     {
         $this->requireAdmin();
         $s = $this->getSettings();
         $s['gemini_api_key'] = $request->gemini_api_key;
         $s['gemini_model']   = $request->gemini_model ?? 'gemini-1.5-flash';
-        file_put_contents(storage_path('app/site_settings.json'), json_encode($s, JSON_PRETTY_PRINT));
+        File::put(storage_path('app/site_settings.json'), json_encode($s, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         return redirect('/admin/ai-content')->with('success', 'AI settings saved.');
     }
 
