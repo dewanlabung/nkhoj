@@ -9,9 +9,11 @@
 </div>
 @endif
 
+{{-- Single Alpine scope wraps nav + all panels so tab state is shared --}}
+<div x-data="{ tab: new URLSearchParams(window.location.search).get('tab') || 'meta' }">
+
 {{-- Tab nav --}}
-<div class="flex gap-1 border-b border-gray-200 dark:border-gray-700 mb-6 -mx-px overflow-x-auto scrollbar-hide"
-    x-data="{ tab: new URLSearchParams(window.location.search).get('tab') || 'meta' }">
+<div class="flex gap-1 border-b border-gray-200 dark:border-gray-700 mb-6 -mx-px overflow-x-auto scrollbar-hide">
     @php $tabs = [
         'meta'      => ['icon' => '🏷️', 'label' => 'Meta Tags'],
         'sitemap'   => ['icon' => '🗺️', 'label' => 'Sitemap'],
@@ -27,8 +29,6 @@
     </button>
     @endforeach
 </div>
-
-<div x-data="{ tab: new URLSearchParams(window.location.search).get('tab') || 'meta' }">
 
 {{-- ═══ META TAGS TAB ═══ --}}
 <div x-show="tab === 'meta'" class="space-y-px">
