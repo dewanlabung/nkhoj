@@ -15,8 +15,14 @@
         }
     </script>
     <style>
-        .nav-item { @apply flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors; }
-        .nav-item.active { @apply bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-400; }
+        .nav-item { display:flex; align-items:center; gap:0.75rem; padding:0.75rem 1rem; border-radius:0.75rem; font-size:0.875rem; font-weight:500; color:#374151; text-decoration:none; transition:background 0.15s,color 0.15s; }
+        .nav-item:hover { background:#f3f4f6; }
+        .nav-item.active { background:#eff6ff; color:#1d4ed8; }
+        @media (prefers-color-scheme: dark) {
+            .nav-item { color:#d1d5db; }
+            .nav-item:hover { background:rgba(55,65,81,0.5); }
+            .nav-item.active { background:rgba(59,130,246,0.15); color:#93c5fd; }
+        }
     </style>
 </head>
 <body class="h-full bg-gray-50 dark:bg-gray-900">

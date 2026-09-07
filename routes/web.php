@@ -72,12 +72,10 @@ Route::middleware('auth')->prefix('notifications')->group(function () {
     Route::get('/count', [NotificationController::class, 'unreadCount']);
 });
 
-// Account settings (auth only)
-Route::middleware('auth')->prefix('account')->group(function () {
-    Route::get('/settings',        [AccountController::class, 'settings']);
-    Route::post('/settings',       [AccountController::class, 'updateSettings']);
-    Route::get('/password',        [AccountController::class, 'password']);
-    Route::post('/password',       [AccountController::class, 'updatePassword']);
+// Old account routes — redirect to new account portal
+Route::middleware('auth')->group(function () {
+    Route::get('/account/settings', fn() => redirect('/account/personal-info'));
+    Route::get('/account/password', fn() => redirect('/account/security'));
 });
 
 // Admin panel
