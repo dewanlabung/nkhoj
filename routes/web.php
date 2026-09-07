@@ -288,8 +288,11 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::put('/memberships/plans/{plan}',                         [AdminController::class, 'updatePlan']);
     Route::post('/memberships/plans/{plan}/toggle',                 [AdminController::class, 'togglePlan']);
     Route::delete('/memberships/plans/{plan}',                      [AdminController::class, 'deletePlan']);
-    Route::post('/memberships/subscriptions/{subscription}/revoke', [AdminController::class, 'revokeSubscription']);
-    Route::post('/memberships/stripe-settings',                     [AdminController::class, 'updateStripeSettings']);
+    Route::post('/memberships/subscriptions/{subscription}/revoke',   [AdminController::class, 'revokeSubscription']);
+    Route::post('/memberships/subscriptions/{subscription}/activate', [AdminController::class, 'activateSubscription']);
+    Route::post('/memberships/stripe-settings',                       [AdminController::class, 'updateStripeSettings']);
+    Route::post('/memberships/paypal-settings',                       [AdminController::class, 'updatePaypalSettings']);
+    Route::post('/memberships/bank-settings',                         [AdminController::class, 'updateBankSettings']);
 
     // Support tickets (admin)
     Route::get('/support',                              [AdminController::class, 'supportTickets']);
@@ -314,7 +317,9 @@ Route::middleware('auth')->prefix('admin')->group(function () {
 // Membership (frontend)
 Route::get('/membership', [MembershipController::class, 'plans']);
 Route::get('/membership/success', [MembershipController::class, 'success']);
+Route::get('/membership/pending', [MembershipController::class, 'pending'])->middleware('auth');
 Route::get('/membership/{plan}/checkout', [MembershipController::class, 'checkout'])->middleware('auth');
+Route::post('/membership/{plan}/process', [MembershipController::class, 'processCheckout'])->middleware('auth');
 Route::post('/membership/cancel', [MembershipController::class, 'cancel'])->middleware('auth');
 
 // Stripe webhook (no auth/csrf)

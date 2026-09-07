@@ -108,7 +108,6 @@
                     {{ $isPopular ? 'bg-brand-500 hover:bg-brand-600 text-white' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-white' }}">
                 Sign In to Subscribe
             </a>
-            @endauth
             @endif
         </div>
         @endforeach
@@ -117,7 +116,7 @@
 
     {{-- Trust badges --}}
     <div class="mt-10 flex flex-wrap items-center justify-center gap-6 text-sm text-gray-400 dark:text-gray-500">
-        <span class="flex items-center gap-1.5">🔒 Secure payment via Stripe</span>
+        <span class="flex items-center gap-1.5">🔒 Stripe · PayPal · Bank Transfer</span>
         <span class="flex items-center gap-1.5">↩️ Cancel anytime</span>
         <span class="flex items-center gap-1.5">📧 Instant access after payment</span>
     </div>

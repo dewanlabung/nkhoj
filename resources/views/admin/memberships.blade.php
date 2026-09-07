@@ -194,10 +194,73 @@
         </div>
     </div>
 
-    {{-- Active subscribers --}}
+    {{-- PayPal settings --}}
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+        <div class="px-5 py-4 border-b border-gray-50 dark:border-gray-700">
+            <h3 class="font-bold text-gray-900 dark:text-white">PayPal Settings</h3>
+            <p class="text-xs text-gray-400 mt-0.5">Allow members to pay manually via PayPal.</p>
+        </div>
+        <div class="px-5 py-5">
+            <form method="POST" action="/admin/memberships/paypal-settings" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                @csrf
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">PayPal Email</label>
+                    <input type="email" name="paypal_email" value="{{ $paypalEmail }}" placeholder="you@paypal.com"
+                        class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">PayPal.me Link <span class="font-normal text-gray-400">(optional)</span></label>
+                    <input type="url" name="paypal_me" value="{{ $paypalMe }}" placeholder="https://paypal.me/yourname"
+                        class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div class="md:col-span-2">
+                    <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg">Save PayPal Settings</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Bank Transfer settings --}}
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+        <div class="px-5 py-4 border-b border-gray-50 dark:border-gray-700">
+            <h3 class="font-bold text-gray-900 dark:text-white">Bank Transfer Settings</h3>
+            <p class="text-xs text-gray-400 mt-0.5">Allow members to pay via direct bank deposit.</p>
+        </div>
+        <div class="px-5 py-5">
+            <form method="POST" action="/admin/memberships/bank-settings" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                @csrf
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Bank Name</label>
+                    <input type="text" name="bank_name" value="{{ $bankName }}" placeholder="e.g. Nepal Investment Bank"
+                        class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Account Name</label>
+                    <input type="text" name="bank_account_name" value="{{ $bankAccountName }}" placeholder="e.g. Dewanlabung Media Pvt Ltd"
+                        class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Account Number</label>
+                    <input type="text" name="bank_account_number" value="{{ $bankAccountNumber }}" placeholder="e.g. 00100012345678"
+                        class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Routing / SWIFT / Branch Code</label>
+                    <input type="text" name="bank_routing" value="{{ $bankRouting }}" placeholder="e.g. NIBLNPKT or 0010"
+                        class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono">
+                </div>
+                <div class="md:col-span-2">
+                    <button type="submit" class="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg">Save Bank Settings</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Subscribers (active + pending manual) --}}
     <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
         <div class="px-5 py-4 border-b border-gray-50 dark:border-gray-700">
-            <h3 class="font-bold text-gray-900 dark:text-white">Active Subscribers</h3>
+            <h3 class="font-bold text-gray-900 dark:text-white">Subscribers</h3>
+            <p class="text-xs text-gray-400 mt-0.5">Active + pending manual payments awaiting confirmation</p>
         </div>
         <table class="w-full">
             <thead>
@@ -234,10 +297,20 @@
                         {{ $sub->ends_at ? $sub->ends_at->format('M d, Y') : 'Lifetime' }}
                     </td>
                     <td class="px-5 py-3.5">
-                        <form method="POST" action="/admin/memberships/subscriptions/{{ $sub->id }}/revoke" onsubmit="return confirm('Revoke this subscription?')">
-                            @csrf
-                            <button class="text-xs text-red-500 hover:text-red-700">Revoke</button>
-                        </form>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            @if($sub->status === 'pending_manual')
+                            <form method="POST" action="/admin/memberships/subscriptions/{{ $sub->id }}/activate">
+                                @csrf
+                                <button class="text-xs px-2 py-1 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-100 font-medium">
+                                    ✓ Activate
+                                </button>
+                            </form>
+                            @endif
+                            <form method="POST" action="/admin/memberships/subscriptions/{{ $sub->id }}/revoke" onsubmit="return confirm('Revoke this subscription?')">
+                                @csrf
+                                <button class="text-xs text-red-500 hover:text-red-700">Revoke</button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
                 @empty

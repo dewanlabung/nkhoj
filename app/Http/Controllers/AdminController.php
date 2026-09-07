@@ -1356,12 +1356,20 @@ class AdminController extends Controller
         $this->requireAdmin();
 
         $plans       = MembershipPlan::withCount(['subscriptions' => fn($q) => $q->where('status', 'active')])->orderBy('sort_order')->get();
-        $subscribers = Subscription::with(['user', 'plan'])->where('status', 'active')->latest()->paginate(20);
+        $subscribers = Subscription::with(['user', 'plan'])
+            ->whereIn('status', ['active', 'pending_manual'])
+            ->latest()->paginate(20);
 
         $s = $this->getSettings();
         $stripePublicKey    = $s['stripe_public_key'] ?? '';
         $stripeSecretKey    = $s['stripe_secret_key'] ?? '';
         $stripeWebhookSecret = $s['stripe_webhook_secret'] ?? '';
+        $paypalEmail        = $s['paypal_email'] ?? '';
+        $paypalMe           = $s['paypal_me'] ?? '';
+        $bankName           = $s['bank_name'] ?? '';
+        $bankAccountName    = $s['bank_account_name'] ?? '';
+        $bankAccountNumber  = $s['bank_account_number'] ?? '';
+        $bankRouting        = $s['bank_routing'] ?? '';
 
         $stats = [
             'active'     => Subscription::where('status', 'active')->count(),
@@ -1370,7 +1378,12 @@ class AdminController extends Controller
             'plans'      => MembershipPlan::count(),
         ];
 
-        return view('admin.memberships', compact('plans', 'subscribers', 'stats', 'stripePublicKey', 'stripeSecretKey', 'stripeWebhookSecret'));
+        return view('admin.memberships', compact(
+            'plans', 'subscribers', 'stats',
+            'stripePublicKey', 'stripeSecretKey', 'stripeWebhookSecret',
+            'paypalEmail', 'paypalMe',
+            'bankName', 'bankAccountName', 'bankAccountNumber', 'bankRouting'
+        ));
     }
 
     public function storePlan(Request $request)
@@ -1447,6 +1460,49 @@ class AdminController extends Controller
         $this->saveSettings($s);
 
         return back()->with('success', 'Stripe settings saved.');
+    }
+
+    public function updatePaypalSettings(Request $request)
+    {
+        $this->requireAdmin();
+        $s = $this->getSettings();
+        $s['paypal_email'] = $request->input('paypal_email', '');
+        $s['paypal_me']    = $request->input('paypal_me', '');
+        $this->saveSettings($s);
+
+        return back()->with('success', 'PayPal settings saved.');
+    }
+
+    public function updateBankSettings(Request $request)
+    {
+        $this->requireAdmin();
+        $s = $this->getSettings();
+        $s['bank_name']           = $request->input('bank_name', '');
+        $s['bank_account_name']   = $request->input('bank_account_name', '');
+        $s['bank_account_number'] = $request->input('bank_account_number', '');
+        $s['bank_routing']        = $request->input('bank_routing', '');
+        $this->saveSettings($s);
+
+        return back()->with('success', 'Bank transfer settings saved.');
+    }
+
+    public function activateSubscription(Subscription $subscription)
+    {
+        $this->requireAdmin();
+        $plan = $subscription->plan;
+        $ends = match($plan->billing_cycle ?? 'monthly') {
+            'monthly'  => now()->addMonth(),
+            'yearly'   => now()->addYear(),
+            'lifetime' => null,
+            default    => now()->addMonth(),
+        };
+        $subscription->update([
+            'status'    => 'active',
+            'starts_at' => now(),
+            'ends_at'   => $ends,
+        ]);
+
+        return back()->with('success', 'Subscription activated for ' . $subscription->user->name . '.');
     }
 
     // ── Support Tickets ───────────────────────────────────
