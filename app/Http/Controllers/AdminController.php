@@ -1290,6 +1290,7 @@ class AdminController extends Controller
 
         $composerBin = trim(shell_exec('which composer 2>/dev/null') ?: 'composer');
         $commands = [
+            'git stash',
             'git pull origin master',
             'HOME=/tmp ' . $composerBin . ' install --no-dev --optimize-autoloader --no-interaction',
             PHP_BINARY . ' artisan migrate --force',
@@ -1335,6 +1336,7 @@ class AdminController extends Controller
 
         $composerBin = trim(shell_exec('which composer 2>/dev/null') ?: 'composer');
         $commands = [
+            'git stash',
             'git pull origin master',
             'HOME=/tmp ' . $composerBin . ' install --no-dev --optimize-autoloader --no-interaction',
             PHP_BINARY . ' artisan migrate --force',
