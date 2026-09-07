@@ -10,41 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          extensions: mbstring, xml, ctype, json, bcmath, pdo, tokenizer
-
-      - name: Install Composer dependencies
-        run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install NPM dependencies
-        run: npm install
-
-      - name: Build frontend assets
-        run: npm run build
-
-      - name: Deploy via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: ${{ secrets.FTP_SERVER_DIR }}
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            **/tests/**
-            .env
-            .env.example
-            README.md
+      - name: Trigger webhook deploy
+        run: |
+          curl -s -o /dev/null -w "%{http_code}" \
+            -X POST https://dewanlabung.com.np/webhook/deploy \
+            -H "Content-Type: application/json" \
+            -d "{\"secret\": \"${{ secrets.DEPLOY_SECRET }}\"}" \
+          | grep -qE '^2' || { echo "Webhook deploy failed"; exit 1; }
