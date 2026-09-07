@@ -1583,9 +1583,17 @@ class AdminController extends Controller
     public function runAiTopic(AiPostTopic $topic)
     {
         $this->requireAdmin();
-        Artisan::call('ai:generate-posts', ['--topic' => $topic->id, '--force' => true]);
+        $exitCode = Artisan::call('ai:generate-posts', ['--topic' => $topic->id, '--force' => true]);
+        $output   = trim(Artisan::output());
+
+        if ($exitCode !== 0) {
+            $error = $output ?: 'Generation failed. Check your Gemini API key in AI Content settings.';
+            return redirect('/admin/ai-content')->with('error', $error);
+        }
+
         $topic->update(['last_run_at' => now()]);
-        return redirect('/admin/ai-content')->with('success', 'Post generation triggered for: ' . $topic->keyword);
+        $msg = $output ?: 'Posts generated for: ' . $topic->keyword;
+        return redirect('/admin/ai-content')->with('success', $msg);
     }
 
     public function runAllAiTopics()

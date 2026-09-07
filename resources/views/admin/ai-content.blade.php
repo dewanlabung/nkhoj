@@ -9,6 +9,12 @@
 </div>
 @endif
 
+@if(session('error'))
+<div class="mb-4 px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-300 rounded-xl text-sm">
+    {{ session('error') }}
+</div>
+@endif
+
 {{-- Header --}}
 <div class="flex items-center justify-between mb-6">
     <div>
