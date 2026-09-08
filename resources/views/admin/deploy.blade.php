@@ -28,10 +28,12 @@
         <div class="text-xs text-gray-500 dark:text-gray-400 mb-4 space-y-1">
             <p>This will run:</p>
             <ol class="list-decimal list-inside space-y-0.5 text-gray-600 dark:text-gray-300">
-                <li>git pull origin master</li>
+                <li>git fetch origin master</li>
+                <li>git reset --hard origin/master</li>
                 <li>composer install (no-dev)</li>
                 <li>php artisan migrate --force</li>
                 <li>php artisan cache:clear</li>
+                <li>php artisan config:clear</li>
                 <li>php artisan config:cache</li>
                 <li>php artisan view:clear</li>
                 <li>php artisan route:cache</li>

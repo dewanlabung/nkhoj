@@ -1290,11 +1290,12 @@ class AdminController extends Controller
 
         $composerBin = trim(shell_exec('which composer 2>/dev/null') ?: 'composer');
         $commands = [
-            'git stash',
-            'git pull origin master',
+            'git fetch origin master',
+            'git reset --hard origin/master',
             'HOME=/tmp ' . $composerBin . ' install --no-dev --optimize-autoloader --no-interaction',
             PHP_BINARY . ' artisan migrate --force',
             PHP_BINARY . ' artisan cache:clear',
+            PHP_BINARY . ' artisan config:clear',
             PHP_BINARY . ' artisan config:cache',
             PHP_BINARY . ' artisan view:clear',
             PHP_BINARY . ' artisan route:cache',
@@ -1352,6 +1353,7 @@ class AdminController extends Controller
             'HOME=/tmp ' . $composerBin . ' install --optimize-autoloader --no-interaction',
             PHP_BINARY . ' artisan migrate --force',
             PHP_BINARY . ' artisan cache:clear',
+            PHP_BINARY . ' artisan config:clear',
             PHP_BINARY . ' artisan config:cache',
             PHP_BINARY . ' artisan view:clear',
             PHP_BINARY . ' artisan route:cache',
