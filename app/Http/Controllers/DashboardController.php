@@ -53,9 +53,14 @@ class DashboardController extends Controller
             'seo_title'     => 'nullable|string|max:160',
             'seo_desc'      => 'nullable|string|max:320',
             'seo_keywords'  => 'nullable|string|max:300',
-            'thumbnail_url' => 'nullable|string|max:500',
-            'thumbnail'     => 'nullable|image|max:4096',
-            'tags'          => 'nullable|string',
+            'thumbnail_url'    => 'nullable|string|max:500',
+            'thumbnail'        => 'nullable|image|max:4096',
+            'tags'             => 'nullable|string',
+            'sources'          => 'nullable|array',
+            'sources.*.label'  => 'nullable|string|max:200',
+            'sources.*.url'    => 'nullable|string|max:500',
+            'article_faq_q'   => 'nullable|array',
+            'article_faq_a'   => 'nullable|array',
         ];
 
         if ($isEvent) {
@@ -98,6 +103,15 @@ class DashboardController extends Controller
 
         $bodyBlocks = $this->textToBlocks($data['body'] ?? '');
 
+        $faqQ = $request->input('article_faq_q', []);
+        $faqA = $request->input('article_faq_a', []);
+        $articleFaq = [];
+        foreach ($faqQ as $idx => $q) {
+            if (trim($q)) $articleFaq[] = ['q' => $q, 'a' => $faqA[$idx] ?? ''];
+        }
+
+        $sources = array_values(array_filter($request->input('sources', []), fn($s) => !empty($s['label']) || !empty($s['url'])));
+
         $postData = [
             'uuid'          => Str::uuid(),
             'author_id'     => auth()->id(),
@@ -112,6 +126,8 @@ class DashboardController extends Controller
             'seo_desc'      => $data['seo_desc'] ?? null,
             'thumbnail_url' => $thumbnailUrl,
             'published_at'  => (($data['status'] ?? 'draft') === 'published') ? now() : null,
+            'sources'       => $sources ?: null,
+            'article_faq'   => $articleFaq ?: null,
         ];
 
         if ($isEvent) {
@@ -185,8 +201,11 @@ class DashboardController extends Controller
             'is_slider'      => 'nullable|boolean',
             'is_recommended' => 'nullable|boolean',
             'is_pro'         => 'nullable|boolean',
-            'article_faq_q'  => 'nullable|array',
-            'article_faq_a'  => 'nullable|array',
+            'article_faq_q'    => 'nullable|array',
+            'article_faq_a'    => 'nullable|array',
+            'sources'          => 'nullable|array',
+            'sources.*.label'  => 'nullable|string|max:200',
+            'sources.*.url'    => 'nullable|string|max:500',
         ]);
 
         $thumbnailUrl = $data['thumbnail_url'] ?? $post->thumbnail_url;
@@ -203,6 +222,8 @@ class DashboardController extends Controller
         foreach ($faqQ as $i => $q) {
             if (trim($q)) $articleFaq[] = ['q' => $q, 'a' => $faqA[$i] ?? ''];
         }
+
+        $sources = array_values(array_filter($request->input('sources', []), fn($s) => !empty($s['label']) || !empty($s['url'])));
 
         $slug = $data['slug'] ?? $post->slug;
         if ($slug !== $post->slug) {
@@ -232,6 +253,7 @@ class DashboardController extends Controller
             'is_recommended' => (bool) ($request->input('is_recommended', 0)),
             'is_pro'         => (bool) ($request->input('is_pro', 0)),
             'article_faq'    => $articleFaq ?: null,
+            'sources'        => $sources ?: null,
             'published_at'   => ($data['status'] === 'published' && !$post->published_at) ? now() : $post->published_at,
         ]);
 
