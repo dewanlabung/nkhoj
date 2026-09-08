@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Bookmark;
 use App\Models\SocialPage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -70,15 +71,21 @@ class SocialPageController extends Controller
     public function show(string $slug)
     {
         $page = SocialPage::where('slug', $slug)->where('is_active', true)->firstOrFail();
-        $isOwner = $page->isOwnedBy(auth()->user());
+        $isOwner    = $page->isOwnedBy(auth()->user());
         $isFollowing = $page->isFollowedBy(auth()->user());
+        $isSaved    = auth()->check()
+            ? Bookmark::where('user_id', auth()->id())
+                ->where('bookmarkable_type', SocialPage::class)
+                ->where('bookmarkable_id', $page->id)
+                ->exists()
+            : false;
 
         $posts = \App\Models\Post::where('author_id', $page->user_id)
             ->where('status', 'published')
             ->latest('published_at')
             ->paginate(12);
 
-        return view('social-pages.show', compact('page', 'isOwner', 'isFollowing', 'posts'));
+        return view('social-pages.show', compact('page', 'isOwner', 'isFollowing', 'isSaved', 'posts'));
     }
 
     // POST /pages/{slug}/follow — toggle follow (AJAX)

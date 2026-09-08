@@ -88,6 +88,16 @@
                         </svg>
                         <span id="follow-label">{{ $isFollowing ? 'Following' : 'Follow' }}</span>
                     </button>
+                    <button id="save-page-btn" onclick="toggleSavePage()"
+                            class="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl transition text-sm font-semibold
+                                   {{ $isSaved ?? false ? 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            data-saved="{{ ($isSaved ?? false) ? 'true' : 'false' }}"
+                            data-id="{{ $page->id }}">
+                        <svg class="w-4 h-4" fill="{{ ($isSaved ?? false) ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 20 20">
+                            <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z"/>
+                        </svg>
+                        <span id="save-page-label">{{ ($isSaved ?? false) ? 'Saved' : 'Save' }}</span>
+                    </button>
                 @else
                     <a href="/login" class="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl transition text-sm">
                         Follow
@@ -221,6 +231,37 @@ function toggleFollow() {
         } else {
             btn.classList.remove('bg-gray-100', 'hover:bg-gray-200', 'text-gray-800');
             btn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'text-white');
+        }
+    });
+}
+
+function toggleSavePage() {
+    const btn = document.getElementById('save-page-btn');
+    const label = document.getElementById('save-page-label');
+    const isSaved = btn.dataset.saved === 'true';
+    const pageId = btn.dataset.id;
+
+    fetch('/bookmarks/toggle', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+        },
+        body: JSON.stringify({ type: 'page', id: pageId })
+    })
+    .then(r => r.json())
+    .then(data => {
+        btn.dataset.saved = data.saved ? 'true' : 'false';
+        label.textContent = data.saved ? 'Saved' : 'Save';
+        const icon = btn.querySelector('svg');
+        if (data.saved) {
+            icon.setAttribute('fill', 'currentColor');
+            btn.classList.replace('bg-gray-100', 'bg-yellow-50');
+            btn.classList.replace('text-gray-700', 'text-yellow-700');
+        } else {
+            icon.setAttribute('fill', 'none');
+            btn.classList.replace('bg-yellow-50', 'bg-gray-100');
+            btn.classList.replace('text-yellow-700', 'text-gray-700');
         }
     });
 }
