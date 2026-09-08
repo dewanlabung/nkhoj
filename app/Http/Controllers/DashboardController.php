@@ -163,16 +163,27 @@ class DashboardController extends Controller
         $post = Post::where('author_id', auth()->id())->findOrFail($id);
 
         $data = $request->validate([
-            'title'         => 'required|string|max:300',
-            'excerpt'       => 'nullable|string|max:500',
-            'body'          => 'nullable|string',
+            'title'          => 'required|string|max:300',
+            'slug'           => 'nullable|string|max:300',
+            'excerpt'        => 'nullable|string|max:500',
+            'body'           => 'nullable|string',
             'category_id'   => 'required|exists:categories,id',
-            'status'        => 'in:draft,published,archived',
-            'seo_title'     => 'nullable|string|max:160',
-            'seo_desc'      => 'nullable|string|max:320',
-            'thumbnail_url' => 'nullable|string|max:500',
-            'thumbnail'     => 'nullable|image|max:4096',
-            'tags'          => 'nullable|string',
+            'status'         => 'in:draft,published,scheduled,archived',
+            'visibility'     => 'nullable|in:public,members,private',
+            'scheduled_at'   => 'nullable|date',
+            'seo_title'      => 'nullable|string|max:160',
+            'seo_desc'       => 'nullable|string|max:320',
+            'thumbnail_url'  => 'nullable|string|max:500',
+            'thumbnail'      => 'nullable|image|max:4096',
+            'image_caption'  => 'nullable|string|max:300',
+            'tags'           => 'nullable|string',
+            'is_featured'    => 'nullable|boolean',
+            'is_breaking'    => 'nullable|boolean',
+            'is_slider'      => 'nullable|boolean',
+            'is_recommended' => 'nullable|boolean',
+            'is_pro'         => 'nullable|boolean',
+            'article_faq_q'  => 'nullable|array',
+            'article_faq_a'  => 'nullable|array',
         ]);
 
         $thumbnailUrl = $data['thumbnail_url'] ?? $post->thumbnail_url;
@@ -183,16 +194,42 @@ class DashboardController extends Controller
             $thumbnailUrl = '/uploads/' . $filename;
         }
 
+        $faqQ = $request->input('article_faq_q', []);
+        $faqA = $request->input('article_faq_a', []);
+        $articleFaq = [];
+        foreach ($faqQ as $i => $q) {
+            if (trim($q)) $articleFaq[] = ['q' => $q, 'a' => $faqA[$i] ?? ''];
+        }
+
+        $slug = $data['slug'] ?? $post->slug;
+        if ($slug !== $post->slug) {
+            $slug = Str::slug($slug) ?: $post->slug;
+            $base = $slug; $i = 1;
+            while (Post::where('slug', $slug)->where('id', '!=', $post->id)->exists()) {
+                $slug = "{$base}-{$i}"; $i++;
+            }
+        }
+
         $post->update([
-            'category_id'   => $data['category_id'],
-            'title'         => $data['title'],
-            'excerpt'       => $data['excerpt'] ?? null,
-            'body'          => $this->textToBlocks($data['body'] ?? ''),
-            'status'        => $data['status'],
-            'seo_title'     => $data['seo_title'] ?? null,
-            'seo_desc'      => $data['seo_desc'] ?? null,
-            'thumbnail_url' => $thumbnailUrl,
-            'published_at'  => ($data['status'] === 'published' && !$post->published_at) ? now() : $post->published_at,
+            'slug'           => $slug,
+            'category_id'    => $data['category_id'],
+            'title'          => $data['title'],
+            'excerpt'        => $data['excerpt'] ?? null,
+            'body'           => $this->textToBlocks($data['body'] ?? ''),
+            'status'         => $data['status'],
+            'visibility'     => $data['visibility'] ?? 'public',
+            'scheduled_at'   => $data['scheduled_at'] ?? null,
+            'seo_title'      => $data['seo_title'] ?? null,
+            'seo_desc'       => $data['seo_desc'] ?? null,
+            'thumbnail_url'  => $thumbnailUrl,
+            'image_caption'  => $data['image_caption'] ?? null,
+            'is_featured'    => (bool) ($request->input('is_featured', 0)),
+            'is_breaking'    => (bool) ($request->input('is_breaking', 0)),
+            'is_slider'      => (bool) ($request->input('is_slider', 0)),
+            'is_recommended' => (bool) ($request->input('is_recommended', 0)),
+            'is_pro'         => (bool) ($request->input('is_pro', 0)),
+            'article_faq'    => $articleFaq ?: null,
+            'published_at'   => ($data['status'] === 'published' && !$post->published_at) ? now() : $post->published_at,
         ]);
 
         $this->syncTags($post, $data['tags'] ?? '');
