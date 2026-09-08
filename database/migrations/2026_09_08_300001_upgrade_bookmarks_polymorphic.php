@@ -27,15 +27,16 @@ return new class extends Migration {
                     'bookmarkable_type' => 'App\\Models\\Post',
                     'bookmarkable_id'   => DB::raw('post_id'),
                 ]);
+
+            Schema::table('bookmarks', function (Blueprint $table) {
+                // Must drop FK before dropping the unique index it depends on (MySQL error 1553)
+                try { $table->dropForeign(['post_id']); } catch (\Exception $e) {}
+                try { $table->dropUnique(['user_id', 'post_id']); } catch (\Exception $e) {}
+                $table->dropColumn('post_id');
+            });
         }
 
         Schema::table('bookmarks', function (Blueprint $table) use ($columns) {
-            // Drop old unique + post_id column if still present
-            if (in_array('post_id', $columns)) {
-                try { $table->dropUnique(['user_id', 'post_id']); } catch (\Exception $e) {}
-                $table->dropColumn('post_id');
-            }
-
             // Add collection column if missing
             if (!in_array('collection', $columns)) {
                 $table->string('collection')->nullable()->after('bookmarkable_id');
@@ -51,7 +52,7 @@ return new class extends Migration {
             } catch (\Exception $e) {}
         });
 
-        // Make polymorphic columns NOT NULL
+        // Make polymorphic columns NOT NULL now that data is migrated
         DB::statement('ALTER TABLE bookmarks MODIFY bookmarkable_type VARCHAR(255) NOT NULL');
         DB::statement('ALTER TABLE bookmarks MODIFY bookmarkable_id BIGINT UNSIGNED NOT NULL');
     }

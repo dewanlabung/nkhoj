@@ -304,122 +304,62 @@
                     </a>
                 </div>
                 @endauth
-
+                {{-- Mobile-only: dark mode toggle (top bar hidden on mobile) --}}
+                <button @click="toggleDark()" class="sm:hidden w-9 h-9 flex items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" :title="dark ? 'Light Mode' : 'Dark Mode'">
+                    <svg x-show="!dark" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                    <svg x-show="dark" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z"/></svg>
+                </button>
                 {{-- Google-style apps grid (desktop only) --}}
-                <div class="hidden lg:block relative" x-data="{ appsOpen: false }" @keydown.escape.window="appsOpen = false">
-                    <button @click="appsOpen = !appsOpen"
+                <div class="hidden lg:block relative" x-data="{ appsOpen: false }">
+                    <button @click="appsOpen = !appsOpen" @click.outside="appsOpen = false"
                             class="w-9 h-9 flex items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                            title="Apps">
+                            title="Services">
                         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M6 8a2 2 0 100-4 2 2 0 000 4zM12 8a2 2 0 100-4 2 2 0 000 4zM18 8a2 2 0 100-4 2 2 0 000 4zM6 14a2 2 0 100-4 2 2 0 000 4zM12 14a2 2 0 100-4 2 2 0 000 4zM18 14a2 2 0 100-4 2 2 0 000 4zM6 20a2 2 0 100-4 2 2 0 000 4zM12 20a2 2 0 100-4 2 2 0 000 4zM18 20a2 2 0 100-4 2 2 0 000 4z"/>
+                            <rect x="3" y="3" width="4" height="4" rx="1"/><rect x="10" y="3" width="4" height="4" rx="1"/><rect x="17" y="3" width="4" height="4" rx="1"/>
+                            <rect x="3" y="10" width="4" height="4" rx="1"/><rect x="10" y="10" width="4" height="4" rx="1"/><rect x="17" y="10" width="4" height="4" rx="1"/>
+                            <rect x="3" y="17" width="4" height="4" rx="1"/><rect x="10" y="17" width="4" height="4" rx="1"/><rect x="17" y="17" width="4" height="4" rx="1"/>
                         </svg>
                     </button>
-
-                    <div x-show="appsOpen" x-cloak
-                         x-transition:enter="transition ease-out duration-150"
-                         x-transition:enter-start="opacity-0 scale-95 translate-y-1"
-                         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                         x-transition:leave="transition ease-in duration-100"
-                         x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                         x-transition:leave-end="opacity-0 scale-95 translate-y-1"
-                         @click.outside="appsOpen = false"
-                         class="absolute right-0 top-11 w-72 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl shadow-2xl z-50 overflow-hidden">
-
-                        {{-- Header --}}
-                        <div class="flex items-center justify-between px-5 pt-4 pb-2">
-                            <span class="font-bold text-gray-900 dark:text-white text-base">Your services</span>
-                            <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600 transition">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                                </svg>
-                            </button>
-                        </div>
-
-                        {{-- Grid --}}
-                        <div class="grid grid-cols-3 gap-0 px-2 pb-4">
+                    <div x-show="appsOpen" x-cloak x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
+                         class="absolute right-0 top-11 w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl p-4 z-50">
+                        <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Your services</p>
+                        <div class="grid grid-cols-3 gap-1">
                             @php
-                            $appLinks = [
-                                [
-                                    'href' => '/pages', 'label' => 'Pages',
-                                    'bg' => '#1877F2',
-                                    'svg' => '<rect width="24" height="24" rx="6" fill="#1877F2"/><path d="M13.5 8H11v2.5H9.5V13H11v7h3v-7h2l.5-2.5H14V8.5c0-.3.2-.5.5-.5H16V5h-1.5C13.1 5 12 6.1 12 7.5" fill="white"/>',
-                                ],
-                                [
-                                    'href' => '/questions', 'label' => 'Q&A',
-                                    'bg' => '#16a34a',
-                                    'svg' => '<rect width="24" height="24" rx="6" fill="#16a34a"/><text x="12" y="17" font-size="14" font-weight="bold" text-anchor="middle" fill="white">Q</text>',
-                                ],
-                                [
-                                    'href' => '/recipe', 'label' => 'Recipes',
-                                    'bg' => '#ef4444',
-                                    'svg' => '<rect width="24" height="24" rx="6" fill="#ef4444"/><path d="M12 4c-.6 0-1 .4-1 1v4.5C9.3 10 8 11.3 8 13c0 1.7 1.3 3 3 3v4h2v-4c1.7 0 3-1.3 3-3 0-1.7-1.3-3-3-3V5c0-.6-.4-1-1-1zM9 7V4.5c0-.3.2-.5.5-.5s.5.2.5.5V7H9zm5 0V4.5c0-.3.2-.5.5-.5s.5.2.5.5V7h-1z" fill="white"/>',
-                                ],
-                                [
-                                    'href' => '/events', 'label' => 'Events',
-                                    'bg' => '#ec4899',
-                                    'svg' => '<rect width="24" height="24" rx="6" fill="#ec4899"/><path d="M8 7V5m8 2V5M5 11h14M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/>',
-                                ],
-                                [
-                                    'href' => '/bookmarks', 'label' => 'Saved',
-                                    'bg' => '#7c3aed',
-                                    'svg' => '<rect width="24" height="24" rx="6" fill="#7c3aed"/><path d="M6 4h12v16l-6-3-6 3V4z" fill="white"/>',
-                                ],
-                                [
-                                    'href' => '/membership', 'label' => 'Members',
-                                    'bg' => '#d97706',
-                                    'svg' => '<rect width="24" height="24" rx="6" fill="#d97706"/><circle cx="12" cy="9" r="3" fill="white"/><path d="M6 19c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/>',
-                                ],
-                                [
-                                    'href' => '/notifications', 'label' => 'Alerts',
-                                    'bg' => '#4f46e5',
-                                    'svg' => '<rect width="24" height="24" rx="6" fill="#4f46e5"/><path d="M12 5a6 6 0 016 6v3l1.5 2H4.5L6 14v-3a6 6 0 016-6zm0 0V3m-1.5 16a1.5 1.5 0 003 0" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/>',
-                                ],
-                                [
-                                    'href' => '/support', 'label' => 'Support',
-                                    'bg' => '#0891b2',
-                                    'svg' => '<rect width="24" height="24" rx="6" fill="#0891b2"/><circle cx="12" cy="12" r="7" stroke="white" stroke-width="1.5" fill="none"/><circle cx="12" cy="12" r="3" stroke="white" stroke-width="1.5" fill="none"/>',
-                                ],
-                                [
-                                    'href' => '/account', 'label' => 'Account',
-                                    'bg' => '#475569',
-                                    'svg' => '<rect width="24" height="24" rx="6" fill="#475569"/><circle cx="12" cy="8" r="3.5" fill="white"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/>',
-                                ],
+                            $apps = [
+                                ['Pages',      '/pages',      'linear-gradient(135deg,#f97316,#f59e0b)', 'M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z'],
+                                ['Q&A',         '/questions',  'linear-gradient(135deg,#10b981,#059669)', 'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
+                                ['Recipes',    '/recipe',     'linear-gradient(135deg,#ef4444,#ec4899)', 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z'],
+                                ['Events',     '/events',     'linear-gradient(135deg,#6366f1,#8b5cf6)', 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
+                                ['Saved',      '/bookmarks',  'linear-gradient(135deg,#7c3aed,#a855f7)', 'M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z'],
+                                ['Membership', '/membership', 'linear-gradient(135deg,#f59e0b,#eab308)', 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z'],
+                                ['Alerts',     '/notifications','linear-gradient(135deg,#ec4899,#f43f5e)', 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9'],
+                                ['Support',    '/support',    'linear-gradient(135deg,#14b8a6,#06b6d4)', 'M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z'],
+                                ['Account',    '/account',    'linear-gradient(135deg,#64748b,#475569)', 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'],
                             ];
                             @endphp
-
-                            @foreach($appLinks as $app)
-                            <a href="{{ $app['href'] }}" @click="appsOpen = false"
-                               class="flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
-                                <svg viewBox="0 0 24 24" class="w-14 h-14" xmlns="http://www.w3.org/2000/svg">
-                                    {!! $app['svg'] !!}
-                                </svg>
-                                <span class="text-xs text-gray-700 dark:text-gray-300 font-medium text-center leading-tight">{{ $app['label'] }}</span>
+                            @foreach($apps as [$label, $href, $grad, $path])
+                            <a href="{{ $href }}" @click="appsOpen = false"
+                               class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors group">
+                                <span class="w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm" style="background:{{ $grad }}">
+                                    <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="{{ $path }}"/></svg>
+                                </span>
+                                <span class="text-xs text-gray-600 dark:text-gray-400 font-medium group-hover:text-gray-900 dark:group-hover:text-white">{{ $label }}</span>
                             </a>
                             @endforeach
-
                             @auth
                             @if(auth()->user()->isAdmin())
                             <a href="/admin" @click="appsOpen = false"
-                               class="flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
-                                <svg viewBox="0 0 24 24" class="w-14 h-14" xmlns="http://www.w3.org/2000/svg">
-                                    <rect width="24" height="24" rx="6" fill="#6366f1"/>
-                                    <path d="M12 3l1.5 3 3.3.5-2.4 2.3.6 3.2L12 10.5l-3 1.5.6-3.2L7.2 6.5l3.3-.5z" fill="white"/>
-                                    <path d="M9 14h6v7H9z" fill="white" opacity=".8"/>
-                                    <path d="M7 21h10" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-                                </svg>
-                                <span class="text-xs text-gray-700 dark:text-gray-300 font-medium text-center leading-tight">Admin</span>
+                               class="flex flex-col items-center gap-1.5 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors group">
+                                <span class="w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm" style="background:linear-gradient(135deg,#1a73e8,#0d47a1)">
+                                    <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+                                </span>
+                                <span class="text-xs text-gray-600 dark:text-gray-400 font-medium group-hover:text-gray-900 dark:group-hover:text-white">Admin</span>
                             </a>
                             @endif
                             @endauth
                         </div>
                     </div>
                 </div>
-
-                {{-- Mobile-only: dark mode toggle (top bar hidden on mobile) --}}
-                <button @click="toggleDark()" class="sm:hidden w-9 h-9 flex items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" :title="dark ? 'Light Mode' : 'Dark Mode'">
-                    <svg x-show="!dark" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-                    <svg x-show="dark" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z"/></svg>
-                </button>
                 {{-- Mobile menu --}}
                 <button @click="mobileMenu = true" class="lg:hidden w-9 h-9 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -535,256 +475,241 @@
 ═══════════════════════════════════════════════════════ --}}
 <div x-show="mobileMenu" x-cloak class="lg:hidden fixed inset-0 z-50 flex">
     {{-- Backdrop --}}
-    <div class="absolute inset-0 bg-black/40" @click="mobileMenu = false"
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="mobileMenu = false"
         x-transition:enter="transition-opacity ease-out duration-200"
         x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
         x-transition:leave="transition-opacity ease-in duration-150"
         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
     </div>
 
-    {{-- Drawer panel — slides from left --}}
-    <div class="relative w-[320px] max-w-[90vw] bg-gray-100 dark:bg-gray-900 h-full flex flex-col shadow-2xl overflow-y-auto"
+    {{-- Drawer panel --}}
+    <div class="relative w-72 max-w-[85vw] bg-white dark:bg-gray-900 h-full flex flex-col shadow-2xl overflow-y-auto"
         x-transition:enter="transition ease-out duration-250"
         x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0"
         x-transition:leave="transition ease-in duration-200"
         x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full">
 
-        {{-- ── HEADER: Logo + close ── --}}
-        <div class="flex items-center justify-between px-4 pt-4 pb-2">
+        {{-- Header --}}
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex-shrink-0">
             <a href="/" @click="mobileMenu = false" class="text-xl font-black text-brand-600 tracking-tight">
                 {{ $siteName }}<span class="text-brand-400">.</span>
             </a>
             <button @click="mobileMenu = false"
-                class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors text-lg">
+                class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-lg font-light">
                 ×
             </button>
         </div>
 
+        {{-- ── PROFILE CARD (expandable with Sign Out, FB style) ── --}}
         @auth
-        {{-- ── PROFILE CARD (like FB "Dewan Labung / View your profile") ── --}}
-        <div class="mx-3 mb-1">
-            <a href="/profile/{{ auth()->user()->username ?? auth()->user()->name }}" @click="mobileMenu = false"
-               class="flex items-center justify-between bg-white dark:bg-gray-800 rounded-2xl px-4 py-3 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
-                <div class="flex items-center gap-3">
-                    @if(auth()->user()->avatar_url)
-                        <img src="{{ auth()->user()->avatar_url }}" class="w-12 h-12 rounded-full object-cover flex-shrink-0">
-                    @else
-                        <div class="w-12 h-12 rounded-full bg-brand-500 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+        <div class="bg-gray-50 dark:bg-gray-950 flex-1 overflow-y-auto pb-4">
+
+            {{-- Profile card --}}
+            <div class="mx-3 mt-3 mb-1" x-data="{ profileOpen: false }">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden">
+                    <button @click="profileOpen = !profileOpen"
+                       class="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+                        <div class="flex items-center gap-3">
+                            @if(auth()->user()->avatar_url)
+                                <img src="{{ auth()->user()->avatar_url }}" class="w-12 h-12 rounded-full object-cover flex-shrink-0">
+                            @else
+                                <div class="w-12 h-12 rounded-full bg-brand-500 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                                </div>
+                            @endif
+                            <div class="min-w-0 text-left">
+                                <p class="font-bold text-gray-900 dark:text-white text-sm truncate">{{ auth()->user()->name }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">View your profile</p>
+                            </div>
                         </div>
-                    @endif
-                    <div class="min-w-0">
-                        <p class="font-bold text-gray-900 dark:text-white text-sm truncate">{{ auth()->user()->name }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">View your profile</p>
+                        <svg class="w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-200" :class="profileOpen ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div x-show="profileOpen" class="border-t border-gray-100 dark:border-gray-700">
+                        <a href="/profile/{{ auth()->user()->username ?? auth()->user()->name }}" @click="mobileMenu = false"
+                           class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+                            <svg class="w-5 h-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            View Profile
+                        </a>
+                        <a href="/account" @click="mobileMenu = false"
+                           class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors border-t border-gray-100 dark:border-gray-700">
+                            <svg class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            Settings
+                        </a>
+                        <form method="POST" action="/logout" class="border-t border-gray-100 dark:border-gray-700">
+                            @csrf
+                            <button class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                Sign Out
+                            </button>
+                        </form>
                     </div>
                 </div>
-                <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
-            </a>
-        </div>
+            </div>
 
-        {{-- ── Write post row ── --}}
-        <div class="mx-3 mb-1">
-            <button @click="mobileMenu = false; formatModal = true"
-               class="w-full flex items-center gap-3 bg-white dark:bg-gray-800 rounded-2xl px-4 py-3 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
-                <span class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                      style="background: linear-gradient(135deg,#f97316,#ef4444)">
-                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                </span>
-                <span class="font-semibold text-gray-900 dark:text-white text-sm">Write a post</span>
-            </button>
-        </div>
-
-        {{-- ── 2-COLUMN FEATURE GRID (FB Lite style) ── --}}
-        <div class="mx-3 mb-1">
-            <div class="grid grid-cols-2 gap-2">
-
-                {{-- Notifications --}}
-                <a href="/notifications" @click="mobileMenu = false"
-                   class="flex flex-col items-start gap-3 bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
-                    <span class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
-                          style="background:linear-gradient(135deg,#8b5cf6,#6366f1)">
-                        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+            {{-- Write post --}}
+            <div class="mx-3 mb-1">
+                <button @click="mobileMenu = false; formatModal = true"
+                   class="w-full flex items-center gap-3 bg-white dark:bg-gray-800 rounded-2xl px-4 py-3 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+                    <span class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background:linear-gradient(135deg,#f97316,#ef4444)">
+                        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                     </span>
-                    <span class="font-semibold text-gray-900 dark:text-white text-sm leading-tight">Notifications</span>
-                </a>
+                    <span class="font-semibold text-gray-900 dark:text-white text-sm">Write a post</span>
+                </button>
+            </div>
 
-                {{-- Pages --}}
-                <a href="/pages" @click="mobileMenu = false"
-                   class="flex flex-col items-start gap-3 bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
-                    <span class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
-                          style="background:linear-gradient(135deg,#f97316,#f59e0b)">
-                        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21l1.65-3.8a9 9 0 1113.7 0L21 21M12 13v-2m0-4h.01"/></svg>
-                    </span>
-                    <span class="font-semibold text-gray-900 dark:text-white text-sm leading-tight">Pages</span>
-                </a>
+            {{-- 2-col feature tile grid (FB Lite style) --}}
+            <div class="mx-3 mb-1">
+                <div class="grid grid-cols-2 gap-2">
+                    {{-- Notifications --}}
+                    <a href="/notifications" @click="mobileMenu = false" class="flex flex-col items-start gap-3 bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+                        <span class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:linear-gradient(135deg,#8b5cf6,#6366f1)">
+                            <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                        </span>
+                        <span class="font-semibold text-gray-900 dark:text-white text-sm leading-tight">Notifications</span>
+                    </a>
+                    {{-- Pages --}}
+                    <a href="/pages" @click="mobileMenu = false" class="flex flex-col items-start gap-3 bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+                        <span class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:linear-gradient(135deg,#f97316,#f59e0b)">
+                            <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+                        </span>
+                        <span class="font-semibold text-gray-900 dark:text-white text-sm leading-tight">Pages</span>
+                    </a>
+                    {{-- Q&A --}}
+                    <a href="/questions" @click="mobileMenu = false" class="flex flex-col items-start gap-3 bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+                        <span class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:linear-gradient(135deg,#10b981,#059669)">
+                            <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </span>
+                        <span class="font-semibold text-gray-900 dark:text-white text-sm leading-tight">Q&amp;A</span>
+                    </a>
+                    {{-- Saved --}}
+                    <a href="/bookmarks" @click="mobileMenu = false" class="flex flex-col items-start gap-3 bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+                        <span class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">
+                            <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+                        </span>
+                        <span class="font-semibold text-gray-900 dark:text-white text-sm leading-tight">Saved</span>
+                    </a>
+                    {{-- Events --}}
+                    <a href="/events" @click="mobileMenu = false" class="flex flex-col items-start gap-3 bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+                        <span class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+                            <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </span>
+                        <span class="font-semibold text-gray-900 dark:text-white text-sm leading-tight">Events</span>
+                    </a>
+                    {{-- Recipes --}}
+                    <a href="/recipe" @click="mobileMenu = false" class="flex flex-col items-start gap-3 bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+                        <span class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:linear-gradient(135deg,#f97316,#ef4444)">
+                            <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                        </span>
+                        <span class="font-semibold text-gray-900 dark:text-white text-sm leading-tight">Recipes</span>
+                    </a>
+                    {{-- Membership --}}
+                    <a href="/membership" @click="mobileMenu = false" class="flex flex-col items-start gap-3 bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+                        <span class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:linear-gradient(135deg,#f59e0b,#eab308)">
+                            <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+                        </span>
+                        <span class="font-semibold text-gray-900 dark:text-white text-sm leading-tight">Membership</span>
+                    </a>
+                    {{-- Dashboard --}}
+                    <a href="/dashboard" @click="mobileMenu = false" class="flex flex-col items-start gap-3 bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+                        <span class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:linear-gradient(135deg,#1a73e8,#0d47a1)">
+                            <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>
+                        </span>
+                        <span class="font-semibold text-gray-900 dark:text-white text-sm leading-tight">Dashboard</span>
+                    </a>
+                    {{-- Support --}}
+                    <a href="/support" @click="mobileMenu = false" class="flex flex-col items-start gap-3 bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+                        <span class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:linear-gradient(135deg,#14b8a6,#06b6d4)">
+                            <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        </span>
+                        <span class="font-semibold text-gray-900 dark:text-white text-sm leading-tight">Support</span>
+                    </a>
+                    {{-- Account --}}
+                    <a href="/account" @click="mobileMenu = false" class="flex flex-col items-start gap-3 bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+                        <span class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:linear-gradient(135deg,#64748b,#475569)">
+                            <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        </span>
+                        <span class="font-semibold text-gray-900 dark:text-white text-sm leading-tight">Account</span>
+                    </a>
+                    @if(auth()->user()->isAdmin())
+                    {{-- Admin Panel --}}
+                    <a href="/admin" @click="mobileMenu = false" class="flex flex-col items-start gap-3 bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+                        <span class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:linear-gradient(135deg,#ef4444,#b91c1c)">
+                            <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+                        </span>
+                        <span class="font-semibold text-gray-900 dark:text-white text-sm leading-tight">Admin Panel</span>
+                    </a>
+                    @endif
+                </div>
+            </div>
 
-                {{-- Questions --}}
-                <a href="/questions" @click="mobileMenu = false"
-                   class="flex flex-col items-start gap-3 bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
-                    <span class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
-                          style="background:linear-gradient(135deg,#10b981,#059669)">
-                        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    </span>
-                    <span class="font-semibold text-gray-900 dark:text-white text-sm leading-tight">Q&amp;A</span>
-                </a>
-
-                {{-- Bookmarks / Saved --}}
-                <a href="/bookmarks" @click="mobileMenu = false"
-                   class="flex flex-col items-start gap-3 bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
-                    <span class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
-                          style="background:linear-gradient(135deg,#7c3aed,#a855f7)">
-                        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
-                    </span>
-                    <span class="font-semibold text-gray-900 dark:text-white text-sm leading-tight">Saved</span>
-                </a>
-
-                {{-- Events --}}
-                <a href="/dashboard/posts/create?format=event" @click="mobileMenu = false"
-                   class="flex flex-col items-start gap-3 bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
-                    <span class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
-                          style="background:linear-gradient(135deg,#ef4444,#f97316)">
-                        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    </span>
-                    <span class="font-semibold text-gray-900 dark:text-white text-sm leading-tight">Events</span>
-                </a>
-
-                {{-- Membership --}}
-                <a href="/membership" @click="mobileMenu = false"
-                   class="flex flex-col items-start gap-3 bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
-                    <span class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
-                          style="background:linear-gradient(135deg,#f59e0b,#eab308)">
-                        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-                    </span>
-                    <span class="font-semibold text-gray-900 dark:text-white text-sm leading-tight">Membership</span>
-                </a>
-
-                {{-- Dashboard --}}
-                <a href="/dashboard" @click="mobileMenu = false"
-                   class="flex flex-col items-start gap-3 bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
-                    <span class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
-                          style="background:linear-gradient(135deg,#3b82f6,#2563eb)">
-                        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                    </span>
-                    <span class="font-semibold text-gray-900 dark:text-white text-sm leading-tight">Dashboard</span>
-                </a>
-
-                {{-- Support --}}
-                <a href="/support" @click="mobileMenu = false"
-                   class="flex flex-col items-start gap-3 bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
-                    <span class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
-                          style="background:linear-gradient(135deg,#06b6d4,#0891b2)">
-                        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                    </span>
-                    <span class="font-semibold text-gray-900 dark:text-white text-sm leading-tight">Support</span>
-                </a>
-
-                {{-- Account --}}
-                <a href="/account" @click="mobileMenu = false"
-                   class="flex flex-col items-start gap-3 bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
-                    <span class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
-                          style="background:linear-gradient(135deg,#64748b,#475569)">
-                        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    </span>
-                    <span class="font-semibold text-gray-900 dark:text-white text-sm leading-tight">Account</span>
-                </a>
-
-                @if(auth()->user()->isAdmin())
-                {{-- Admin Panel --}}
-                <a href="/admin" @click="mobileMenu = false"
-                   class="flex flex-col items-start gap-3 bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
-                    <span class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
-                          style="background:linear-gradient(135deg,#6366f1,#4f46e5)">
-                        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-                    </span>
-                    <span class="font-semibold text-brand-600 text-sm leading-tight">Admin Panel</span>
-                </a>
-                @endif
-
+            {{-- Bottom: dark mode + logout --}}
+            <div class="mx-3 mb-4 mt-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden">
+                <button @click="toggleDark()"
+                    class="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+                    <svg x-show="!dark" class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                    <svg x-show="dark" class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0z"/></svg>
+                    <span x-text="dark ? 'Light Mode' : 'Dark Mode'"></span>
+                </button>
+                <form method="POST" action="/logout">
+                    @csrf
+                    <button class="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        Sign Out
+                    </button>
+                </form>
             </div>
         </div>
-
         @else
-        {{-- ── GUEST: Sign in / Register ── --}}
-        <div class="mx-3 mb-1 flex gap-2">
+        {{-- Guest CTA --}}
+        <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex gap-2">
             <a href="/login" @click="mobileMenu = false"
-                class="flex-1 text-center py-3 border border-gray-300 dark:border-gray-600 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors shadow-sm">
+                class="flex-1 text-center py-2 border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                 Sign In
             </a>
             <a href="/register" @click="mobileMenu = false"
-                class="flex-1 text-center py-3 bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold rounded-2xl transition-colors shadow-sm">
+                class="flex-1 text-center py-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold rounded-lg transition-colors">
                 Register
             </a>
         </div>
         @endauth
 
-        {{-- ── NAVIGATION: categories ── --}}
-        <nav class="flex-1 py-2">
-            <div class="mx-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden">
-                @if($showHome)
-                <a href="/" @click="mobileMenu = false"
-                    class="flex items-center justify-between px-4 py-3.5 text-sm font-semibold border-b border-gray-100 dark:border-gray-700 {{ request()->is('/') ? 'text-brand-600' : 'text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-750' }} transition-colors">
-                    Home
+        {{-- Guest: navigation links + dark mode --}}
+        @guest
+        <nav class="flex-1 py-3 overflow-y-auto">
+            @if($showHome)
+            <a href="/" @click="mobileMenu = false"
+                class="flex items-center justify-between px-5 py-3 text-sm font-medium {{ request()->is('/') ? 'text-brand-600 bg-brand-50 dark:bg-brand-900/20' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }} transition-colors">
+                Home
+            </a>
+            @endif
+            @if($useFallback)
+                @foreach((\App\Models\Category::orderBy('sort_order')->limit(10)->get() ?? collect()) as $cat)
+                <a href="/category/{{ $cat->slug }}" @click="mobileMenu = false"
+                    class="flex items-center justify-between px-5 py-3 text-sm font-medium font-nepali {{ request()->is('category/'.$cat->slug) ? 'text-brand-600 bg-brand-50 dark:bg-brand-900/20' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }} transition-colors">
+                    {{ $cat->name_ne ?? $cat->name_en }}
                 </a>
-                @endif
-
-                @if($useFallback)
-                    @foreach((\App\Models\Category::orderBy('sort_order')->limit(10)->get() ?? collect()) as $cat)
-                    <a href="/category/{{ $cat->slug }}" @click="mobileMenu = false"
-                        class="flex items-center justify-between px-4 py-3.5 text-sm font-semibold border-b border-gray-100 dark:border-gray-700 last:border-0 font-nepali {{ request()->is('category/'.$cat->slug) ? 'text-brand-600' : 'text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-750' }} transition-colors">
-                        {{ $cat->name_ne ?? $cat->name_en }}
-                    </a>
-                    @endforeach
-                @else
-                    @foreach($navItems as $nav)
-                    @php $navUrl = $nav->resolvedUrl(); @endphp
-                    @if($nav->children->count())
-                    <div x-data="{ open: false }">
-                        <button @click="open = !open"
-                            class="w-full flex items-center justify-between px-4 py-3.5 text-sm font-semibold border-b border-gray-100 dark:border-gray-700 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
-                            {{ $nav->label }}
-                            <svg class="w-4 h-4 text-gray-400 transition-transform" :class="open ? 'rotate-90' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                        </button>
-                        <div x-show="open" class="bg-gray-50 dark:bg-gray-700/50">
-                            @foreach($nav->children as $child)
-                            <a href="{{ $child->resolvedUrl() }}" @click="mobileMenu = false"
-                                class="block pl-8 pr-4 py-3 text-sm text-gray-600 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700 last:border-0 hover:text-brand-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                                {{ $child->label }}
-                            </a>
-                            @endforeach
-                        </div>
-                    </div>
-                    @else
-                    <a href="{{ $navUrl }}" @click="mobileMenu = false"
-                        class="flex items-center justify-between px-4 py-3.5 text-sm font-semibold border-b border-gray-100 dark:border-gray-700 last:border-0 {{ request()->is(ltrim($navUrl,'/')) ? 'text-brand-600' : 'text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-750' }} transition-colors">
-                        {{ $nav->label }}
-                    </a>
-                    @endif
-                    @endforeach
-                @endif
-            </div>
+                @endforeach
+            @else
+                @foreach($navItems as $nav)
+                @php $navUrl = $nav->resolvedUrl(); @endphp
+                <a href="{{ $navUrl }}" @click="mobileMenu = false"
+                    class="flex items-center justify-between px-5 py-3 text-sm font-medium {{ request()->is(ltrim($navUrl,'/')) ? 'text-brand-600 bg-brand-50 dark:bg-brand-900/20' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }} transition-colors">
+                    {{ $nav->label }}
+                </a>
+                @endforeach
+            @endif
         </nav>
-
-        {{-- ── BOTTOM: dark mode + logout ── --}}
-        <div class="mx-3 mb-4 mt-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden">
+        <div class="border-t border-gray-100 dark:border-gray-800 px-5 py-4 flex-shrink-0">
             <button @click="toggleDark()"
-                class="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
-                <svg x-show="!dark" class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-                <svg x-show="dark" class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0z"/></svg>
+                class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                <svg x-show="!dark" class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                <svg x-show="dark" class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0z"/></svg>
                 <span x-text="dark ? 'Light Mode' : 'Dark Mode'"></span>
             </button>
-            @auth
-            <form method="POST" action="/logout">
-                @csrf
-                <button class="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                    Logout
-                </button>
-            </form>
-            @endauth
         </div>
-
+        @endguest
     </div>
 </div>
 
@@ -808,8 +733,8 @@
                 <ul class="space-y-2 text-sm">
                     <li><a href="/" class="hover:text-white transition-colors">Home</a></li>
                     <li><a href="/search" class="hover:text-white transition-colors">Search</a></li>
-                    <li><a href="/about" class="hover:text-white transition-colors">About</a></li>
                     <li><a href="/register" class="hover:text-white transition-colors">Become an Author</a></li>
+                    <li><a href="/about" class="hover:text-white transition-colors">About</a></li>
                     <li><a href="/contact" class="hover:text-white transition-colors">Contact</a></li>
                     <li><a href="/feed.xml" class="hover:text-white transition-colors">RSS Feed</a></li>
                 </ul>
