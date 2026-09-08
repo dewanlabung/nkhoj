@@ -389,3 +389,17 @@ Route::middleware('auth')->prefix('dashboard')->group(function () {
     Route::get('/posts/{id}/edit', [DashboardController::class, 'edit']);
     Route::put('/posts/{id}', [DashboardController::class, 'update']);
 });
+
+// Recipes community
+Route::get('/recipe',                    [\App\Http\Controllers\RecipeController::class, 'index']);
+Route::get('/recipe/create',             [\App\Http\Controllers\RecipeController::class, 'create'])->middleware('auth');
+Route::post('/recipe',                   [\App\Http\Controllers\RecipeController::class, 'store'])->middleware('auth');
+Route::get('/recipe/{slug}',             [\App\Http\Controllers\RecipeController::class, 'show']);
+Route::post('/recipe/{recipe}/like',     [\App\Http\Controllers\RecipeController::class, 'like'])->middleware('auth');
+
+// Events community
+Route::get('/events',                    [\App\Http\Controllers\EventController::class, 'index']);
+Route::get('/events/create',             [\App\Http\Controllers\EventController::class, 'create'])->middleware('auth');
+Route::post('/events',                   [\App\Http\Controllers\EventController::class, 'store'])->middleware('auth');
+Route::get('/events/{slug}',             [\App\Http\Controllers\EventController::class, 'show']);
+Route::post('/events/{event}/attend',    [\App\Http\Controllers\EventController::class, 'attend'])->middleware('auth');
