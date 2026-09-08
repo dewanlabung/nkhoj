@@ -138,10 +138,6 @@
         {{-- Left links --}}
         <div class="flex items-center gap-4">
             <a href="/contact" class="hover:text-white transition-colors">Contact</a>
-            <span class="text-gray-700">|</span>
-            <a href="/about" class="hover:text-white transition-colors">About</a>
-            <span class="text-gray-700">|</span>
-            <a href="/register" class="hover:text-white transition-colors">Become an Author</a>
         </div>
         {{-- Right actions --}}
         <div class="flex items-center gap-3">
@@ -308,6 +304,117 @@
                     </a>
                 </div>
                 @endauth
+
+                {{-- Google-style apps grid (desktop only) --}}
+                <div class="hidden lg:block relative" x-data="{ appsOpen: false }" @keydown.escape.window="appsOpen = false">
+                    <button @click="appsOpen = !appsOpen"
+                            class="w-9 h-9 flex items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                            title="Apps">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M6 8a2 2 0 100-4 2 2 0 000 4zM12 8a2 2 0 100-4 2 2 0 000 4zM18 8a2 2 0 100-4 2 2 0 000 4zM6 14a2 2 0 100-4 2 2 0 000 4zM12 14a2 2 0 100-4 2 2 0 000 4zM18 14a2 2 0 100-4 2 2 0 000 4zM6 20a2 2 0 100-4 2 2 0 000 4zM12 20a2 2 0 100-4 2 2 0 000 4zM18 20a2 2 0 100-4 2 2 0 000 4z"/>
+                        </svg>
+                    </button>
+
+                    <div x-show="appsOpen" x-cloak
+                         x-transition:enter="transition ease-out duration-150"
+                         x-transition:enter-start="opacity-0 scale-95 translate-y-1"
+                         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-100"
+                         x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 scale-95 translate-y-1"
+                         @click.outside="appsOpen = false"
+                         class="absolute right-0 top-11 w-72 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl shadow-2xl z-50 overflow-hidden">
+
+                        {{-- Header --}}
+                        <div class="flex items-center justify-between px-5 pt-4 pb-2">
+                            <span class="font-bold text-gray-900 dark:text-white text-base">Your services</span>
+                            <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        {{-- Grid --}}
+                        <div class="grid grid-cols-3 gap-0 px-2 pb-4">
+                            @php
+                            $appLinks = [
+                                [
+                                    'href' => '/pages', 'label' => 'Pages',
+                                    'bg' => '#1877F2',
+                                    'svg' => '<rect width="24" height="24" rx="6" fill="#1877F2"/><path d="M13.5 8H11v2.5H9.5V13H11v7h3v-7h2l.5-2.5H14V8.5c0-.3.2-.5.5-.5H16V5h-1.5C13.1 5 12 6.1 12 7.5" fill="white"/>',
+                                ],
+                                [
+                                    'href' => '/questions', 'label' => 'Q&A',
+                                    'bg' => '#16a34a',
+                                    'svg' => '<rect width="24" height="24" rx="6" fill="#16a34a"/><text x="12" y="17" font-size="14" font-weight="bold" text-anchor="middle" fill="white">Q</text>',
+                                ],
+                                [
+                                    'href' => '/recipe', 'label' => 'Recipes',
+                                    'bg' => '#ef4444',
+                                    'svg' => '<rect width="24" height="24" rx="6" fill="#ef4444"/><path d="M12 4c-.6 0-1 .4-1 1v4.5C9.3 10 8 11.3 8 13c0 1.7 1.3 3 3 3v4h2v-4c1.7 0 3-1.3 3-3 0-1.7-1.3-3-3-3V5c0-.6-.4-1-1-1zM9 7V4.5c0-.3.2-.5.5-.5s.5.2.5.5V7H9zm5 0V4.5c0-.3.2-.5.5-.5s.5.2.5.5V7h-1z" fill="white"/>',
+                                ],
+                                [
+                                    'href' => '/events', 'label' => 'Events',
+                                    'bg' => '#ec4899',
+                                    'svg' => '<rect width="24" height="24" rx="6" fill="#ec4899"/><path d="M8 7V5m8 2V5M5 11h14M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/>',
+                                ],
+                                [
+                                    'href' => '/bookmarks', 'label' => 'Saved',
+                                    'bg' => '#7c3aed',
+                                    'svg' => '<rect width="24" height="24" rx="6" fill="#7c3aed"/><path d="M6 4h12v16l-6-3-6 3V4z" fill="white"/>',
+                                ],
+                                [
+                                    'href' => '/membership', 'label' => 'Members',
+                                    'bg' => '#d97706',
+                                    'svg' => '<rect width="24" height="24" rx="6" fill="#d97706"/><circle cx="12" cy="9" r="3" fill="white"/><path d="M6 19c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/>',
+                                ],
+                                [
+                                    'href' => '/notifications', 'label' => 'Alerts',
+                                    'bg' => '#4f46e5',
+                                    'svg' => '<rect width="24" height="24" rx="6" fill="#4f46e5"/><path d="M12 5a6 6 0 016 6v3l1.5 2H4.5L6 14v-3a6 6 0 016-6zm0 0V3m-1.5 16a1.5 1.5 0 003 0" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/>',
+                                ],
+                                [
+                                    'href' => '/support', 'label' => 'Support',
+                                    'bg' => '#0891b2',
+                                    'svg' => '<rect width="24" height="24" rx="6" fill="#0891b2"/><circle cx="12" cy="12" r="7" stroke="white" stroke-width="1.5" fill="none"/><circle cx="12" cy="12" r="3" stroke="white" stroke-width="1.5" fill="none"/>',
+                                ],
+                                [
+                                    'href' => '/account', 'label' => 'Account',
+                                    'bg' => '#475569',
+                                    'svg' => '<rect width="24" height="24" rx="6" fill="#475569"/><circle cx="12" cy="8" r="3.5" fill="white"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/>',
+                                ],
+                            ];
+                            @endphp
+
+                            @foreach($appLinks as $app)
+                            <a href="{{ $app['href'] }}" @click="appsOpen = false"
+                               class="flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
+                                <svg viewBox="0 0 24 24" class="w-14 h-14" xmlns="http://www.w3.org/2000/svg">
+                                    {!! $app['svg'] !!}
+                                </svg>
+                                <span class="text-xs text-gray-700 dark:text-gray-300 font-medium text-center leading-tight">{{ $app['label'] }}</span>
+                            </a>
+                            @endforeach
+
+                            @auth
+                            @if(auth()->user()->isAdmin())
+                            <a href="/admin" @click="appsOpen = false"
+                               class="flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
+                                <svg viewBox="0 0 24 24" class="w-14 h-14" xmlns="http://www.w3.org/2000/svg">
+                                    <rect width="24" height="24" rx="6" fill="#6366f1"/>
+                                    <path d="M12 3l1.5 3 3.3.5-2.4 2.3.6 3.2L12 10.5l-3 1.5.6-3.2L7.2 6.5l3.3-.5z" fill="white"/>
+                                    <path d="M9 14h6v7H9z" fill="white" opacity=".8"/>
+                                    <path d="M7 21h10" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                                <span class="text-xs text-gray-700 dark:text-gray-300 font-medium text-center leading-tight">Admin</span>
+                            </a>
+                            @endif
+                            @endauth
+                        </div>
+                    </div>
+                </div>
+
                 {{-- Mobile-only: dark mode toggle (top bar hidden on mobile) --}}
                 <button @click="toggleDark()" class="sm:hidden w-9 h-9 flex items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" :title="dark ? 'Light Mode' : 'Dark Mode'">
                     <svg x-show="!dark" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
@@ -701,7 +808,8 @@
                 <ul class="space-y-2 text-sm">
                     <li><a href="/" class="hover:text-white transition-colors">Home</a></li>
                     <li><a href="/search" class="hover:text-white transition-colors">Search</a></li>
-                    <li><a href="/register" class="hover:text-white transition-colors">Start Writing</a></li>
+                    <li><a href="/about" class="hover:text-white transition-colors">About</a></li>
+                    <li><a href="/register" class="hover:text-white transition-colors">Become an Author</a></li>
                     <li><a href="/contact" class="hover:text-white transition-colors">Contact</a></li>
                     <li><a href="/feed.xml" class="hover:text-white transition-colors">RSS Feed</a></li>
                 </ul>
