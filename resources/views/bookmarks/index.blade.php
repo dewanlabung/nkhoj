@@ -61,9 +61,9 @@
                     @if($bookmark->bookmarkable_type === 'App\Models\Post')
                         {{-- Article card --}}
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group relative">
-                            <a href="/post/{{ $item->slug ?? $item->id }}">
-                                @if($item->thumbnail)
-                                    <img src="{{ asset('uploads/' . $item->thumbnail) }}"
+                            <a href="/posts/{{ $item->slug }}">
+                                @if($item->thumbnail_url)
+                                    <img src="{{ $item->thumbnail_url }}"
                                          class="w-full h-40 object-cover group-hover:opacity-95 transition">
                                 @else
                                     <div class="w-full h-40 bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center">
@@ -75,7 +75,7 @@
                             </a>
                             <div class="p-4">
                                 <span class="text-xs font-semibold text-blue-600 uppercase tracking-wide">Article</span>
-                                <a href="/post/{{ $item->slug ?? $item->id }}"
+                                <a href="/posts/{{ $item->slug }}"
                                    class="block font-bold text-gray-900 text-sm mt-1 line-clamp-2 group-hover:text-blue-600 transition">
                                     {{ $item->title }}
                                 </a>
