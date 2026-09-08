@@ -1349,6 +1349,7 @@ class AdminController extends Controller
             'git fetch origin master',
             'git reset --hard origin/master',
             'HOME=/tmp ' . $composerBin . ' install --no-dev --optimize-autoloader --no-interaction',
+            PHP_BINARY . ' artisan clear-compiled',
             PHP_BINARY . ' artisan migrate --force',
             PHP_BINARY . ' artisan config:cache',
             PHP_BINARY . ' artisan view:clear',
