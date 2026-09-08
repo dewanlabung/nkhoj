@@ -8,25 +8,50 @@ use Illuminate\Support\Facades\DB;
 return new class extends Migration {
     public function up(): void
     {
-        // Migrate existing post bookmarks to polymorphic format
-        DB::statement('ALTER TABLE bookmarks ADD COLUMN bookmarkable_type VARCHAR(255) NULL AFTER user_id');
-        DB::statement('ALTER TABLE bookmarks ADD COLUMN bookmarkable_id BIGINT UNSIGNED NULL AFTER bookmarkable_type');
+        $columns = Schema::getColumnListing('bookmarks');
 
-        // Convert existing post_id records
-        DB::table('bookmarks')->update([
-            'bookmarkable_type' => 'App\\Models\\Post',
-            'bookmarkable_id'   => DB::raw('post_id'),
-        ]);
+        // Add polymorphic columns only if missing
+        if (!in_array('bookmarkable_type', $columns)) {
+            DB::statement('ALTER TABLE bookmarks ADD COLUMN bookmarkable_type VARCHAR(255) NULL AFTER user_id');
+        }
+        if (!in_array('bookmarkable_id', $columns)) {
+            DB::statement('ALTER TABLE bookmarks ADD COLUMN bookmarkable_id BIGINT UNSIGNED NULL AFTER bookmarkable_type');
+        }
 
-        Schema::table('bookmarks', function (Blueprint $table) {
-            $table->dropUnique(['user_id', 'post_id']);
-            $table->dropColumn('post_id');
-            $table->string('collection')->nullable()->after('bookmarkable_id'); // future: custom lists
-            $table->unique(['user_id', 'bookmarkable_type', 'bookmarkable_id'], 'bookmarks_unique');
-            $table->index(['bookmarkable_type', 'bookmarkable_id']);
+        // Migrate existing post_id records (only rows not yet migrated)
+        if (in_array('post_id', $columns)) {
+            DB::table('bookmarks')
+                ->whereNull('bookmarkable_type')
+                ->whereNotNull('post_id')
+                ->update([
+                    'bookmarkable_type' => 'App\\Models\\Post',
+                    'bookmarkable_id'   => DB::raw('post_id'),
+                ]);
+        }
+
+        Schema::table('bookmarks', function (Blueprint $table) use ($columns) {
+            // Drop old unique + post_id column if still present
+            if (in_array('post_id', $columns)) {
+                try { $table->dropUnique(['user_id', 'post_id']); } catch (\Exception $e) {}
+                $table->dropColumn('post_id');
+            }
+
+            // Add collection column if missing
+            if (!in_array('collection', $columns)) {
+                $table->string('collection')->nullable()->after('bookmarkable_id');
+            }
+
+            // Add unique index if missing
+            try {
+                $table->unique(['user_id', 'bookmarkable_type', 'bookmarkable_id'], 'bookmarks_unique');
+            } catch (\Exception $e) {}
+
+            try {
+                $table->index(['bookmarkable_type', 'bookmarkable_id']);
+            } catch (\Exception $e) {}
         });
 
-        // Make polymorphic columns not nullable now that data is migrated
+        // Make polymorphic columns NOT NULL
         DB::statement('ALTER TABLE bookmarks MODIFY bookmarkable_type VARCHAR(255) NOT NULL');
         DB::statement('ALTER TABLE bookmarks MODIFY bookmarkable_id BIGINT UNSIGNED NOT NULL');
     }
@@ -42,10 +67,10 @@ return new class extends Migration {
             ->update(['post_id' => DB::raw('bookmarkable_id')]);
 
         Schema::table('bookmarks', function (Blueprint $table) {
-            $table->dropIndex('bookmarks_unique');
-            $table->dropIndex(['bookmarkable_type', 'bookmarkable_id']);
+            try { $table->dropIndex('bookmarks_unique'); } catch (\Exception $e) {}
+            try { $table->dropIndex(['bookmarkable_type', 'bookmarkable_id']); } catch (\Exception $e) {}
             $table->dropColumn(['bookmarkable_type', 'bookmarkable_id', 'collection']);
-            $table->unique(['user_id', 'post_id']);
+            try { $table->unique(['user_id', 'post_id']); } catch (\Exception $e) {}
         });
     }
 };

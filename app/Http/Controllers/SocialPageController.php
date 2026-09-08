@@ -10,15 +10,32 @@ use Illuminate\Support\Str;
 class SocialPageController extends Controller
 {
     // GET /pages — discover
-    public function index()
+    public function index(Request $request)
     {
-        $pages = SocialPage::where('is_active', true)
-            ->orderByDesc('followers_count')
-            ->paginate(20);
+        $tab      = $request->query('tab', 'discover');
+        $search   = $request->query('q');
+        $category = $request->query('category', 'All');
 
         $myPages = auth()->check()
             ? SocialPage::where('user_id', auth()->id())->latest()->get()
             : collect();
+
+        $query = SocialPage::where('is_active', true);
+
+        if ($search) {
+            $query->where('name', 'like', "%{$search}%");
+        }
+        if ($category && $category !== 'All') {
+            $query->whereJsonContains('categories', $category);
+        }
+
+        if ($tab === 'liked' && auth()->check()) {
+            $query->whereHas('followers', fn($q) => $q->where('user_id', auth()->id()));
+        } elseif ($tab === 'mine' && auth()->check()) {
+            $query->where('user_id', auth()->id());
+        }
+
+        $pages = $query->orderByDesc('followers_count')->paginate(24)->withQueryString();
 
         return view('social-pages.discover', compact('pages', 'myPages'));
     }
@@ -39,11 +56,14 @@ class SocialPageController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'      => 'required|string|max:150',
-            'page_type' => 'required|in:creator,business',
-            'categories'=> 'nullable|array|max:3',
+            'name'         => 'required|string|max:150',
+            'page_type'    => 'required|in:creator,business',
+            'categories'   => 'nullable|array|max:3',
             'categories.*' => 'nullable|string|max:100',
-            'bio'       => 'nullable|string|max:500',
+            'bio'          => 'nullable|string|max:500',
+            'website'      => 'nullable|url|max:255',
+            'location'     => 'nullable|string|max:255',
+            'phone'        => 'nullable|string|max:50',
         ]);
 
         $slug = Str::slug($data['name']);
@@ -61,6 +81,9 @@ class SocialPageController extends Controller
             'page_type'  => $data['page_type'],
             'categories' => array_filter($data['categories'] ?? []),
             'bio'        => $data['bio'] ?? null,
+            'website'    => $data['website'] ?? null,
+            'location'   => $data['location'] ?? null,
+            'phone'      => $data['phone'] ?? null,
         ]);
 
         return redirect("/pages/{$page->slug}/dashboard")
