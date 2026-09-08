@@ -31,6 +31,7 @@
                 <li>git pull origin master</li>
                 <li>composer install (no-dev)</li>
                 <li>php artisan migrate --force</li>
+                <li>php artisan cache:clear</li>
                 <li>php artisan config:cache</li>
                 <li>php artisan view:clear</li>
                 <li>php artisan route:cache</li>
