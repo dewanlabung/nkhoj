@@ -26,15 +26,17 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-            LoginHistory::record(Auth::id(), 'email');
+            try { LoginHistory::record(Auth::id(), 'email'); } catch (\Throwable) {}
             return redirect()->intended('/dashboard');
         }
 
         // Record failed attempt if user exists
-        $failedUser = User::where('email', $credentials['email'])->first();
-        if ($failedUser) {
-            LoginHistory::record($failedUser->id, 'email', false);
-        }
+        try {
+            $failedUser = User::where('email', $credentials['email'])->first();
+            if ($failedUser) {
+                LoginHistory::record($failedUser->id, 'email', false);
+            }
+        } catch (\Throwable) {}
 
         return back()->withErrors(['email' => 'These credentials do not match our records.']);
     }

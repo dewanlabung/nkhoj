@@ -18,6 +18,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\PollController;
+use App\Http\Controllers\SocialPageController;
 
 // Public routes
 Route::get('/', [HomeController::class, 'index']);
@@ -68,7 +69,12 @@ Route::post('/follow/{id}', [\App\Http\Controllers\ProfileController::class, 'fo
 Route::post('/react/{postId}', [\App\Http\Controllers\ReactionController::class, 'store']);
 
 // Bookmarks (auth only)
-Route::post('/bookmark/{postId}', [BookmarkController::class, 'toggle'])->middleware('auth');
+Route::middleware('auth')->group(function () {
+    Route::get('/bookmarks', [BookmarkController::class, 'index']);
+    Route::post('/bookmarks/toggle', [BookmarkController::class, 'toggle']);
+    Route::delete('/bookmarks/{bookmark}', [BookmarkController::class, 'destroy']);
+    Route::post('/bookmark/{postId}', [BookmarkController::class, 'togglePost']); // legacy
+});
 
 // Notifications (auth only)
 Route::middleware('auth')->prefix('notifications')->group(function () {
@@ -381,6 +387,19 @@ Route::get('/questions/{id}/edit',            [\App\Http\Controllers\QuestionCon
 Route::put('/questions/{id}',                 [\App\Http\Controllers\QuestionController::class, 'update'])->middleware('auth');
 Route::post('/answers/{id}/vote',             [\App\Http\Controllers\QuestionController::class, 'voteAnswer']);
 
+// Social Pages (Facebook-style pages)
+Route::get('/pages',                            [SocialPageController::class, 'index']);
+Route::get('/pages/start',                      [SocialPageController::class, 'intro']);
+Route::middleware('auth')->group(function () {
+    Route::get('/pages/create',                 [SocialPageController::class, 'create']);
+    Route::post('/pages',                       [SocialPageController::class, 'store']);
+    Route::post('/pages/{slug}/follow',         [SocialPageController::class, 'follow'])->name('pages.follow');
+    Route::get('/pages/{slug}/dashboard',       [SocialPageController::class, 'dashboard']);
+    Route::get('/pages/{slug}/settings',        [SocialPageController::class, 'settings']);
+    Route::put('/pages/{slug}/settings',        [SocialPageController::class, 'updateSettings']);
+});
+Route::get('/pages/{slug}',                     [SocialPageController::class, 'show']);
+
 // Dashboard (auth required)
 Route::middleware('auth')->prefix('dashboard')->group(function () {
     Route::get('/', [DashboardController::class, 'index']);
@@ -388,6 +407,7 @@ Route::middleware('auth')->prefix('dashboard')->group(function () {
     Route::post('/posts', [DashboardController::class, 'store']);
     Route::get('/posts/{id}/edit', [DashboardController::class, 'edit']);
     Route::put('/posts/{id}', [DashboardController::class, 'update']);
+    Route::get('/pages', [SocialPageController::class, 'myPages']);
 });
 
 // Recipes community

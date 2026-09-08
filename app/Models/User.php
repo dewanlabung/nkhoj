@@ -144,6 +144,14 @@ class User extends Authenticatable
         return $this->hasMany(Bookmark::class);
     }
 
+    public function hasSaved(string $type, int $id): bool
+    {
+        return $this->bookmarks()
+            ->where('bookmarkable_type', $type)
+            ->where('bookmarkable_id', $id)
+            ->exists();
+    }
+
     public function nkhojNotifications()
     {
         return $this->hasMany(Notification::class)->latest();

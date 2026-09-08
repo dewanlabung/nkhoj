@@ -34,7 +34,10 @@ class PostController extends Controller
         $isBookmarked = false;
         if (auth()->check()) {
             $userReaction = $post->reactions()->where('user_id', auth()->id())->value('emoji');
-            $isBookmarked = Bookmark::where('user_id', auth()->id())->where('post_id', $post->id)->exists();
+            $isBookmarked = Bookmark::where('user_id', auth()->id())
+                ->where('bookmarkable_type', \App\Models\Post::class)
+                ->where('bookmarkable_id', $post->id)
+                ->exists();
         }
 
         return view('posts.show', compact('post', 'related', 'comments', 'reactionCounts', 'userReaction', 'isBookmarked'));

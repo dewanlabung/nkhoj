@@ -83,7 +83,7 @@ class SocialAuthController extends Controller
         }
 
         Auth::login($user, true);
-        LoginHistory::record($user->id, $provider);
+        try { LoginHistory::record($user->id, $provider); } catch (\Throwable) {}
 
         return redirect()->intended('/dashboard');
     }
