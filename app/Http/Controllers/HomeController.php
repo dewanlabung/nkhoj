@@ -26,7 +26,6 @@ class HomeController extends Controller
                         ->limit(3)->get();
 
         $posts = Post::with(['author', 'category', 'tags'])->published()
-                    ->whereNotIn('id', $heroIds)
                     ->latest('published_at')->paginate(12);
 
         // Fallback sidebar data (used when no matching widget exists)

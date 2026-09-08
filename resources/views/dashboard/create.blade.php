@@ -23,10 +23,11 @@
         </div>
     </div>
 
-    <form method="POST" action="/dashboard/posts" enctype="multipart/form-data" id="article-form">
+    <form method="POST" action="/dashboard/posts" enctype="multipart/form-data" id="article-form"
+        @submit="$refs.tagsHidden.value = tags.join(', ')">
         @csrf
         <input type="hidden" name="post_format" value="article">
-        <input type="hidden" name="tags" :value="JSON.stringify(tags)">
+        <input type="hidden" name="tags" x-ref="tagsHidden">
 
         {{-- Two-column WordPress layout --}}
         <div class="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6 items-start">
@@ -275,7 +276,7 @@
                             ] as [$name, $label])
                             <label class="flex items-center justify-between cursor-pointer py-1" x-data="{ on: false }">
                                 <span class="text-sm text-gray-700 dark:text-gray-300">{{ $label }}</span>
-                                <div class="relative flex-shrink-0" @click="on = !on">
+                                <div class="relative flex-shrink-0" @click.stop="on = !on">
                                     <input type="hidden" name="{{ $name }}" value="0">
                                     <input type="checkbox" name="{{ $name }}" value="1" class="sr-only" :checked="on">
                                     <div class="w-9 h-5 rounded-full transition-colors" :class="on ? 'bg-brand-500' : 'bg-gray-200 dark:bg-gray-600'"></div>
@@ -290,7 +291,7 @@
                                     <span class="text-sm text-gray-700 dark:text-gray-300">Premium</span>
                                     <p class="text-xs text-gray-400">Members-only access</p>
                                 </div>
-                                <div class="relative flex-shrink-0" @click="on = !on">
+                                <div class="relative flex-shrink-0" @click.stop="on = !on">
                                     <input type="hidden" name="is_pro" value="0">
                                     <input type="checkbox" name="is_pro" value="1" class="sr-only" :checked="on">
                                     <div class="w-9 h-5 rounded-full transition-colors" :class="on ? 'bg-amber-500' : 'bg-gray-200 dark:bg-gray-600'"></div>
