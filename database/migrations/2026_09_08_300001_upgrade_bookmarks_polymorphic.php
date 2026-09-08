@@ -8,14 +8,15 @@ use Illuminate\Support\Facades\DB;
 return new class extends Migration {
     private function fkExists(string $table, string $fkName): bool
     {
-        $db = config('database.connections.mysql.database');
-        $count = DB::table('information_schema.KEY_COLUMN_USAGE')
-            ->where('TABLE_SCHEMA', $db)
-            ->where('TABLE_NAME', $table)
-            ->where('CONSTRAINT_NAME', $fkName)
-            ->whereNotNull('REFERENCED_TABLE_NAME')
-            ->count();
-        return $count > 0;
+        $rows = DB::select(
+            "SELECT COUNT(*) as cnt FROM information_schema.TABLE_CONSTRAINTS
+             WHERE TABLE_SCHEMA = DATABASE()
+               AND TABLE_NAME = ?
+               AND CONSTRAINT_NAME = ?
+               AND CONSTRAINT_TYPE = 'FOREIGN KEY'",
+            [$table, $fkName]
+        );
+        return ($rows[0]->cnt ?? 0) > 0;
     }
 
     private function indexExists(string $table, string $indexName): bool
