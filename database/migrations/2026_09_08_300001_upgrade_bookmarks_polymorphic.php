@@ -6,6 +6,24 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
 return new class extends Migration {
+    private function fkExists(string $table, string $fkName): bool
+    {
+        $db = config('database.connections.mysql.database');
+        $count = DB::table('information_schema.KEY_COLUMN_USAGE')
+            ->where('TABLE_SCHEMA', $db)
+            ->where('TABLE_NAME', $table)
+            ->where('CONSTRAINT_NAME', $fkName)
+            ->whereNotNull('REFERENCED_TABLE_NAME')
+            ->count();
+        return $count > 0;
+    }
+
+    private function indexExists(string $table, string $indexName): bool
+    {
+        $rows = DB::select("SHOW INDEX FROM `{$table}` WHERE Key_name = ?", [$indexName]);
+        return count($rows) > 0;
+    }
+
     public function up(): void
     {
         $columns = Schema::getColumnListing('bookmarks');
@@ -28,29 +46,41 @@ return new class extends Migration {
                     'bookmarkable_id'   => DB::raw('post_id'),
                 ]);
 
+            // Drop FK via raw SQL only if it still exists
+            if ($this->fkExists('bookmarks', 'bookmarks_post_id_foreign')) {
+                DB::statement('ALTER TABLE bookmarks DROP FOREIGN KEY bookmarks_post_id_foreign');
+            }
+
+            // Drop unique index via raw SQL only if it still exists
+            if ($this->indexExists('bookmarks', 'bookmarks_user_id_post_id_unique')) {
+                DB::statement('ALTER TABLE bookmarks DROP INDEX bookmarks_user_id_post_id_unique');
+            }
+
             Schema::table('bookmarks', function (Blueprint $table) {
-                // Must drop FK before dropping the unique index it depends on (MySQL error 1553)
-                try { $table->dropForeign(['post_id']); } catch (\Exception $e) {}
-                try { $table->dropUnique(['user_id', 'post_id']); } catch (\Exception $e) {}
                 $table->dropColumn('post_id');
             });
         }
 
-        Schema::table('bookmarks', function (Blueprint $table) use ($columns) {
-            // Add collection column if missing
-            if (!in_array('collection', $columns)) {
+        // Add collection column if missing
+        if (!in_array('collection', Schema::getColumnListing('bookmarks'))) {
+            Schema::table('bookmarks', function (Blueprint $table) {
                 $table->string('collection')->nullable()->after('bookmarkable_id');
-            }
+            });
+        }
 
-            // Add unique index if missing
-            try {
+        // Add new unique index if missing
+        if (!$this->indexExists('bookmarks', 'bookmarks_unique')) {
+            Schema::table('bookmarks', function (Blueprint $table) {
                 $table->unique(['user_id', 'bookmarkable_type', 'bookmarkable_id'], 'bookmarks_unique');
-            } catch (\Exception $e) {}
+            });
+        }
 
-            try {
+        // Add lookup index if missing
+        if (!$this->indexExists('bookmarks', 'bookmarks_bookmarkable_type_bookmarkable_id_index')) {
+            Schema::table('bookmarks', function (Blueprint $table) {
                 $table->index(['bookmarkable_type', 'bookmarkable_id']);
-            } catch (\Exception $e) {}
-        });
+            });
+        }
 
         // Make polymorphic columns NOT NULL now that data is migrated
         DB::statement('ALTER TABLE bookmarks MODIFY bookmarkable_type VARCHAR(255) NOT NULL');
@@ -67,11 +97,21 @@ return new class extends Migration {
             ->where('bookmarkable_type', 'App\\Models\\Post')
             ->update(['post_id' => DB::raw('bookmarkable_id')]);
 
+        if ($this->indexExists('bookmarks', 'bookmarks_unique')) {
+            DB::statement('ALTER TABLE bookmarks DROP INDEX bookmarks_unique');
+        }
+        if ($this->indexExists('bookmarks', 'bookmarks_bookmarkable_type_bookmarkable_id_index')) {
+            DB::statement('ALTER TABLE bookmarks DROP INDEX bookmarks_bookmarkable_type_bookmarkable_id_index');
+        }
+
         Schema::table('bookmarks', function (Blueprint $table) {
-            try { $table->dropIndex('bookmarks_unique'); } catch (\Exception $e) {}
-            try { $table->dropIndex(['bookmarkable_type', 'bookmarkable_id']); } catch (\Exception $e) {}
             $table->dropColumn(['bookmarkable_type', 'bookmarkable_id', 'collection']);
-            try { $table->unique(['user_id', 'post_id']); } catch (\Exception $e) {}
         });
+
+        if (!$this->indexExists('bookmarks', 'bookmarks_user_id_post_id_unique')) {
+            Schema::table('bookmarks', function (Blueprint $table) {
+                $table->unique(['user_id', 'post_id']);
+            });
+        }
     }
 };
