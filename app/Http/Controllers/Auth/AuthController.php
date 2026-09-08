@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\LoginHistory;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,7 +26,14 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
+            LoginHistory::record(Auth::id(), 'email');
             return redirect()->intended('/dashboard');
+        }
+
+        // Record failed attempt if user exists
+        $failedUser = User::where('email', $credentials['email'])->first();
+        if ($failedUser) {
+            LoginHistory::record($failedUser->id, 'email', false);
         }
 
         return back()->withErrors(['email' => 'These credentials do not match our records.']);

@@ -65,6 +65,70 @@
         </dl>
     </div>
 
+    {{-- Linked social accounts --}}
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+        <h2 class="font-bold text-gray-900 dark:text-white mb-1">Connected Accounts</h2>
+        <p class="text-sm text-gray-400 mb-5">Sign in with your social accounts.</p>
+        <div class="space-y-3">
+            @foreach(['google' => ['Google', '#4285F4'], 'facebook' => ['Facebook', '#1877F2']] as $provider => [$label, $color])
+            @php $linked = $socialAccounts->firstWhere('provider', $provider); @endphp
+            <div class="flex items-center justify-between py-3 border-b border-gray-50 dark:border-gray-700 last:border-0">
+                <div class="flex items-center gap-3">
+                    <span class="text-lg">{{ $provider === 'google' ? '🔵' : '🔷' }}</span>
+                    <div>
+                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ $label }}</p>
+                        @if($linked)
+                        <p class="text-xs text-gray-400">{{ $linked->provider_email ?? $linked->provider_name }}</p>
+                        @else
+                        <p class="text-xs text-gray-400">Not connected</p>
+                        @endif
+                    </div>
+                </div>
+                @if($linked)
+                <span class="text-xs text-green-600 dark:text-green-400 font-semibold">✓ Connected</span>
+                @else
+                <a href="/auth/{{ $provider }}/redirect" class="text-xs px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Connect</a>
+                @endif
+            </div>
+            @endforeach
+        </div>
+    </div>
+
+    {{-- Login history --}}
+    @if($loginHistories->count())
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+        <h2 class="font-bold text-gray-900 dark:text-white mb-1">Login History</h2>
+        <p class="text-sm text-gray-400 mb-5">Recent sign-in activity on your account.</p>
+        <div class="space-y-1">
+            @foreach($loginHistories as $history)
+            <div class="flex items-center justify-between py-2.5 border-b border-gray-50 dark:border-gray-700 last:border-0">
+                <div class="flex items-center gap-3">
+                    <span class="text-base" title="{{ $history->device_type }}">{{ $history->deviceIcon() }}</span>
+                    <div>
+                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
+                            {{ $history->providerIcon() }} {{ ucfirst($history->provider) }}
+                            <span class="font-normal text-gray-500">via {{ $history->browser }} on {{ $history->platform }}</span>
+                        </p>
+                        <p class="text-xs text-gray-400">
+                            {{ $history->ip_address }}
+                            @if($history->city || $history->country)
+                            · {{ implode(', ', array_filter([$history->city, $history->country])) }}
+                            @endif
+                        </p>
+                    </div>
+                </div>
+                <div class="text-right shrink-0 ml-4">
+                    <p class="text-xs text-gray-400">{{ $history->created_at->diffForHumans() }}</p>
+                    @if(!$history->success)
+                    <p class="text-xs text-red-500 font-semibold">Failed</p>
+                    @endif
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     {{-- Sign out all devices --}}
     <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
         <h2 class="font-bold text-gray-900 dark:text-white mb-1">Sign Out</h2>

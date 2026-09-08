@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\LoginHistory;
+use App\Models\SocialAccount;
 
 class User extends Authenticatable
 {
@@ -155,6 +157,16 @@ class User extends Authenticatable
     public function answers()
     {
         return $this->hasMany(\App\Models\Answer::class);
+    }
+
+    public function loginHistories()
+    {
+        return $this->hasMany(LoginHistory::class)->latest('created_at');
+    }
+
+    public function socialAccounts()
+    {
+        return $this->hasMany(SocialAccount::class);
     }
 
     public function unreadNotificationCount(): int
