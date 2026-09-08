@@ -32,13 +32,48 @@
 </form>
 
 <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
-    <table class="w-full text-sm">
+    {{-- Mobile card list --}}
+    <div class="divide-y divide-gray-100 dark:divide-gray-700 md:hidden">
+        @forelse($posts as $post)
+        <div class="px-4 py-3">
+            <a href="/posts/{{ $post->slug }}" class="font-medium text-gray-900 dark:text-white hover:text-brand-600 block mb-0.5" target="_blank">{{ $post->title }}</a>
+            <p class="text-xs text-gray-400 mb-2">{{ $post->created_at->format('d M Y') }} · {{ $post->category?->name_en }}</p>
+            <div class="flex flex-wrap items-center gap-2">
+                <form method="POST" action="/admin/posts/{{ $post->id }}/status" class="flex items-center gap-1">
+                    @csrf
+                    <select name="status" class="text-xs border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1 bg-white dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        @foreach(['draft','published','scheduled','archived'] as $s)
+                        <option value="{{ $s }}" {{ $post->status===$s?'selected':'' }}>{{ ucfirst($s) }}</option>
+                        @endforeach
+                    </select>
+                    <button class="text-xs px-2 py-1 bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 rounded-lg hover:bg-brand-100 font-medium">Set</button>
+                </form>
+                <a href="/dashboard/posts/{{ $post->id }}/edit" class="text-xs font-medium text-blue-500 hover:text-blue-700 px-2 py-1 bg-blue-50 dark:bg-blue-900/20 rounded-lg">Edit</a>
+                <form method="POST" action="/admin/posts/{{ $post->id }}/toggle-pro">
+                    @csrf
+                    <button class="text-xs font-semibold {{ $post->is_pro ? 'text-brand-600 bg-brand-50 dark:bg-brand-900/20' : 'text-gray-400 hover:text-brand-600 bg-gray-50 dark:bg-gray-700' }} px-2 py-1 rounded-lg transition-colors">
+                        {{ $post->is_pro ? '✨Pro' : 'Pro?' }}
+                    </button>
+                </form>
+                <form method="POST" action="/admin/posts/{{ $post->id }}" onsubmit="return confirm('Delete permanently?')">
+                    @csrf @method('DELETE')
+                    <button class="text-xs font-medium text-red-400 hover:text-red-600 px-2 py-1 bg-red-50 dark:bg-red-900/20 rounded-lg">Delete</button>
+                </form>
+            </div>
+        </div>
+        @empty
+        <div class="text-center py-12 text-gray-400 dark:text-gray-500">No posts found.</div>
+        @endforelse
+    </div>
+
+    {{-- Desktop table --}}
+    <table class="w-full text-sm hidden md:table">
         <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-100 dark:border-gray-600">
             <tr>
                 <th class="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wide">Post</th>
-                <th class="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wide hidden md:table-cell">Author</th>
+                <th class="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wide">Author</th>
                 <th class="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wide hidden lg:table-cell">Format</th>
-                <th class="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wide hidden md:table-cell">Views</th>
+                <th class="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wide">Views</th>
                 <th class="text-left px-5 py-3 font-semibold text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wide">Status</th>
                 <th class="px-5 py-3"></th>
             </tr>
@@ -53,11 +88,11 @@
                     <p class="text-xs text-blue-500 mt-0.5">🕐 Scheduled: {{ $post->scheduled_at->format('d M Y H:i') }}</p>
                     @endif
                 </td>
-                <td class="px-5 py-3 text-gray-600 dark:text-gray-300 hidden md:table-cell">{{ $post->author?->name }}</td>
+                <td class="px-5 py-3 text-gray-600 dark:text-gray-300">{{ $post->author?->name }}</td>
                 <td class="px-5 py-3 hidden lg:table-cell">
                     <span class="text-[10px] font-semibold uppercase tracking-wide bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-full">{{ $post->post_format ?? 'article' }}</span>
                 </td>
-                <td class="px-5 py-3 text-gray-600 dark:text-gray-300 hidden md:table-cell">{{ number_format($post->view_count) }}</td>
+                <td class="px-5 py-3 text-gray-600 dark:text-gray-300">{{ number_format($post->view_count) }}</td>
                 <td class="px-5 py-3">
                     <form method="POST" action="/admin/posts/{{ $post->id }}/status" class="flex items-center gap-1">
                         @csrf
@@ -70,8 +105,8 @@
                     </form>
                 </td>
                 <td class="px-5 py-3">
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <a href="/dashboard/posts/{{ $post->id }}/edit" class="text-xs text-blue-500 hover:text-blue-700">Edit</a>
+                    <div class="flex items-center gap-2">
+                        <a href="/dashboard/posts/{{ $post->id }}/edit" class="text-xs text-blue-500 hover:text-blue-700 font-medium">Edit</a>
                         <form method="POST" action="/admin/posts/{{ $post->id }}/toggle-pro" title="{{ $post->is_pro ? 'Remove Pro lock' : 'Mark as Pro-only' }}">
                             @csrf
                             <button class="text-xs font-semibold {{ $post->is_pro ? 'text-brand-600 bg-brand-50 dark:bg-brand-900/20' : 'text-gray-400 hover:text-brand-600' }} px-1.5 py-0.5 rounded transition-colors">
@@ -80,7 +115,7 @@
                         </form>
                         <form method="POST" action="/admin/posts/{{ $post->id }}" onsubmit="return confirm('Delete permanently?')">
                             @csrf @method('DELETE')
-                            <button class="text-xs text-red-400 hover:text-red-600">Delete</button>
+                            <button class="text-xs text-red-400 hover:text-red-600 font-medium">Delete</button>
                         </form>
                     </div>
                 </td>
