@@ -27,7 +27,7 @@ return new class extends Migration
             [
                 'slug'         => 'sample-how-nepal-is-embracing-digital-transformation',
                 'title'        => 'How Nepal Is Embracing Digital Transformation in 2025',
-                'excerpt'      => 'From mobile banking to e-governance, Nepal is rapidly modernizing its digital infrastructure. Here's a look at the key trends shaping the country's tech future.',
+                'excerpt'      => "From mobile banking to e-governance, Nepal is rapidly modernizing its digital infrastructure. Here's a look at the key trends shaping the country's tech future.",
                 'thumbnail'    => 'https://picsum.photos/seed/nepal-tech/1200/630',
                 'body'         => [
                     ['type' => 'paragraph', 'content' => 'Nepal has seen remarkable growth in digital adoption over the past few years. With smartphone penetration exceeding 70% and mobile internet becoming the primary means of connectivity, the country is undergoing a quiet but significant digital revolution.'],
@@ -45,7 +45,7 @@ return new class extends Migration
             [
                 'slug'         => 'sample-10-tips-for-productive-remote-work',
                 'title'        => '10 Proven Tips for Staying Productive While Working Remotely',
-                'excerpt'      => 'Remote work is here to stay. Whether you're a freelancer or part of a distributed team, these practical strategies will help you stay focused and deliver your best work every day.',
+                'excerpt'      => "Remote work is here to stay. Whether you're a freelancer or part of a distributed team, these practical strategies will help you stay focused and deliver your best work every day.",
                 'thumbnail'    => 'https://picsum.photos/seed/remote-work/1200/630',
                 'body'         => [
                     ['type' => 'paragraph', 'content' => 'Remote work offers incredible flexibility, but without structure it can quickly become chaotic. The most productive remote workers share a set of habits that keep them on track regardless of distractions.'],
@@ -69,7 +69,7 @@ return new class extends Migration
             [
                 'slug'         => 'sample-beginners-guide-to-personal-finance',
                 'title'        => 'A Beginner's Guide to Personal Finance: Build Wealth Step by Step',
-                'excerpt'      => 'Managing your money doesn't have to be complicated. This beginner-friendly guide covers budgeting, saving, investing, and building an emergency fund — the foundations of lasting financial health.',
+                'excerpt'      => "Managing your money doesn't have to be complicated. This beginner-friendly guide covers budgeting, saving, investing, and building an emergency fund — the foundations of lasting financial health.",
                 'thumbnail'    => 'https://picsum.photos/seed/personal-finance/1200/630',
                 'body'         => [
                     ['type' => 'paragraph', 'content' => 'Personal finance is one of the most important life skills — yet it's rarely taught in school. The good news is that the core principles are simple and actionable, regardless of your income level.'],
