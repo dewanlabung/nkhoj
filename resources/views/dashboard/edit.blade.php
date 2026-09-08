@@ -367,7 +367,7 @@ function editForm() {
         titleVal: @js(old('title', $post->title)),
         slugVal:  @js(old('slug',  $post->slug)),
         tags: [],
-        sources: [{ label: '', url: '' }],
+        sources: @json($post->sources ?? []),
         articleFaq: [],
         aiLoading: false,
         aiResult: '',

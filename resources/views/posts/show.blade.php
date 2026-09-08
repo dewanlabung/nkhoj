@@ -80,6 +80,12 @@
                     <div class="ml-auto flex items-center gap-4 text-xs text-gray-400">
                         <span>{{ $post->readingTimeMinutes() }} min read</span>
                         <span>{{ number_format($post->view_count) }} views</span>
+                        @if(auth()->check() && auth()->id() === $post->author_id)
+                        <a href="/dashboard/posts/{{ $post->id }}/edit"
+                            class="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 text-amber-600 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors font-medium">
+                            ✏️ Edit
+                        </a>
+                        @endif
                     </div>
                 </div>
 
@@ -113,6 +119,56 @@
                         {!! nl2br(e($post->body)) !!}
                     @endif
                 </x-content-locker>
+
+                {{-- ═══════════════════ SOURCES ═══════════════════ --}}
+                @if($post->sources && count($post->sources))
+                <div class="mt-8 pt-6 border-t border-gray-100">
+                    <h4 class="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                        Sources
+                    </h4>
+                    <ul class="space-y-1">
+                        @foreach($post->sources as $src)
+                        @if(!empty($src['label']) || !empty($src['url']))
+                        <li class="text-sm text-gray-600">
+                            @if(!empty($src['url']))
+                            <a href="{{ $src['url'] }}" target="_blank" rel="nofollow noopener"
+                                class="text-brand-600 hover:underline">{{ $src['label'] ?: $src['url'] }}</a>
+                            @else
+                            <span>{{ $src['label'] }}</span>
+                            @endif
+                        </li>
+                        @endif
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+
+                {{-- ═══════════════════ FAQ ═══════════════════ --}}
+                @if($post->article_faq && count($post->article_faq))
+                <div class="mt-8 pt-6 border-t border-gray-100" x-data="{ open: null }">
+                    <h4 class="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Frequently Asked Questions
+                    </h4>
+                    <div class="space-y-2">
+                        @foreach($post->article_faq as $i => $faq)
+                        @if(!empty($faq['q']))
+                        <div class="border border-gray-100 rounded-xl overflow-hidden" x-data="{ open: false }">
+                            <button type="button" @click="open = !open"
+                                class="w-full flex items-center justify-between px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 transition-colors">
+                                <span class="text-sm font-semibold text-gray-800">{{ $faq['q'] }}</span>
+                                <svg class="w-4 h-4 text-gray-400 flex-shrink-0 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <div x-show="open" x-collapse class="px-4 py-3 text-sm text-gray-600 bg-white">
+                                {{ $faq['a'] ?? '' }}
+                            </div>
+                        </div>
+                        @endif
+                        @endforeach
+                    </div>
+                </div>
+                @endif
 
                 {{-- ═══════════════════ REACTIONS ═══════════════════ --}}
                 <div class="mt-10 pt-6 border-t border-gray-100"
