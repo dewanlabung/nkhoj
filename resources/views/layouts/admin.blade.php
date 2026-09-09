@@ -503,29 +503,19 @@
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
-        <div class="p-6 overflow-y-auto">
+        <div class="p-4 overflow-y-auto">
             @php
+            // [key, label, icon-path, desc, url, gradient, popular]
             $formats = [
-                ['key'=>'article',           'label'=>'Article',          'desc'=>'An article with images and embed videos',         'icon'=>'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',         'url'=>'/dashboard/posts/create',              'color'=>'indigo'],
-                ['key'=>'sorted_list',        'label'=>'Sorted List',      'desc'=>'A list based article',                            'icon'=>'M4 6h16M4 10h16M4 14h16M4 18h16',                                                                                                'url'=>'/dashboard/posts/create?format=sorted_list',   'color'=>'blue'],
-                ['key'=>'table_of_contents',  'label'=>'Table of Contents','desc'=>'List of links based on headings',                 'icon'=>'M4 6h16M4 10h16M4 14h7',                                                                                                         'url'=>'/dashboard/posts/create?format=table_of_contents','color'=>'cyan'],
-                ['key'=>'trivia_quiz',         'label'=>'Trivia Quiz',      'desc'=>'Quizzes with right and wrong answers',            'icon'=>'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z','url'=>'/dashboard/posts/create?format=trivia_quiz',  'color'=>'violet'],
-                ['key'=>'personality_quiz',    'label'=>'Personality Quiz', 'desc'=>'Quizzes with custom results',                    'icon'=>'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',  'url'=>'/dashboard/posts/create?format=personality_quiz','color'=>'pink'],
-                ['key'=>'poll',               'label'=>'Poll',             'desc'=>'Get user opinions about something',               'icon'=>'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z','url'=>'/dashboard/posts/create?format=poll',         'color'=>'green'],
-                ['key'=>'recipe',             'label'=>'Recipe',           'desc'=>'A list of ingredients and directions',            'icon'=>'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z','url'=>'/dashboard/posts/create?format=recipe',       'color'=>'orange'],
-                ['key'=>'event',              'label'=>'Event',            'desc'=>'Scheduled events with location and map details',  'icon'=>'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',                                              'url'=>'/dashboard/create-event',              'color'=>'teal'],
-                ['key'=>'question',           'label'=>'Ask Question',     'desc'=>'Post a Q&A question for community answers',       'icon'=>'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z','url'=>'/ask-question',                      'color'=>'amber'],
-            ];
-            $colorMap = [
-                'indigo'=>'bg-blue-500',
-                'blue'  =>'bg-orange-500',
-                'cyan'  =>'bg-teal-500',
-                'violet'=>'bg-yellow-400',
-                'pink'  =>'bg-purple-500',
-                'green' =>'bg-indigo-500',
-                'orange'=>'bg-red-500',
-                'teal'  =>'bg-violet-500',
-                'amber' =>'bg-emerald-500',
+                ['article',          'Article',          'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',         'An article with images and embed videos',        '/dashboard/posts/create',                       'from-blue-400 to-blue-600',     true],
+                ['sorted_list',       'Sorted List',      'M4 6h16M4 10h16M4 14h16M4 18h16',                                                                                                'A list-based article',                           '/dashboard/posts/create?format=sorted_list',    'from-orange-400 to-orange-600', false],
+                ['table_of_contents', 'Table of Contents','M4 6h16M4 10h16M4 14h7',                                                                                                         'List of links based on headings',                '/dashboard/posts/create?format=table_of_contents','from-teal-400 to-teal-600',    false],
+                ['trivia_quiz',       'Trivia Quiz',      'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z','Quizzes with right and wrong answers',          '/dashboard/posts/create?format=trivia_quiz',    'from-yellow-400 to-amber-500',  false],
+                ['personality_quiz',  'Personality Quiz', 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2','Quizzes with custom results',                   '/dashboard/posts/create?format=personality_quiz','from-purple-400 to-purple-600', false],
+                ['poll',              'Poll',             'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z','Get user opinions about something',             '/dashboard/posts/create?format=poll',           'from-indigo-400 to-indigo-600', false],
+                ['recipe',            'Recipe',           'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z','A list of ingredients and directions',           '/dashboard/posts/create?format=recipe',         'from-red-400 to-rose-600',     false],
+                ['event',             'Event',            'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',                                        'Scheduled events with location and map',         '/dashboard/create-event',                       'from-violet-400 to-violet-600', false],
+                ['question',          'Ask Question',     'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z','Post a Q&A question for community',             '/ask-question',                                 'from-emerald-400 to-emerald-600',false],
             ];
             // Filter by content settings toggles
             try {
@@ -534,26 +524,34 @@
             } catch (\Exception $_e) { $_ss = []; }
             $_fe = $_ss['formats_enabled'] ?? null;
             $formats = array_values(array_filter($formats, function($f) use ($_fe) {
-                if ($f['key'] === 'article') return true;   // always visible
-                if ($f['key'] === 'question') return true;  // always visible
-                if ($_fe === null) return true;             // no settings saved yet
-                return !empty($_fe[$f['key']]);
+                if ($f[0] === 'article') return true;
+                if ($f[0] === 'question') return true;
+                if ($_fe === null) return true;
+                return !empty($_fe[$f[0]]);
             }));
             @endphp
-            <div class="grid grid-cols-3 gap-3">
-                @foreach($formats as $fmt)
-                @php $c = $colorMap[$fmt['color']]; @endphp
-                <a href="{{ $fmt['url'] }}"
-                    class="group flex flex-col items-center gap-3 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-500 hover:shadow-md transition-all text-center cursor-pointer bg-white dark:bg-gray-800"
-                    onclick="document.getElementById('format-chooser').classList.add('hidden')"
-                    title="{{ $fmt['desc'] }}">
-                    <div class="w-14 h-14 rounded-2xl {{ $c }} shadow-md flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                        <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="{{ $fmt['icon'] }}"/></svg>
+            <div class="flex flex-col divide-y divide-gray-50 dark:divide-gray-700/60">
+                @foreach($formats as [$fKey, $fLabel, $fIcon, $fDesc, $fUrl, $fGradient, $fPopular])
+                <a href="{{ $fUrl }}"
+                    class="flex items-center gap-4 px-3 py-3.5 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group"
+                    onclick="document.getElementById('format-chooser').classList.add('hidden')">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br {{ $fGradient }} shadow flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform duration-150">
+                        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="{{ $fIcon }}"/>
+                        </svg>
                     </div>
-                    <div>
-                        <p class="text-xs font-semibold text-gray-800 dark:text-white leading-tight">{{ $fmt['label'] }}</p>
-                        <p class="text-[10px] text-gray-400 mt-1 leading-snug">{{ $fmt['desc'] }}</p>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $fLabel }}</p>
+                            @if($fPopular)
+                            <span class="text-[10px] font-bold px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-full leading-none">Popular</span>
+                            @endif
+                        </div>
+                        <p class="text-xs text-gray-400 mt-0.5 truncate">{{ $fDesc }}</p>
                     </div>
+                    <svg class="w-4 h-4 text-gray-300 dark:text-gray-600 group-hover:text-gray-400 flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
                 </a>
                 @endforeach
             </div>
