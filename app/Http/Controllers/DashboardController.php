@@ -38,6 +38,9 @@ class DashboardController extends Controller
         if ($postFormat === 'recipe') {
             return view('dashboard.create-recipe', compact('categories', 'allTags'));
         }
+        if ($postFormat === 'poll') {
+            return view('dashboard.create-poll', compact('categories', 'allTags'));
+        }
         return view('dashboard.create', compact('categories', 'allTags', 'postFormat'));
     }
 
