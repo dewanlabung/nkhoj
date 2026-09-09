@@ -9,7 +9,25 @@
     <div class="lg:col-span-2 space-y-6">
 
         {{-- Question Card --}}
-        <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden"
+            x-data="{
+                votes: {{ $question->votes }},
+                userVote: {{ $userQuestionVote ?? 'null' }},
+                loading: false,
+                async vote(dir) {
+                    if (this.loading) return;
+                    this.loading = true;
+                    const res = await fetch('/questions/{{ $question->id }}/vote', {
+                        method: 'POST',
+                        headers: {'Content-Type':'application/json','X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content},
+                        body: JSON.stringify({vote: dir})
+                    });
+                    const d = await res.json();
+                    this.votes = d.votes;
+                    this.userVote = d.userVote;
+                    this.loading = false;
+                }
+            }">
 
             {{-- Breadcrumb --}}
             <div class="px-6 pt-5 flex items-center gap-2 text-xs text-gray-400 mb-3">
@@ -20,17 +38,18 @@
 
             <div class="flex gap-4 px-6 pb-6">
 
-                {{-- Vote column (Discy-style left) --}}
-                <div class="flex flex-col items-center gap-1 flex-shrink-0 pt-1" id="q-vote-box">
-                    <button onclick="voteQ('up')"
-                        class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-brand-100 dark:hover:bg-brand-900/30 hover:text-brand-600 text-gray-500 transition-colors">
+                {{-- Vote column --}}
+                <div class="flex flex-col items-center gap-1 flex-shrink-0 pt-1">
+                    <button @click="vote('up')" :disabled="loading"
+                        :class="userVote === 1 ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-500 ring-1 ring-orange-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 hover:bg-orange-100 hover:text-orange-500'"
+                        class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/></svg>
                     </button>
-                    <span id="q-vote-count" class="text-lg font-bold {{ $question->votes > 0 ? 'text-brand-600' : ($question->votes < 0 ? 'text-red-500' : 'text-gray-700 dark:text-gray-300') }}">
-                        {{ $question->votes >= 1000 ? round($question->votes / 1000, 1).'k' : $question->votes }}
-                    </span>
-                    <button onclick="voteQ('down')"
-                        class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 text-gray-500 transition-colors">
+                    <span :class="userVote === 1 ? 'text-orange-500' : (userVote === -1 ? 'text-blue-500' : 'text-gray-700 dark:text-gray-300')"
+                        class="text-lg font-bold" x-text="votes >= 1000 ? (votes/1000).toFixed(1)+'k' : votes"></span>
+                    <button @click="vote('down')" :disabled="loading"
+                        :class="userVote === -1 ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-500 ring-1 ring-blue-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 hover:bg-blue-100 hover:text-blue-500'"
+                        class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                     </button>
                 </div>
@@ -96,6 +115,12 @@
                         </div>
 
                         <div class="flex items-center gap-2">
+                            {{-- Copy link --}}
+                            <button onclick="copyLink('{{ url()->current() }}')"
+                                class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-brand-50 dark:hover:bg-brand-900/20 hover:text-brand-600 transition-colors text-gray-500">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                Copy link
+                            </button>
                             {{-- Edit (owner/admin) --}}
                             @auth
                             @if(auth()->id() === $question->user_id || in_array(auth()->user()->role, ['admin','editor']))
@@ -148,7 +173,32 @@
 
             <div class="space-y-4">
                 @foreach($sorted as $answer)
-                <div class="bg-white dark:bg-gray-800 rounded-2xl border {{ $answer->is_best ? 'border-green-300 dark:border-green-700' : 'border-gray-100 dark:border-gray-700' }} shadow-sm p-5 flex gap-4 relative">
+                @php $initVote = $userAnswerVotes[$answer->id] ?? null; @endphp
+                <div class="bg-white dark:bg-gray-800 rounded-2xl border {{ $answer->is_best ? 'border-green-300 dark:border-green-700' : 'border-gray-100 dark:border-gray-700' }} shadow-sm p-5 flex gap-4 relative"
+                    x-data="{
+                        votes: {{ $answer->votes }},
+                        userVote: {{ $initVote ?? 'null' }},
+                        loading: false,
+                        copied: false,
+                        async vote(dir) {
+                            if (this.loading) return;
+                            this.loading = true;
+                            const res = await fetch('/answers/{{ $answer->id }}/vote', {
+                                method: 'POST',
+                                headers: {'Content-Type':'application/json','X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content},
+                                body: JSON.stringify({vote: dir})
+                            });
+                            const d = await res.json();
+                            this.votes = d.votes;
+                            this.userVote = d.userVote;
+                            this.loading = false;
+                        },
+                        copyLink() {
+                            navigator.clipboard.writeText(window.location.origin + window.location.pathname + '#answer-{{ $answer->id }}');
+                            this.copied = true;
+                            setTimeout(() => this.copied = false, 2000);
+                        }
+                    }" id="answer-{{ $answer->id }}">
                     @if($answer->is_best)
                     <div class="absolute top-3 right-3 flex items-center gap-1 text-xs font-semibold text-green-600 bg-green-50 dark:bg-green-900/20 px-2 py-0.5 rounded-full">
                         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
@@ -158,13 +208,16 @@
 
                     {{-- Answer vote --}}
                     <div class="flex flex-col items-center gap-1 flex-shrink-0 pt-1">
-                        <button onclick="voteA({{ $answer->id }}, 'up')"
-                            class="w-7 h-7 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-green-100 hover:text-green-600 text-gray-500 transition-colors">
+                        <button @click="vote('up')" :disabled="loading"
+                            :class="userVote === 1 ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-500 ring-1 ring-orange-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 hover:bg-orange-100 hover:text-orange-500'"
+                            class="w-7 h-7 flex items-center justify-center rounded-lg transition-colors">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/></svg>
                         </button>
-                        <span id="a-vote-{{ $answer->id }}" class="text-sm font-bold text-gray-700 dark:text-gray-300">{{ $answer->votes }}</span>
-                        <button onclick="voteA({{ $answer->id }}, 'down')"
-                            class="w-7 h-7 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-red-100 hover:text-red-500 text-gray-500 transition-colors">
+                        <span :class="userVote === 1 ? 'text-orange-500' : (userVote === -1 ? 'text-blue-500' : 'text-gray-700 dark:text-gray-300')"
+                            class="text-sm font-bold" x-text="votes"></span>
+                        <button @click="vote('down')" :disabled="loading"
+                            :class="userVote === -1 ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-500 ring-1 ring-blue-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 hover:bg-blue-100 hover:text-blue-500'"
+                            class="w-7 h-7 flex items-center justify-center rounded-lg transition-colors">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                         </button>
                     </div>
@@ -183,6 +236,12 @@
                                 <span>{{ $answer->created_at->diffForHumans() }}</span>
                             </div>
                             <div class="flex items-center gap-2">
+                                {{-- Copy link to answer --}}
+                                <button @click="copyLink()"
+                                    class="flex items-center gap-1 text-xs px-2 py-1 rounded-lg text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors">
+                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101"/></svg>
+                                    <span x-text="copied ? 'Copied!' : 'Share'"></span>
+                                </button>
                                 @auth
                                 @if((auth()->id() === $question->user_id || in_array(auth()->user()->role, ['admin','editor'])) && !$answer->is_best)
                                 <form method="POST" action="/questions/{{ $question->id }}/best/{{ $answer->id }}">
@@ -212,7 +271,7 @@
                     Leave An Answer
                 </button>
             </div>
-            <div id="answer-form" class="p-6 {{ old('content') ? '' : '' }}">
+            <div id="answer-form" class="p-6">
                 @if(session('success'))
                 <div class="mb-4 px-4 py-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl text-green-700 dark:text-green-400 text-sm">
                     {{ session('success') }}
@@ -342,27 +401,12 @@
 </div>
 
 <script>
-const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
-
-function voteQ(dir) {
-    fetch('/questions/{{ $question->id }}/vote', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json','X-CSRF-TOKEN': csrfToken},
-        body: JSON.stringify({vote: dir})
-    }).then(r => r.json()).then(d => {
-        const el = document.getElementById('q-vote-count');
-        if (el) el.textContent = Math.abs(d.votes) >= 1000 ? (d.votes/1000).toFixed(1)+'k' : d.votes;
-    });
-}
-
-function voteA(id, dir) {
-    fetch('/answers/'+id+'/vote', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json','X-CSRF-TOKEN': csrfToken},
-        body: JSON.stringify({vote: dir})
-    }).then(r => r.json()).then(d => {
-        const el = document.getElementById('a-vote-'+id);
-        if (el) el.textContent = d.votes;
+function copyLink(url) {
+    navigator.clipboard.writeText(url).then(() => {
+        const btn = event.currentTarget;
+        const orig = btn.textContent.trim();
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = orig, 2000);
     });
 }
 </script>

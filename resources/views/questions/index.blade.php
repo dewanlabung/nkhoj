@@ -16,11 +16,38 @@
             </a>
         </div>
 
+        {{-- Search bar --}}
+        <form method="GET" action="/questions" class="relative">
+            @if(request('tab'))
+            <input type="hidden" name="tab" value="{{ request('tab') }}">
+            @endif
+            @if(request('category'))
+            <input type="hidden" name="category" value="{{ request('category') }}">
+            @endif
+            <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <input type="text" name="q" value="{{ $search }}" placeholder="Search questions…"
+                class="w-full pl-10 pr-10 py-2.5 text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+            @if($search)
+            <a href="/questions?tab={{ request('tab', 'new') }}" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </a>
+            @endif
+        </form>
+
+        @if($search)
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+            Showing results for <span class="font-semibold text-gray-900 dark:text-white">"{{ $search }}"</span>
+            · {{ $questions->total() }} {{ Str::plural('result', $questions->total()) }}
+        </p>
+        @endif
+
         {{-- Tabs --}}
-        <div class="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
-            @foreach(['new' => 'Newest', 'trending' => 'Trending', 'must-read' => 'Must Read', 'hot' => 'Hot'] as $key => $label)
-            <a href="?tab={{ $key }}"
-                class="flex-1 text-center py-1.5 text-sm font-medium rounded-lg transition-colors {{ $tab === $key ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700' }}">
+        <div class="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl overflow-x-auto">
+            @foreach(['new' => 'Newest', 'top' => 'Top', 'trending' => 'Trending', 'hot' => 'Hot 🔥', 'must-read' => 'Must Read'] as $key => $label)
+            <a href="?tab={{ $key }}{{ $search ? '&q='.urlencode($search) : '' }}{{ request('category') ? '&category='.request('category') : '' }}"
+                class="flex-1 text-center py-1.5 text-sm font-medium rounded-lg whitespace-nowrap transition-colors {{ $tab === $key ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700' }}">
                 {{ $label }}
             </a>
             @endforeach
@@ -30,13 +57,17 @@
         <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5 hover:shadow-md transition-shadow">
             <div class="flex gap-4">
                 {{-- Vote/answer counts --}}
-                <div class="flex flex-col items-center gap-3 flex-shrink-0 text-center w-12">
+                <div class="flex flex-col items-center gap-3 flex-shrink-0 text-center w-14">
+                    <div class="text-sm font-bold {{ $q->votes > 0 ? 'text-orange-500' : ($q->votes < 0 ? 'text-blue-500' : 'text-gray-700 dark:text-gray-300') }}">
+                        {{ $q->votes >= 1000 ? round($q->votes / 1000, 1).'k' : $q->votes }}
+                        <span class="block text-[10px] font-normal text-gray-400">votes</span>
+                    </div>
                     <div class="text-sm font-bold {{ $q->best_answer_id ? 'text-green-500' : 'text-gray-700 dark:text-gray-300' }}">
                         {{ $q->answers_count }}
                         <span class="block text-[10px] font-normal text-gray-400">{{ $q->answers_count == 1 ? 'answer' : 'answers' }}</span>
                     </div>
                     <div class="text-xs text-gray-400">
-                        {{ $q->views_count }}
+                        {{ number_format($q->views_count) }}
                         <span class="block">views</span>
                     </div>
                 </div>
@@ -50,6 +81,19 @@
                     @if($q->content)
                     <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-3">{{ strip_tags($q->content) }}</p>
                     @endif
+
+                    {{-- Tags --}}
+                    @if($q->tags && $q->tags->count())
+                    <div class="flex flex-wrap gap-1 mb-2">
+                        @foreach($q->tags->take(4) as $tag)
+                        <a href="/questions?tag={{ $tag->slug }}"
+                            class="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 hover:bg-brand-50 dark:hover:bg-brand-900/20 hover:text-brand-600 text-gray-500 dark:text-gray-400 rounded-full transition-colors">
+                            {{ $tag->name_en }}
+                        </a>
+                        @endforeach
+                    </div>
+                    @endif
+
                     <div class="flex flex-wrap items-center gap-2">
                         @if($q->category)
                         <a href="/questions?category={{ $q->category->slug }}"
@@ -78,8 +122,13 @@
         @empty
         <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-12 text-center">
             <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            @if($search)
+            <p class="text-gray-500 dark:text-gray-400 font-medium">No results for "{{ $search }}"</p>
+            <p class="text-sm text-gray-400 mt-1">Try a different search term or ask a new question.</p>
+            @else
             <p class="text-gray-500 dark:text-gray-400 font-medium">No questions yet</p>
             <p class="text-sm text-gray-400 mt-1">Be the first to ask a question!</p>
+            @endif
             <a href="/ask-question" class="inline-block mt-4 px-5 py-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold rounded-xl transition-colors">Ask a Question</a>
         </div>
         @endforelse
