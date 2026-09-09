@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Bookmark;
+use App\Models\BookmarkCollection;
 use App\Models\Post;
 use App\Models\SocialPage;
 use Illuminate\Http\Request;
@@ -16,16 +17,34 @@ class BookmarkController extends Controller
 
     public function index(Request $request)
     {
-        $filter = $request->query('type', 'all');
-        $query  = auth()->user()->bookmarks()->with('bookmarkable')->latest();
+        $filter     = $request->query('type', 'all');
+        $collection = $request->query('collection');
+
+        $query = auth()->user()->bookmarks()->with('bookmarkable')->latest();
 
         if ($filter !== 'all' && isset($this->typeMap[$filter])) {
             $query->where('bookmarkable_type', $this->typeMap[$filter]);
         }
+        if ($collection) {
+            $query->where('collection_id', $collection);
+        }
 
-        $bookmarks = $query->paginate(18)->withQueryString();
+        $bookmarks   = $query->paginate(18)->withQueryString();
+        $collections = BookmarkCollection::where('user_id', auth()->id())
+            ->withCount('bookmarks')->get();
 
-        return view('bookmarks.index', compact('bookmarks', 'filter'));
+        return view('bookmarks.index', compact('bookmarks', 'filter', 'collections'));
+    }
+
+    public function createCollection(Request $request)
+    {
+        $request->validate(['name' => 'required|string|max:100']);
+        $col = BookmarkCollection::create([
+            'user_id' => auth()->id(),
+            'name'    => $request->name,
+            'slug'    => \Str::slug($request->name . '-' . auth()->id()),
+        ]);
+        return response()->json(['id' => $col->id, 'name' => $col->name]);
     }
 
     public function toggle(Request $request)
@@ -52,6 +71,7 @@ class BookmarkController extends Controller
                 'user_id'           => $userId,
                 'bookmarkable_type' => $modelClass,
                 'bookmarkable_id'   => $model->id,
+                'collection_id'     => $request->collection_id ?: null,
             ]);
             $saved = true;
         }

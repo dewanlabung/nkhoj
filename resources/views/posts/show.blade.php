@@ -231,15 +231,20 @@
                 {{-- ═══════════════════ SHARE + BOOKMARK ═══════════════════ --}}
                 <div class="mt-6 pt-4 border-t border-gray-100 flex items-center gap-3 flex-wrap">
                     <span class="text-sm text-gray-500 font-medium">Share:</span>
-                    <a href="https://twitter.com/intent/tweet?text={{ urlencode($post->title) }}&url={{ urlencode(url()->current()) }}"
-                        target="_blank"
-                        class="px-3 py-1.5 text-xs font-medium bg-sky-50 text-sky-600 rounded-lg hover:bg-sky-100 transition-colors">
-                        Twitter/X
+                    <a href="https://wa.me/?text={{ urlencode($post->title . ' ' . url()->current()) }}"
+                        target="_blank" rel="noopener"
+                        class="px-3 py-1.5 text-xs font-medium bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors">
+                        WhatsApp
                     </a>
                     <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(url()->current()) }}"
                         target="_blank"
                         class="px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors">
                         Facebook
+                    </a>
+                    <a href="https://twitter.com/intent/tweet?text={{ urlencode($post->title) }}&url={{ urlencode(url()->current()) }}"
+                        target="_blank"
+                        class="px-3 py-1.5 text-xs font-medium bg-sky-50 text-sky-600 rounded-lg hover:bg-sky-100 transition-colors">
+                        Twitter/X
                     </a>
                     <button onclick="navigator.clipboard.writeText(window.location.href).then(()=>this.textContent='Copied!')"
                         class="px-3 py-1.5 text-xs font-medium bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors">

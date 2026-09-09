@@ -75,4 +75,21 @@ class HomeController extends Controller
             'widgetData'
         ));
     }
+
+    public function followingFeed()
+    {
+        $followingIds = auth()->user()->following()->pluck('users.id');
+
+        $posts = Post::with(['author', 'category', 'tags'])
+            ->published()
+            ->whereIn('author_id', $followingIds)
+            ->latest('published_at')
+            ->paginate(12);
+
+        if (request()->ajax() || request('ajax')) {
+            return view('partials.posts-feed', compact('posts'));
+        }
+
+        return view('following-feed', compact('posts'));
+    }
 }

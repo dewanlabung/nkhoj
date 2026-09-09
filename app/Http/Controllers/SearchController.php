@@ -29,11 +29,14 @@ class SearchController extends Controller
             } catch (\Throwable) {}
 
             // Count totals for all types (for tab badges)
+            // Use FULLTEXT if query has 3+ chars (MySQL requirement), fall back to LIKE
+            $useFulltext = mb_strlen($query) >= 3;
             $counts['posts'] = Post::published()
-                ->where(fn($q) =>
-                    $q->where('title', 'like', "%{$query}%")
-                      ->orWhere('excerpt', 'like', "%{$query}%")
-                      ->orWhere('body', 'like', "%{$query}%")
+                ->where(fn($q) => $useFulltext
+                    ? $q->whereRaw('MATCH(title, excerpt) AGAINST(? IN BOOLEAN MODE)', ["*{$query}*"])
+                        ->orWhere('title', 'like', "%{$query}%")
+                    : $q->where('title', 'like', "%{$query}%")
+                         ->orWhere('excerpt', 'like', "%{$query}%")
                 )->count();
 
             $counts['questions'] = Question::where(fn($q) =>
@@ -71,12 +74,18 @@ class SearchController extends Controller
                 $type = 'posts';
                 $results = Post::with(['author', 'category', 'tags'])
                     ->published()
-                    ->where(fn($q) =>
+                    ->when($useFulltext, fn($q) =>
+                        $q->whereRaw('MATCH(title, excerpt) AGAINST(? IN BOOLEAN MODE)', ["*{$query}*"])
+                          ->orWhere('title', 'like', "%{$query}%")
+                    , fn($q) =>
                         $q->where('title', 'like', "%{$query}%")
                           ->orWhere('excerpt', 'like', "%{$query}%")
-                          ->orWhere('body', 'like', "%{$query}%")
                     )
-                    ->latest('published_at')
+                    ->orderByRaw($useFulltext
+                        ? 'MATCH(title, excerpt) AGAINST(? IN BOOLEAN MODE) DESC'
+                        : 'published_at DESC',
+                        $useFulltext ? ["*{$query}*"] : []
+                    )
                     ->paginate(10)
                     ->withQueryString();
             }
