@@ -24,14 +24,17 @@
 </div>
 
 @elseif($type === 'popular_tags' && !empty($data['popular_tags']))
+@php $popularTagsList = $data['popular_tags']; @endphp
 <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-4">
-    <h3 class="font-bold text-gray-900 dark:text-white mb-3 text-sm">🏷 {{ $title }}</h3>
-    <div class="flex flex-wrap gap-1.5">
-        @foreach($data['popular_tags'] as $tag)
+    <h3 class="font-bold text-gray-900 dark:text-white mb-3 text-sm border-b border-gray-100 dark:border-gray-700 pb-2">{{ $title }}</h3>
+    <div class="flex flex-wrap gap-1.5 mt-1">
+        @foreach($popularTagsList as $i => $tag)
         <a href="/tag/{{ $tag->slug }}"
-            class="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-brand-100 dark:hover:bg-brand-900/30 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
+           class="px-3 py-1 rounded-full text-xs font-medium transition-colors
+                  {{ $i === 0
+                      ? 'bg-brand-500 text-white hover:bg-brand-600'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-brand-500 hover:text-white' }}">
             {{ $tag->name }}
-            <span class="text-gray-400 dark:text-gray-500 text-xs">({{ $tag->posts_count }})</span>
         </a>
         @endforeach
     </div>

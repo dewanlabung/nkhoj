@@ -436,7 +436,25 @@ class AdminController extends Controller
     public function tags()
     {
         $this->requireAdmin();
-        return view('admin.tags', ['tags' => Tag::withCount('posts')->orderByDesc('posts_count')->get()]);
+        return view('admin.tags', ['tags' => Tag::withCount('posts')->orderByDesc('id')->get()]);
+    }
+
+    public function storeTag(\Illuminate\Http\Request $request)
+    {
+        $this->requireAdmin();
+        $data = $request->validate(['name_en' => 'required|string|max:100', 'name_ne' => 'nullable|string|max:100', 'slug' => 'nullable|string|max:100']);
+        $data['slug'] = $data['slug'] ?: \Str::slug($data['name_en']);
+        Tag::firstOrCreate(['slug' => $data['slug']], $data);
+        return back()->with('success', 'Tag created.');
+    }
+
+    public function updateTag(\Illuminate\Http\Request $request, int $id)
+    {
+        $this->requireAdmin();
+        $data = $request->validate(['name_en' => 'required|string|max:100', 'name_ne' => 'nullable|string|max:100']);
+        $tag = Tag::findOrFail($id);
+        $tag->update($data);
+        return back()->with('success', 'Tag updated.');
     }
 
     public function deleteTag(int $id)
