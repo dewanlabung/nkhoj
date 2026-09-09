@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Bookmark;
+use App\Models\Comment;
 use App\Models\Post;
+use App\Models\Tag;
+use App\Models\Widget;
+use Illuminate\Support\Facades\File;
 
 class PostController extends Controller
 {
@@ -40,6 +44,38 @@ class PostController extends Controller
                 ->exists();
         }
 
-        return view('posts.show', compact('post', 'related', 'comments', 'reactionCounts', 'userReaction', 'isBookmarked'));
+        // Load sidebar widgets for post page
+        $sidebarWidgets = Widget::forPosition('sidebar')->merge(Widget::forPosition('post_sidebar'));
+        $widgetTypes    = $sidebarWidgets->pluck('type')->unique();
+        $widgetData     = [];
+
+        if ($widgetTypes->contains('popular_posts')) {
+            $widgetData['popular_posts'] = Post::with(['author','category'])
+                ->published()->orderByDesc('view_count')->limit(5)->get();
+        }
+        if ($widgetTypes->contains('popular_tags') || $widgetTypes->contains('related_searches')) {
+            $widgetData['popular_tags'] = Tag::withCount(['posts' => fn($q) => $q->published()])
+                ->having('posts_count', '>', 0)->orderByDesc('posts_count')->limit(15)->get();
+        }
+        if ($widgetTypes->contains('recommended_posts')) {
+            $widgetData['recommended_posts'] = Post::with(['author','category'])
+                ->published()->latest('published_at')->limit(5)->get();
+        }
+        if ($widgetTypes->contains('trending_now')) {
+            $widgetData['trending_now'] = Post::with(['author','category'])
+                ->published()->where('published_at', '>=', now()->subHours(24))
+                ->orderByDesc('view_count')->limit(5)->get()
+                ->whenEmpty(fn() => Post::with(['author','category'])->published()->orderByDesc('view_count')->limit(5)->get());
+        }
+        if ($widgetTypes->contains('comment_highlights')) {
+            $widgetData['comment_highlights'] = Comment::with(['post:id,slug,title','author:id,name,username'])
+                ->approved()->whereNotNull('body')->where('body','!=','')->latest()->limit(4)->get();
+        }
+        if ($widgetTypes->contains('follow_us') || $widgetTypes->contains('about_us')) {
+            $path = storage_path('app/site_settings.json');
+            $widgetData['settings'] = File::exists($path) ? (json_decode(File::get($path), true) ?? []) : [];
+        }
+
+        return view('posts.show', compact('post', 'related', 'comments', 'reactionCounts', 'userReaction', 'isBookmarked', 'sidebarWidgets', 'widgetData'));
     }
 }
