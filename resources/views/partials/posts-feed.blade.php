@@ -59,6 +59,8 @@
     @endforelse
 </div>
 
+<div hidden data-feed-meta data-has-more="{{ $posts->hasMorePages() ? 'true' : 'false' }}" data-current-page="{{ $posts->currentPage() }}"></div>
+
 @if($posts->hasPages())
-<div class="flex justify-center mt-8">{{ $posts->links() }}</div>
+<noscript><div class="flex justify-center mt-8">{{ $posts->links() }}</div></noscript>
 @endif

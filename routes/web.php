@@ -68,12 +68,14 @@ Route::post('/follow/{id}', [\App\Http\Controllers\ProfileController::class, 'fo
 // Reactions (works guest + auth)
 Route::post('/react/{postId}', [\App\Http\Controllers\ReactionController::class, 'store']);
 
-// Bookmarks (auth only)
+// Bookmarks + following feed (auth only)
 Route::middleware('auth')->group(function () {
     Route::get('/bookmarks', [BookmarkController::class, 'index']);
     Route::post('/bookmarks/toggle', [BookmarkController::class, 'toggle']);
     Route::delete('/bookmarks/{bookmark}', [BookmarkController::class, 'destroy']);
     Route::post('/bookmark/{postId}', [BookmarkController::class, 'togglePost']); // legacy
+    Route::post('/bookmark-collections', [BookmarkController::class, 'createCollection']);
+    Route::get('/following/feed', [\App\Http\Controllers\HomeController::class, 'followingFeed']);
 });
 
 // Notifications (auth only)

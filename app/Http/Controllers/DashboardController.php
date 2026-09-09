@@ -7,6 +7,8 @@ use App\Models\Post;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class DashboardController extends Controller
 {
@@ -88,10 +90,7 @@ class DashboardController extends Controller
 
         $thumbnailUrl = $data['thumbnail_url'] ?? null;
         if ($request->hasFile('thumbnail')) {
-            $file = $request->file('thumbnail');
-            $filename = time() . '_' . Str::slug($file->getClientOriginalName()) . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads'), $filename);
-            $thumbnailUrl = '/uploads/' . $filename;
+            $thumbnailUrl = $this->saveOptimizedThumbnail($request->file('thumbnail'));
         }
 
         $slug = Str::slug($data['title']);
@@ -210,10 +209,7 @@ class DashboardController extends Controller
 
         $thumbnailUrl = $data['thumbnail_url'] ?? $post->thumbnail_url;
         if ($request->hasFile('thumbnail')) {
-            $file = $request->file('thumbnail');
-            $filename = time() . '_' . Str::slug($file->getClientOriginalName()) . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads'), $filename);
-            $thumbnailUrl = '/uploads/' . $filename;
+            $thumbnailUrl = $this->saveOptimizedThumbnail($request->file('thumbnail'));
         }
 
         $faqQ = $request->input('article_faq_q', []);
@@ -286,5 +282,26 @@ class DashboardController extends Controller
             $tagIds[] = $tag->id;
         }
         $post->tags()->sync($tagIds);
+    }
+
+    private function saveOptimizedThumbnail(\Illuminate\Http\UploadedFile $file): string
+    {
+        $filename  = time() . '_' . Str::random(8) . '.webp';
+        $destPath  = public_path('uploads/' . $filename);
+
+        try {
+            $manager = new ImageManager(new Driver());
+            $manager->read($file->getRealPath())
+                ->scaleDown(1200, 675)   // max 16:9 at 1200px wide
+                ->toWebp(80)
+                ->save($destPath);
+        } catch (\Throwable) {
+            // Fallback: plain move without optimization
+            $filename = time() . '_' . Str::slug($file->getClientOriginalName()) . '.' . $file->getClientOriginalExtension();
+            $destPath = public_path('uploads/' . $filename);
+            $file->move(public_path('uploads'), $filename);
+        }
+
+        return '/uploads/' . $filename;
     }
 }

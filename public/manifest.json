@@ -1,0 +1,19 @@
+{
+    "name": "नखोज — Nepali News",
+    "short_name": "नखोज",
+    "description": "Nepali community news and blogging platform",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#f9fafb",
+    "theme_color": "#6366f1",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/favicon.ico",
+            "sizes": "any",
+            "type": "image/x-icon"
+        }
+    ],
+    "categories": ["news", "social"],
+    "lang": "ne"
+}

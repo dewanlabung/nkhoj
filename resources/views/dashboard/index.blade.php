@@ -1,5 +1,8 @@
 @extends('layouts.app')
 @section('title', 'Dashboard — nkhoj')
+@push('head')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+@endpush
 
 @section('content')
 <div class="flex items-center justify-between mb-8">
@@ -33,6 +36,53 @@
         <p class="text-3xl font-black text-yellow-500 mt-1">{{ $stats['drafts'] }}</p>
     </div>
 </div>
+
+{{-- Top posts chart --}}
+@php
+    $topPosts = \App\Models\Post::where('author_id', auth()->id())
+        ->where('status', 'published')
+        ->orderByDesc('view_count')
+        ->limit(5)
+        ->get(['title', 'view_count', 'slug']);
+@endphp
+@if($topPosts->isNotEmpty())
+<div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-8">
+    <h2 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <span class="text-lg">📊</span> Top Performing Articles
+    </h2>
+    <canvas id="viewsChart" height="120"></canvas>
+    <script>
+    (function(){
+        const labels = {!! json_encode($topPosts->map(fn($p) => \Illuminate\Support\Str::limit($p->title, 30))->toArray()) !!};
+        const data   = {!! json_encode($topPosts->pluck('view_count')->toArray()) !!};
+        const ctx = document.getElementById('viewsChart');
+        if (!ctx) return;
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Views',
+                    data,
+                    backgroundColor: 'rgba(99,102,241,0.7)',
+                    borderColor: 'rgb(99,102,241)',
+                    borderWidth: 1,
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { precision: 0 } },
+                    x: { ticks: { font: { size: 11 } } }
+                }
+            }
+        });
+    })();
+    </script>
+</div>
+@endif
 
 {{-- Articles list --}}
 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">

@@ -47,6 +47,43 @@
                     </a>
                 @endif
             @endforeach
+            @foreach($collections as $col)
+                <a href="/bookmarks?collection={{ $col->id }}"
+                   class="shrink-0 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap
+                          {{ request('collection') == $col->id
+                              ? 'border-brand-500 text-brand-600'
+                              : 'border-transparent text-gray-600 hover:text-gray-900' }}">
+                    📁 {{ $col->name }}
+                    <span class="ml-1 text-xs text-gray-400">({{ $col->bookmarks_count }})</span>
+                </a>
+            @endforeach
+        </div>
+
+        {{-- New collection button --}}
+        <div class="max-w-5xl mx-auto px-4 py-2 flex justify-end"
+            x-data="{ open: false, name: '' }">
+            <button @click="open = !open" class="text-xs text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                New Collection
+            </button>
+            <div x-show="open" x-cloak class="absolute mt-6 right-4 bg-white border border-gray-200 rounded-xl shadow-lg p-4 z-30 w-64">
+                <p class="text-sm font-semibold text-gray-700 mb-2">Create Collection</p>
+                <input x-model="name" type="text" placeholder="e.g. Politics, Sports..."
+                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 mb-2">
+                <div class="flex gap-2">
+                    <button @click="open=false;name=''" class="text-xs text-gray-400 hover:text-gray-600">Cancel</button>
+                    <button @click="
+                        if(!name.trim()) return;
+                        fetch('/bookmark-collections', {
+                            method: 'POST',
+                            headers: {'Content-Type':'application/json','X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content},
+                            body: JSON.stringify({name})
+                        }).then(()=>location.reload());
+                    " class="ml-auto px-3 py-1 bg-brand-500 text-white text-xs font-semibold rounded-lg hover:bg-brand-600">
+                        Create
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
