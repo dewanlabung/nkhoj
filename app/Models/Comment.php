@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\CommentReaction;
 
 class Comment extends Model
 {
@@ -33,6 +34,20 @@ class Comment extends Model
     public function scopeTopLevel($query)
     {
         return $query->whereNull('parent_id');
+    }
+
+    public function reactions(): HasMany
+    {
+        return $this->hasMany(CommentReaction::class);
+    }
+
+    public function reactionCounts(): array
+    {
+        return $this->reactions()
+            ->selectRaw('emoji, count(*) as cnt')
+            ->groupBy('emoji')
+            ->pluck('cnt', 'emoji')
+            ->toArray();
     }
 
     public function displayName(): string

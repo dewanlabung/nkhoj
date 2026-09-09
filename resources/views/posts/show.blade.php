@@ -33,6 +33,22 @@
 @endpush
 
 @section('content')
+{{-- Reading progress bar --}}
+<div id="reading-progress" class="fixed top-0 left-0 right-0 z-50 h-1 bg-gray-200/50 dark:bg-gray-700/50">
+    <div id="reading-progress-bar" class="h-full bg-brand-500 transition-all duration-75" style="width:0%"></div>
+</div>
+<script>
+(function() {
+    const bar = document.getElementById('reading-progress-bar');
+    if (!bar) return;
+    window.addEventListener('scroll', function() {
+        const doc = document.documentElement;
+        const scrolled = doc.scrollTop || document.body.scrollTop;
+        const total = doc.scrollHeight - doc.clientHeight;
+        bar.style.width = total > 0 ? Math.min(100, (scrolled / total) * 100) + '%' : '0%';
+    }, { passive: true });
+})();
+</script>
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
     {{-- Article --}}
@@ -335,16 +351,31 @@
                             </div>
                             <p class="text-sm text-gray-700 leading-relaxed font-nepali">{{ $comment->body }}</p>
                         </div>
-                        {{-- Reply button --}}
-                        <div class="mt-1 flex items-center gap-3 px-2">
+                        {{-- Emoji reactions + reply button --}}
+                        <div class="mt-1 flex items-center gap-1 px-2 flex-wrap"
+                             x-data="{ counts: {{ json_encode($comment->reactionCounts()) }}, open: false }">
+                            @foreach(['👍','❤️','😂','😮','😢','😡'] as $emoji)
+                            <button @click="
+                                fetch('/comments/{{ $comment->id }}/react', {
+                                    method: 'POST',
+                                    headers: {'Content-Type':'application/json','X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content},
+                                    body: JSON.stringify({emoji: '{{ $emoji }}'})
+                                }).then(r=>r.json()).then(d=>{ counts = d.counts; })
+                            " class="inline-flex items-center gap-0.5 text-xs px-1.5 py-0.5 rounded-full hover:bg-gray-100 transition-colors"
+                            :class="counts['{{ $emoji }}'] ? 'bg-gray-100' : ''">
+                                <span>{{ $emoji }}</span>
+                                <span x-show="counts['{{ $emoji }}']" x-text="counts['{{ $emoji }}']" class="text-gray-500 font-medium"></span>
+                            </button>
+                            @endforeach
+                            <span class="mx-1 text-gray-200">|</span>
                             <button
                                 @click="replyTo = {{ $comment->id }}; replyName = '{{ $comment->displayName() }}'; $nextTick(() => $el.closest('.comment-wrap').querySelector('textarea').focus())"
                                 class="text-xs text-gray-400 hover:text-brand-600 font-medium transition-colors">
-                                ↩ जवाफ दिनुहोस्
+                                ↩ जवाफ
                             </button>
                             @auth
-                            @if(auth()->id() === $comment->user_id || auth()->user()->isAdmin())
-                            <form method="POST" action="/comments/{{ $comment->id }}" class="inline" onsubmit="return confirm('हटाउनुहोस्?')">
+                            @if(auth()->id() === $comment->user_id || auth()->user()?->isAdmin())
+                            <form method="POST" action="/comments/{{ $comment->id }}" class="inline ml-1" onsubmit="return confirm('हटाउनुहोस्?')">
                                 @csrf @method('DELETE')
                                 <button class="text-xs text-red-400 hover:text-red-600 transition-colors">हटाउनुहोस्</button>
                             </form>
@@ -394,6 +425,42 @@
                 @endforelse
             </div>
         </div>
+    {{-- Series navigation --}}
+    @if($post->series_id && $post->relationLoaded('series') && $post->series)
+    @php
+        $seriesPosts = $post->series->posts()->published()->orderBy('series_order')->get();
+        $seriesIdx   = $seriesPosts->search(fn($p) => $p->id === $post->id);
+        $prevPost    = $seriesIdx > 0 ? $seriesPosts[$seriesIdx - 1] : null;
+        $nextPost    = $seriesIdx < $seriesPosts->count() - 1 ? $seriesPosts[$seriesIdx + 1] : null;
+    @endphp
+    <div class="bg-brand-50 dark:bg-brand-900/10 border border-brand-100 dark:border-brand-900/30 rounded-2xl p-5 mb-6">
+        <div class="flex items-center gap-2 mb-3">
+            <span class="text-lg">📚</span>
+            <div>
+                <p class="text-xs text-brand-500 font-semibold uppercase tracking-wide">Part {{ $seriesIdx + 1 }} of {{ $seriesPosts->count() }}</p>
+                <a href="/series/{{ $post->series->slug }}" class="font-bold text-gray-900 dark:text-white hover:text-brand-600 transition-colors text-sm">
+                    {{ $post->series->title }}
+                </a>
+            </div>
+        </div>
+        <div class="flex gap-3">
+            @if($prevPost)
+            <a href="/posts/{{ $prevPost->slug }}"
+               class="flex-1 flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-brand-300 transition-colors text-xs">
+                <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                <span class="line-clamp-1 font-nepali text-gray-700 dark:text-gray-300">{{ $prevPost->title }}</span>
+            </a>
+            @endif
+            @if($nextPost)
+            <a href="/posts/{{ $nextPost->slug }}"
+               class="flex-1 flex items-center justify-end gap-2 px-3 py-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-brand-300 transition-colors text-xs">
+                <span class="line-clamp-1 font-nepali text-gray-700 dark:text-gray-300">{{ $nextPost->title }}</span>
+                <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
+            @endif
+        </div>
+    </div>
+    @endif
     </article>
 
     {{-- Sidebar --}}

@@ -135,4 +135,268 @@
         {{ $settings['site_description'] ?? 'नेपालको अग्रणी बहु-ब्लग र समाचार प्लेटफर्म। हजारौं नेपाली पाठकसँग आफ्नो कथा साझा गर्नुहोस्।' }}
     </p>
 </div>
+
+@elseif($type === 'category_grid')
+@php
+$cfg = $widget->config ?? [];
+$showSearch = $cfg['show_search'] ?? true;
+$searchPlaceholder = $cfg['search_placeholder'] ?? 'Search topics…';
+$cats = $cfg['categories'] ?? [
+    ['slug' => 'science',    'label' => 'Science',     'icon' => '🔬', 'color' => 'bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40',    'text' => 'text-blue-700 dark:text-blue-300'],
+    ['slug' => 'it',         'label' => 'IT',           'icon' => '💻', 'color' => 'bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40', 'text' => 'text-purple-700 dark:text-purple-300'],
+    ['slug' => 'technology', 'label' => 'Technology',  'icon' => '⚙️', 'color' => 'bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700',       'text' => 'text-gray-700 dark:text-gray-300'],
+    ['slug' => 'health',     'label' => 'Health',       'icon' => '❤️', 'color' => 'bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40',          'text' => 'text-red-700 dark:text-red-300'],
+    ['slug' => 'finance',    'label' => 'Finance',      'icon' => '💰', 'color' => 'bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40',   'text' => 'text-green-700 dark:text-green-300'],
+    ['slug' => 'sports',     'label' => 'Sports',       'icon' => '⚽', 'color' => 'bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/40', 'text' => 'text-orange-700 dark:text-orange-300'],
+    ['slug' => 'politics',   'label' => 'Politics',     'icon' => '🏛️', 'color' => 'bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/40', 'text' => 'text-indigo-700 dark:text-indigo-300'],
+    ['slug' => 'education',  'label' => 'Education',    'icon' => '📚', 'color' => 'bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/40', 'text' => 'text-yellow-700 dark:text-yellow-300'],
+    ['slug' => 'travel',     'label' => 'Travel',       'icon' => '✈️', 'color' => 'bg-cyan-50 dark:bg-cyan-900/20 hover:bg-cyan-100 dark:hover:bg-cyan-900/40',      'text' => 'text-cyan-700 dark:text-cyan-300'],
+];
+@endphp
+<div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-4"
+     x-data="{ q: '' }">
+    <h3 class="font-bold text-gray-900 dark:text-white mb-3 text-sm flex items-center gap-1.5">
+        <span>🗂</span> {{ $title }}
+    </h3>
+    <div class="grid grid-cols-3 gap-2 mb-3">
+        @foreach($cats as $cat)
+        <a href="/category/{{ $cat['slug'] }}"
+           x-show="!q || '{{ strtolower($cat['label']) }}'.includes(q.toLowerCase())"
+           class="flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-colors cursor-pointer {{ $cat['color'] }}">
+            <span class="text-2xl leading-none">{{ $cat['icon'] }}</span>
+            <span class="text-[10px] font-semibold leading-tight text-center {{ $cat['text'] }}">{{ $cat['label'] }}</span>
+        </a>
+        @endforeach
+    </div>
+    @if($showSearch)
+    <div class="relative">
+        <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input x-model="q" type="text" placeholder="{{ $searchPlaceholder }}"
+            class="w-full pl-8 pr-3 py-2 text-xs bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all">
+    </div>
+    @endif
+</div>
+
+@elseif($type === 'breaking_ticker')
+@php
+$cfg = $widget->config ?? [];
+$items = $cfg['items'] ?? [
+    'ताजा समाचार: नेपालमा आज महत्वपूर्ण घटना घटे',
+    'अर्थतन्त्र: बजार परिसूचकमा सुधार',
+    'खेलकुद: नेपाल क्रिकेट टिमले जित्यो',
+    'मौसम: काठमाण्डौमा वर्षाको सम्भावना',
+];
+$speed = $cfg['speed'] ?? '30s';
+$label = $cfg['label'] ?? 'ब्रेकिङ';
+@endphp
+<div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+    <div class="flex items-stretch">
+        <span class="flex-shrink-0 bg-red-600 text-white text-xs font-black px-3 flex items-center tracking-wider uppercase">
+            {{ $label }}
+        </span>
+        <div class="flex-1 overflow-hidden py-2.5 px-2">
+            <div class="ticker-track whitespace-nowrap" style="animation: ticker {{ $speed }} linear infinite; display: inline-block;">
+                @foreach($items as $item)
+                <span class="inline-block text-xs text-gray-700 dark:text-gray-300 mr-10">
+                    <span class="text-red-500 mr-1">▶</span> {{ $item }}
+                </span>
+                @endforeach
+                @foreach($items as $item)
+                <span class="inline-block text-xs text-gray-700 dark:text-gray-300 mr-10">
+                    <span class="text-red-500 mr-1">▶</span> {{ $item }}
+                </span>
+                @endforeach
+            </div>
+        </div>
+    </div>
+</div>
+@once
+<style>
+@keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+</style>
+@endonce
+
+@elseif($type === 'author_spotlight')
+@php
+$cfg = $widget->config ?? [];
+$userId = $cfg['user_id'] ?? null;
+$spotlightUser = $userId ? \App\Models\User::find($userId) : null;
+if (!$spotlightUser) {
+    $spotlightUser = \App\Models\User::withCount('posts')->orderByDesc('posts_count')->first();
+}
+$postCount = $spotlightUser?->posts_count ?? $spotlightUser?->posts()->published()->count() ?? 0;
+$bio = $cfg['bio'] ?? $spotlightUser?->bio ?? 'नेपाली पत्रकारिता र लेखनमा समर्पित।';
+@endphp
+@if($spotlightUser)
+<div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-4">
+    <h3 class="font-bold text-gray-900 dark:text-white mb-3 text-sm flex items-center gap-1.5">
+        <span>✍️</span> {{ $title }}
+    </h3>
+    <div class="flex flex-col items-center text-center">
+        <div class="w-16 h-16 rounded-full overflow-hidden bg-brand-100 mb-3 ring-2 ring-brand-200">
+            @if($spotlightUser->avatar)
+                <img src="{{ $spotlightUser->avatar }}" class="w-full h-full object-cover" alt="{{ $spotlightUser->name }}">
+            @else
+                <div class="w-full h-full flex items-center justify-center text-2xl font-black text-brand-600">
+                    {{ strtoupper(substr($spotlightUser->name, 0, 1)) }}
+                </div>
+            @endif
+        </div>
+        <a href="/profile/{{ $spotlightUser->username }}" class="font-bold text-gray-900 dark:text-white hover:text-brand-600 transition-colors text-sm">
+            {{ $spotlightUser->name }}
+        </a>
+        <p class="text-xs text-brand-500 mb-1">{{ number_format($postCount) }} articles</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3 font-nepali">{{ Str::limit($bio, 80) }}</p>
+        @auth
+        <button class="px-4 py-1.5 text-xs font-semibold bg-brand-500 hover:bg-brand-600 text-white rounded-full transition-colors">
+            Follow
+        </button>
+        @endauth
+    </div>
+</div>
+@endif
+
+@elseif($type === 'trending_now')
+@php $trendingNow = $data['trending_now'] ?? collect(); @endphp
+@if($trendingNow->isNotEmpty())
+<div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-4">
+    <h3 class="font-bold text-gray-900 dark:text-white mb-3 text-sm flex items-center gap-1.5">
+        <span class="text-orange-500">📈</span> {{ $title }}
+        <span class="ml-auto text-[10px] font-normal text-gray-400">last 24h</span>
+    </h3>
+    <ol class="space-y-2.5">
+        @foreach($trendingNow as $i => $post)
+        <li class="flex gap-2.5 items-start">
+            <span class="text-lg font-black leading-none mt-0.5 min-w-[18px] {{ $i < 3 ? 'text-orange-500' : 'text-gray-200 dark:text-gray-600' }}">{{ $i+1 }}</span>
+            <div class="flex-1 min-w-0">
+                <a href="/posts/{{ $post->slug }}" class="text-xs font-medium text-gray-800 dark:text-gray-200 hover:text-brand-600 dark:hover:text-brand-400 line-clamp-2 font-nepali leading-snug">{{ $post->title }}</a>
+                <p class="text-xs text-gray-400 mt-0.5">{{ number_format($post->view_count) }} views · {{ $post->published_at?->diffForHumans() }}</p>
+            </div>
+        </li>
+        @endforeach
+    </ol>
+</div>
+@endif
+
+@elseif($type === 'related_searches')
+@php
+$cfg = $widget->config ?? [];
+$topics = $cfg['topics'] ?? [];
+$relatedTags = !empty($topics)
+    ? collect($topics)->map(fn($t) => (object)['name' => $t, 'slug' => \Str::slug($t)])
+    : ($data['popular_tags'] ?? collect())->take(12);
+@endphp
+<div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-4">
+    <h3 class="font-bold text-gray-900 dark:text-white mb-3 text-sm">🔍 {{ $title }}</h3>
+    <div class="flex flex-wrap gap-1.5">
+        @foreach($relatedTags as $tag)
+        <a href="/tag/{{ $tag->slug }}"
+            class="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors flex items-center gap-1">
+            <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            {{ $tag->name }}
+        </a>
+        @endforeach
+    </div>
+</div>
+
+@elseif($type === 'comment_highlights')
+@php $commentHighlights = $data['comment_highlights'] ?? collect(); @endphp
+@if($commentHighlights->isNotEmpty())
+<div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-4">
+    <h3 class="font-bold text-gray-900 dark:text-white mb-3 text-sm">💬 {{ $title }}</h3>
+    <div class="space-y-3">
+        @foreach($commentHighlights as $comment)
+        <div class="border-l-2 border-brand-200 dark:border-brand-800 pl-3">
+            <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-nepali line-clamp-2">{{ $comment->body }}</p>
+            <div class="flex items-center gap-2 mt-1.5">
+                <span class="text-xs font-semibold text-brand-600 dark:text-brand-400">{{ $comment->displayName() }}</span>
+                <span class="text-gray-300 dark:text-gray-600">·</span>
+                <a href="/posts/{{ $comment->post->slug }}#comment-{{ $comment->id }}"
+                   class="text-xs text-gray-400 hover:text-brand-500 transition-colors line-clamp-1 flex-1 truncate">
+                    {{ Str::limit($comment->post->title, 30) }}
+                </a>
+            </div>
+        </div>
+        @endforeach
+    </div>
+</div>
+@endif
+
+@elseif($type === 'dark_mode_toggle')
+<div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-4"
+     x-data="{
+        theme: localStorage.getItem('theme') || 'system',
+        apply(t) {
+            this.theme = t;
+            localStorage.setItem('theme', t);
+            const root = document.documentElement;
+            if (t === 'dark') root.setAttribute('data-theme','dark');
+            else if (t === 'light') root.setAttribute('data-theme','light');
+            else root.removeAttribute('data-theme');
+        }
+     }">
+    <h3 class="font-bold text-gray-900 dark:text-white mb-3 text-sm">🎨 {{ $title }}</h3>
+    <div class="grid grid-cols-3 gap-2">
+        <button @click="apply('light')"
+            :class="theme === 'light' ? 'ring-2 ring-brand-500 bg-brand-50 dark:bg-brand-900/20' : 'bg-gray-50 dark:bg-gray-700'"
+            class="flex flex-col items-center gap-1 py-3 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 transition-all">
+            <span class="text-xl">☀️</span> Light
+        </button>
+        <button @click="apply('dark')"
+            :class="theme === 'dark' ? 'ring-2 ring-brand-500 bg-brand-50 dark:bg-brand-900/20' : 'bg-gray-50 dark:bg-gray-700'"
+            class="flex flex-col items-center gap-1 py-3 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 transition-all">
+            <span class="text-xl">🌙</span> Dark
+        </button>
+        <button @click="apply('system')"
+            :class="theme === 'system' ? 'ring-2 ring-brand-500 bg-brand-50 dark:bg-brand-900/20' : 'bg-gray-50 dark:bg-gray-700'"
+            class="flex flex-col items-center gap-1 py-3 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 transition-all">
+            <span class="text-xl">💻</span> Auto
+        </button>
+    </div>
+</div>
+
+@elseif($type === 'social_proof')
+@php
+$cfg = $widget->config ?? [];
+$readerCount = $cfg['reader_count'] ?? '12,400';
+$readerLabel = $cfg['reader_label'] ?? 'monthly readers';
+$stats = $cfg['stats'] ?? [
+    ['platform' => 'Facebook',  'icon' => '📘', 'count' => '8.2K',  'label' => 'Followers', 'url' => '#', 'color' => 'bg-blue-600'],
+    ['platform' => 'YouTube',   'icon' => '▶️', 'count' => '3.1K',  'label' => 'Subscribers', 'url' => '#', 'color' => 'bg-red-600'],
+    ['platform' => 'Instagram', 'icon' => '📸', 'count' => '1.5K',  'label' => 'Followers', 'url' => '#', 'color' => 'bg-pink-600'],
+];
+@endphp
+<div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-4">
+    <h3 class="font-bold text-gray-900 dark:text-white mb-3 text-sm">🌐 {{ $title }}</h3>
+
+    {{-- Headline reader count --}}
+    <div class="flex items-center gap-3 bg-brand-50 dark:bg-brand-900/20 rounded-xl px-4 py-3 mb-3">
+        <div class="w-10 h-10 rounded-full bg-brand-500 flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+        </div>
+        <div>
+            <p class="text-lg font-black text-brand-600 dark:text-brand-400 leading-none">{{ $readerCount }}</p>
+            <p class="text-xs text-brand-500 dark:text-brand-400">{{ $readerLabel }}</p>
+        </div>
+    </div>
+
+    {{-- Social stat rows --}}
+    <div class="space-y-2">
+        @foreach($stats as $stat)
+        <a href="{{ $stat['url'] ?? '#' }}" target="_blank" rel="noopener"
+           class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <span class="w-8 h-8 {{ $stat['color'] }} rounded-lg flex items-center justify-center text-sm flex-shrink-0 text-white font-bold">{{ $stat['icon'] }}</span>
+            <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold text-gray-800 dark:text-gray-200">{{ $stat['platform'] }}</p>
+                <p class="text-xs text-gray-400">{{ $stat['label'] }}</p>
+            </div>
+            <span class="text-sm font-black text-gray-700 dark:text-gray-300">{{ $stat['count'] }}</span>
+        </a>
+        @endforeach
+    </div>
+</div>
 @endif

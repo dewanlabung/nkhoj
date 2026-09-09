@@ -26,6 +26,14 @@ class Widget extends Model
             'follow_us'          => 'Follow Us',
             'newsletter'         => 'Newsletter Signup',
             'about_us'           => 'About Us',
+            'category_grid'      => 'Category Grid (Icon Tiles)',
+            'social_proof'       => 'Social Proof (Reader Stats)',
+            'breaking_ticker'    => 'Breaking News Ticker',
+            'author_spotlight'   => 'Author Spotlight',
+            'trending_now'       => 'Trending Now (24h)',
+            'related_searches'   => 'Related Searches / Topics',
+            'comment_highlights' => 'Comment Highlights',
+            'dark_mode_toggle'   => 'Dark Mode Toggle',
         ];
     }
 

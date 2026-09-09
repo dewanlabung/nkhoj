@@ -9,7 +9,7 @@ class PostController extends Controller
 {
     public function show(string $slug)
     {
-        $post = Post::with(['author', 'category', 'tags'])->published()->where('slug', $slug)->firstOrFail();
+        $post = Post::with(['author', 'category', 'tags', 'series'])->published()->where('slug', $slug)->firstOrFail();
 
         $post->increment('view_count');
 
