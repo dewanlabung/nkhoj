@@ -43,11 +43,15 @@ class Comment extends Model
 
     public function reactionCounts(): array
     {
-        return $this->reactions()
-            ->selectRaw('emoji, count(*) as cnt')
-            ->groupBy('emoji')
-            ->pluck('cnt', 'emoji')
-            ->toArray();
+        try {
+            return $this->reactions()
+                ->selectRaw('emoji, count(*) as cnt')
+                ->groupBy('emoji')
+                ->pluck('cnt', 'emoji')
+                ->toArray();
+        } catch (\Throwable) {
+            return [];
+        }
     }
 
     public function displayName(): string
