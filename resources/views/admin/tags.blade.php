@@ -149,35 +149,35 @@
             <span x-show="selected.length > 0" class="text-red-500 font-medium" x-text="`${selected.length} selected`"></span>
         </div>
     </div>
-</div>
 
-{{-- Edit modal --}}
-<div x-show="editId !== null" x-cloak
-     class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-     @keydown.escape.window="editId=null">
-    <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4" @click.stop>
-        <h3 class="font-bold text-gray-900 mb-4 text-lg">Edit Tag</h3>
-        <form method="POST" :action="`/admin/tags/${editId}`">
-            @csrf @method('PATCH')
-            <div class="space-y-3">
-                <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Name (English)</label>
-                    <input type="text" name="name_en" x-model="editNameEn" required
-                           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none">
+    {{-- Edit modal (inside x-data so Alpine vars are in scope) --}}
+    <div x-show="editId !== null" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+         @keydown.escape.window="editId=null">
+        <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4" @click.stop>
+            <h3 class="font-bold text-gray-900 mb-4 text-lg">Edit Tag</h3>
+            <form method="POST" :action="`/admin/tags/${editId}`">
+                @csrf @method('PATCH')
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Name (English)</label>
+                        <input type="text" name="name_en" x-model="editNameEn" required
+                               class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Name (Nepali)</label>
+                        <input type="text" name="name_ne" x-model="editNameNe"
+                               class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none">
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Name (Nepali)</label>
-                    <input type="text" name="name_ne" x-model="editNameNe"
-                           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none">
+                <div class="flex gap-2 justify-end mt-5">
+                    <button type="button" @click="editId=null"
+                            class="px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50">Cancel</button>
+                    <button type="submit"
+                            class="px-5 py-2 text-sm bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">Save Changes</button>
                 </div>
-            </div>
-            <div class="flex gap-2 justify-end mt-5">
-                <button type="button" @click="editId=null"
-                        class="px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50">Cancel</button>
-                <button type="submit"
-                        class="px-5 py-2 text-sm bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">Save Changes</button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
+</div>{{-- end x-data --}}
 @endsection
