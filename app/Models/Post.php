@@ -56,6 +56,11 @@ class Post extends Model
         return $this->belongsToMany(Tag::class);
     }
 
+    public function series()
+    {
+        return $this->belongsTo(\App\Models\PostSeries::class, 'series_id');
+    }
+
     public function scopePublished($query)
     {
         return $query->where('status', 'published')

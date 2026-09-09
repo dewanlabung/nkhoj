@@ -47,6 +47,7 @@ Route::get('/polls/{pollId}/results',  [PollController::class, 'results']);
 // Comments (auth or guest)
 Route::post('/posts/{slug}/comments', [CommentController::class, 'store']);
 Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->middleware('auth');
+Route::post('/comments/{comment}/react', [\App\Http\Controllers\CommentReactionController::class, 'toggle']);
 
 // Auth routes
 Route::middleware('guest')->group(function () {
@@ -376,6 +377,12 @@ Route::middleware('auth')->prefix('support')->group(function () {
 
 // GitHub deploy webhook (no auth, verified by HMAC secret)
 Route::post('/webhook/deploy', [AdminController::class, 'webhookDeploy'])->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+
+// Post Series
+Route::get('/series', [\App\Http\Controllers\PostSeriesController::class, 'index']);
+Route::get('/series/create', [\App\Http\Controllers\PostSeriesController::class, 'create'])->middleware('auth');
+Route::post('/series', [\App\Http\Controllers\PostSeriesController::class, 'store'])->middleware('auth');
+Route::get('/series/{series:slug}', [\App\Http\Controllers\PostSeriesController::class, 'show']);
 
 // Questions (public)
 Route::get('/questions',                      [\App\Http\Controllers\QuestionController::class, 'index']);

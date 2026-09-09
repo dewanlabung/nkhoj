@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Comment;
 use App\Models\Poll;
 use App\Models\Post;
 use App\Models\Tag;
@@ -62,6 +63,28 @@ class HomeController extends Controller
             $path = storage_path('app/site_settings.json');
             $widgetData['settings'] = File::exists($path)
                 ? (json_decode(File::get($path), true) ?? []) : [];
+        }
+        if ($widgetTypes->contains('trending_now')) {
+            $widgetData['trending_now'] = Post::with(['author','category'])
+                ->published()
+                ->where('published_at', '>=', now()->subHours(24))
+                ->orderByDesc('view_count')
+                ->limit(5)
+                ->get()
+                ->whenEmpty(fn() => Post::with(['author','category'])->published()->orderByDesc('view_count')->limit(5)->get());
+        }
+        if ($widgetTypes->contains('comment_highlights')) {
+            $widgetData['comment_highlights'] = Comment::with(['post:id,slug,title', 'author:id,name,username'])
+                ->approved()
+                ->whereNotNull('body')
+                ->where('body', '!=', '')
+                ->latest()
+                ->limit(4)
+                ->get();
+        }
+        if ($widgetTypes->contains('related_searches') && !isset($widgetData['popular_tags'])) {
+            $widgetData['popular_tags'] = Tag::withCount(['posts' => fn($q) => $q->published()])
+                ->having('posts_count', '>', 0)->orderByDesc('posts_count')->limit(12)->get();
         }
 
         if (request()->ajax() || request('ajax')) {
