@@ -741,7 +741,7 @@ class AdminController extends Controller
     public function updateSettingsSocial(Request $request)
     {
         $this->requireAdmin();
-        $this->patchSettings($request->only(['social_facebook','social_twitter','social_instagram','social_youtube','social_tiktok']));
+        $this->patchSettings($request->only(['social_facebook','social_twitter','social_instagram','social_youtube','social_tiktok','social_linkedin','social_newsletter','reader_count','reader_label']));
         return back()->with('success', 'Social links saved.');
     }
 

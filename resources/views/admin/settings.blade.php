@@ -266,11 +266,15 @@
             @csrf
             @php
             $socialPlatforms = [
-                'facebook'  => ['label'=>'Facebook', 'ph'=>'https://facebook.com/nkhoj'],
-                'twitter'   => ['label'=>'X (Twitter)', 'ph'=>'https://x.com/nkhoj'],
-                'instagram' => ['label'=>'Instagram', 'ph'=>'https://instagram.com/nkhoj'],
-                'youtube'   => ['label'=>'YouTube', 'ph'=>'https://youtube.com/@nkhoj'],
-                'tiktok'    => ['label'=>'TikTok', 'ph'=>'https://tiktok.com/@nkhoj'],
+                'facebook'   => ['label'=>'Facebook', 'ph'=>'https://facebook.com/nkhoj'],
+                'twitter'    => ['label'=>'X (Twitter)', 'ph'=>'https://x.com/nkhoj'],
+                'instagram'  => ['label'=>'Instagram', 'ph'=>'https://instagram.com/nkhoj'],
+                'youtube'    => ['label'=>'YouTube', 'ph'=>'https://youtube.com/@nkhoj'],
+                'tiktok'     => ['label'=>'TikTok', 'ph'=>'https://tiktok.com/@nkhoj'],
+                'linkedin'   => ['label'=>'LinkedIn', 'ph'=>'https://linkedin.com/company/nkhoj'],
+                'newsletter' => ['label'=>'Newsletter / Email signup URL', 'ph'=>'https://nkhoj.com/newsletter'],
+                'reader_count' => ['label'=>'Reader Count (shown in Social Proof widget)', 'ph'=>'12,400+'],
+                'reader_label' => ['label'=>'Reader Count Label', 'ph'=>'monthly readers'],
             ];
             @endphp
             @foreach($socialPlatforms as $key => $info)
