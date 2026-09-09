@@ -136,6 +136,8 @@ Route::middleware('auth')->prefix('admin')->group(function () {
 
     // Tags
     Route::get('/tags',                      [AdminController::class, 'tags']);
+    Route::post('/tags',                     [AdminController::class, 'storeTag']);
+    Route::patch('/tags/{id}',               [AdminController::class, 'updateTag']);
     Route::delete('/tags/{id}',              [AdminController::class, 'deleteTag']);
 
     // Questions

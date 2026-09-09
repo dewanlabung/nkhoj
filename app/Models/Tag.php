@@ -8,6 +8,13 @@ class Tag extends Model
 {
     protected $fillable = ['slug', 'name_en', 'name_ne'];
 
+    protected $appends = ['name'];
+
+    public function getNameAttribute(): string
+    {
+        return $this->name_en ?? $this->slug;
+    }
+
     public function posts()
     {
         return $this->belongsToMany(Post::class);
