@@ -535,6 +535,13 @@
             </div>
         </div>
         @endif
+
+        {{-- Sidebar widgets (sidebar + post_sidebar positions) --}}
+        @if(isset($sidebarWidgets) && $sidebarWidgets->isNotEmpty())
+            @foreach($sidebarWidgets as $widget)
+                @include('partials._widget', ['widget' => $widget, 'data' => $widgetData ?? []])
+            @endforeach
+        @endif
     </aside>
 </div>
 @endsection
