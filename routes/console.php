@@ -10,3 +10,6 @@ Artisan::command('inspire', function () {
 
 // AI auto-post generation — runs daily at 6:00 AM server time
 Schedule::command('ai:generate-posts')->dailyAt('06:00');
+
+// Auto-publish posts whose scheduled_at has passed
+Schedule::command('posts:publish-scheduled')->everyFiveMinutes();

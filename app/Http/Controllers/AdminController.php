@@ -359,8 +359,9 @@ class AdminController extends Controller
         if ($request->filled('post_format')) $query->where('post_format', $request->post_format);
         if ($request->filled('q'))           $query->where('title', 'like', '%'.$request->q.'%');
         return view('admin.posts', [
-            'posts'  => $query->latest()->paginate(20),
-            'counts' => [
+            'posts'   => $query->latest()->paginate(20),
+            'allTags' => \App\Models\Tag::orderBy('name_en')->get(['id','name_en']),
+            'counts'  => [
                 'all'       => Post::count(),
                 'published' => Post::where('status','published')->count(),
                 'draft'     => Post::where('status','draft')->count(),
@@ -400,12 +401,23 @@ class AdminController extends Controller
     public function bulkPostAction(Request $request)
     {
         $this->requireAdmin();
-        $data = $request->validate(['action' => 'required|in:publish,draft,archived,delete', 'ids' => 'required|array', 'ids.*' => 'integer']);
+        $data = $request->validate([
+            'action' => 'required|in:publish,draft,archived,delete,tag',
+            'ids'    => 'required|array',
+            'ids.*'  => 'integer',
+            'tag_id' => 'nullable|integer|exists:tags,id',
+        ]);
+
         if ($data['action'] === 'delete') {
             Post::whereIn('id', $data['ids'])->delete();
+        } elseif ($data['action'] === 'tag') {
+            $request->validate(['tag_id' => 'required|integer|exists:tags,id']);
+            Post::whereIn('id', $data['ids'])->get()
+                ->each(fn ($post) => $post->tags()->syncWithoutDetaching([$data['tag_id']]));
         } else {
             Post::whereIn('id', $data['ids'])->update(['status' => $data['action']]);
         }
+
         return back()->with('success', 'Bulk action applied.');
     }
 
