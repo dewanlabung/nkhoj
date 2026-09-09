@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('comment_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->char('session_key', 64)->nullable();
-            $table->enum('emoji', ['👍', '❤️', '😂', '😮', '😢', '😡'])->default('👍');
+            $table->string('emoji', 10)->default('👍');
             $table->timestamp('created_at')->useCurrent();
             $table->unique(['comment_id', 'user_id']);
             $table->index(['comment_id', 'emoji']);
