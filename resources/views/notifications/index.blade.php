@@ -14,6 +14,7 @@
             <div class="text-2xl flex-shrink-0">
                 @if($n->type === 'comment') 💬
                 @elseif($n->type === 'follow') 👥
+                @elseif($n->type === 'new_post') 📰
                 @elseif($n->type === 'reaction') ❤️
                 @elseif($n->type === 'bookmark') 🔖
                 @else 🔔
@@ -33,6 +34,12 @@
                 <p class="text-sm text-gray-800 font-nepali">
                     <a href="/profile/{{ $n->data['username'] ?? '#' }}" class="text-brand-600 hover:underline">{{ $n->data['follower'] ?? 'कसैले' }}</a>
                     ले तपाईंलाई फलो गर्नुभयो।
+                </p>
+                @elseif($n->type === 'new_post')
+                <p class="text-sm text-gray-800 font-nepali">
+                    <a href="/profile/{{ $n->data['author_username'] ?? '#' }}" class="text-brand-600 hover:underline">{{ $n->data['author_name'] ?? 'कसैले' }}</a>
+                    ले नयाँ लेख प्रकाशन गर्नुभयो:
+                    <a href="/posts/{{ $n->data['post_slug'] ?? '#' }}" class="text-brand-600 hover:underline font-medium">{{ $n->data['post_title'] ?? '' }}</a>
                 </p>
                 @else
                 <p class="text-sm text-gray-800">{{ json_encode($n->data) }}</p>

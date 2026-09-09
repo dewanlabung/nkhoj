@@ -297,14 +297,52 @@
                     </div>
                 </div>
                 @auth
-                {{-- Notification --}}
-                <div class="relative" x-data="{ count: 0 }" x-init="fetch('/notifications/count').then(r=>r.json()).then(d=>count=d.count).catch(()=>{})">
-                    <a href="/notifications"
+                {{-- Notification bell with dropdown --}}
+                <div class="relative" x-data="{
+                    open: false,
+                    count: 0,
+                    items: [],
+                    loading: false,
+                    init() {
+                        fetch('/notifications/count').then(r=>r.json()).then(d=>{ this.count=d.count; }).catch(()=>{});
+                    },
+                    toggle() {
+                        this.open = !this.open;
+                        if (this.open && this.items.length === 0) this.load();
+                    },
+                    load() {
+                        this.loading = true;
+                        fetch('/notifications/recent').then(r=>r.json()).then(d=>{ this.items=d.items; this.count=0; this.loading=false; }).catch(()=>{ this.loading=false; });
+                    }
+                }" @click.outside="open = false">
+                    <button @click="toggle()"
                         class="w-9 h-9 flex items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors relative">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                         <span x-show="count > 0" x-text="count > 9 ? '9+' : count"
                             class="absolute -top-0.5 -right-0.5 bg-brand-500 text-white text-[9px] rounded-full min-w-[15px] h-3.5 flex items-center justify-center px-1 font-bold"></span>
-                    </a>
+                    </button>
+                    {{-- Dropdown panel --}}
+                    <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
+                         class="absolute right-0 top-11 w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
+                        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+                            <span class="text-sm font-bold text-gray-900 dark:text-white">Notifications</span>
+                            <a href="/notifications" class="text-xs text-brand-500 hover:underline font-medium">View all</a>
+                        </div>
+                        <div x-show="loading" class="py-8 text-center text-sm text-gray-400">Loading…</div>
+                        <div x-show="!loading && items.length === 0" class="py-8 text-center text-sm text-gray-400">No new notifications</div>
+                        <div x-show="!loading && items.length > 0" class="divide-y divide-gray-50 dark:divide-gray-700 max-h-72 overflow-y-auto">
+                            <template x-for="n in items" :key="n.id">
+                                <a :href="n.url" class="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" :class="!n.read ? 'bg-brand-50/40 dark:bg-brand-900/10' : ''">
+                                    <span class="text-lg flex-shrink-0" x-text="n.icon"></span>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs text-gray-700 dark:text-gray-200 leading-snug" x-text="n.text"></p>
+                                        <p class="text-[10px] text-gray-400 mt-0.5" x-text="n.ago"></p>
+                                    </div>
+                                    <span x-show="!n.read" class="w-2 h-2 bg-brand-500 rounded-full flex-shrink-0 mt-1"></span>
+                                </a>
+                            </template>
+                        </div>
+                    </div>
                 </div>
                 @endauth
                 {{-- Mobile-only: dark mode toggle (top bar hidden on mobile) --}}
