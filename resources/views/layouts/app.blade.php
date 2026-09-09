@@ -297,14 +297,52 @@
                     </div>
                 </div>
                 @auth
-                {{-- Notification --}}
-                <div class="relative" x-data="{ count: 0 }" x-init="fetch('/notifications/count').then(r=>r.json()).then(d=>count=d.count).catch(()=>{})">
-                    <a href="/notifications"
+                {{-- Notification bell with dropdown --}}
+                <div class="relative" x-data="{
+                    open: false,
+                    count: 0,
+                    items: [],
+                    loading: false,
+                    init() {
+                        fetch('/notifications/count').then(r=>r.json()).then(d=>{ this.count=d.count; }).catch(()=>{});
+                    },
+                    toggle() {
+                        this.open = !this.open;
+                        if (this.open && this.items.length === 0) this.load();
+                    },
+                    load() {
+                        this.loading = true;
+                        fetch('/notifications/recent').then(r=>r.json()).then(d=>{ this.items=d.items; this.count=0; this.loading=false; }).catch(()=>{ this.loading=false; });
+                    }
+                }" @click.outside="open = false">
+                    <button @click="toggle()"
                         class="w-9 h-9 flex items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors relative">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                         <span x-show="count > 0" x-text="count > 9 ? '9+' : count"
                             class="absolute -top-0.5 -right-0.5 bg-brand-500 text-white text-[9px] rounded-full min-w-[15px] h-3.5 flex items-center justify-center px-1 font-bold"></span>
-                    </a>
+                    </button>
+                    {{-- Dropdown panel --}}
+                    <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
+                         class="absolute right-0 top-11 w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
+                        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+                            <span class="text-sm font-bold text-gray-900 dark:text-white">Notifications</span>
+                            <a href="/notifications" class="text-xs text-brand-500 hover:underline font-medium">View all</a>
+                        </div>
+                        <div x-show="loading" class="py-8 text-center text-sm text-gray-400">Loading…</div>
+                        <div x-show="!loading && items.length === 0" class="py-8 text-center text-sm text-gray-400">No new notifications</div>
+                        <div x-show="!loading && items.length > 0" class="divide-y divide-gray-50 dark:divide-gray-700 max-h-72 overflow-y-auto">
+                            <template x-for="n in items" :key="n.id">
+                                <a :href="n.url" class="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" :class="!n.read ? 'bg-brand-50/40 dark:bg-brand-900/10' : ''">
+                                    <span class="text-lg flex-shrink-0" x-text="n.icon"></span>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs text-gray-700 dark:text-gray-200 leading-snug" x-text="n.text"></p>
+                                        <p class="text-[10px] text-gray-400 mt-0.5" x-text="n.ago"></p>
+                                    </div>
+                                    <span x-show="!n.read" class="w-2 h-2 bg-brand-500 rounded-full flex-shrink-0 mt-1"></span>
+                                </a>
+                            </template>
+                        </div>
+                    </div>
                 </div>
                 @endauth
                 {{-- Mobile-only: dark mode toggle (top bar hidden on mobile) --}}
@@ -432,15 +470,15 @@
 
         @php
         $_allFormats = [
-            ['article',          'Article',           'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',       'An article with images and embed videos',       '/dashboard/posts/create?format=article',          'bg-blue-500'],
-            ['sorted_list',      'Sorted List',       'M4 6h16M4 10h16M4 14h16M4 18h16',                                                                                             'A list based article',                          '/dashboard/posts/create?format=sorted_list',      'bg-orange-500'],
-            ['table_of_contents','Table of Contents', 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1','List of links based on headings',              '/dashboard/posts/create?format=table_of_contents','bg-teal-500'],
-            ['trivia_quiz',      'Trivia Quiz',       'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z','Quizzes with right and wrong answers',         '/dashboard/posts/create?format=trivia_quiz',      'bg-yellow-400'],
-            ['personality_quiz', 'Personality Quiz',  'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4','Quizzes with custom results',                  '/dashboard/posts/create?format=personality_quiz', 'bg-purple-500'],
-            ['poll',             'Poll',              'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z','Get user opinions about something',            '/dashboard/posts/create?format=poll',             'bg-indigo-500'],
-            ['recipe',           'Recipe',            'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z','A list of ingredients and directions',          '/dashboard/posts/create?format=recipe',           'bg-red-500'],
-            ['event',            'Event',             'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',                                     'Scheduled events with location and map',        '/dashboard/create-event',                         'bg-violet-500'],
-            ['question',         'Ask Question',      'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z','Post a Q&A question for community',            '/ask-question',                                   'bg-emerald-500'],
+            ['article',          'Article',           'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',       'An article with images and embed videos',       '/dashboard/posts/create?format=article',          'from-blue-400 to-blue-600',    true],
+            ['sorted_list',      'Sorted List',       'M4 6h16M4 10h16M4 14h16M4 18h16',                                                                                             'A list-based article',                          '/dashboard/posts/create?format=sorted_list',      'from-orange-400 to-orange-600', false],
+            ['table_of_contents','Table of Contents', 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1','List of links based on headings',              '/dashboard/posts/create?format=table_of_contents','from-teal-400 to-teal-600',    false],
+            ['trivia_quiz',      'Trivia Quiz',       'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z','Quizzes with right and wrong answers',         '/dashboard/posts/create?format=trivia_quiz',      'from-yellow-400 to-amber-500', false],
+            ['personality_quiz', 'Personality Quiz',  'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4','Quizzes with custom results',                  '/dashboard/posts/create?format=personality_quiz', 'from-purple-400 to-purple-600', false],
+            ['poll',             'Poll',              'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z','Get user opinions about something',            '/dashboard/posts/create?format=poll',             'from-indigo-400 to-indigo-600', false],
+            ['recipe',           'Recipe',            'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z','A list of ingredients and directions',          '/dashboard/posts/create?format=recipe',           'from-red-400 to-rose-600',     false],
+            ['event',            'Event',             'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',                                     'Scheduled events with location and map',        '/dashboard/create-event',                         'from-violet-400 to-violet-600', false],
+            ['question',         'Ask Question',      'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z','Post a Q&A question for community',            '/ask-question',                                   'from-emerald-400 to-emerald-600', false],
         ];
         try {
             $_sp = storage_path('app/site_settings.json');
@@ -454,19 +492,27 @@
             return !empty($_fe[$f[0]]);
         }));
         @endphp
-        <div class="p-6 grid grid-cols-3 gap-3">
-            @foreach($_filteredFormats as [$format, $label, $icon, $desc, $url, $color])
+        <div class="p-4 flex flex-col divide-y divide-gray-50 dark:divide-gray-800">
+            @foreach($_filteredFormats as [$format, $label, $icon, $desc, $url, $gradient, $popular])
             <a href="{{ $url }}" @click="formatModal = false"
-                class="flex flex-col items-center gap-3 p-4 border border-gray-100 dark:border-gray-700 rounded-2xl hover:border-gray-300 dark:hover:border-gray-500 hover:shadow-md transition-all cursor-pointer group bg-white dark:bg-gray-800">
-                <div class="w-14 h-14 rounded-2xl {{ $color }} shadow-md flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                    <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                class="flex items-center gap-4 px-3 py-3.5 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors cursor-pointer group">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br {{ $gradient }} shadow flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform duration-150">
+                    <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="{{ $icon }}"/>
                     </svg>
                 </div>
-                <div class="text-center">
-                    <p class="text-sm font-semibold text-gray-900 dark:text-white leading-tight">{{ $label }}</p>
-                    <p class="text-[11px] text-gray-400 mt-1 leading-tight">{{ $desc }}</p>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                        <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $label }}</p>
+                        @if($popular)
+                        <span class="text-[10px] font-bold px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-full leading-none">Popular</span>
+                        @endif
+                    </div>
+                    <p class="text-xs text-gray-400 mt-0.5 truncate">{{ $desc }}</p>
                 </div>
+                <svg class="w-4 h-4 text-gray-300 dark:text-gray-600 group-hover:text-gray-400 flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
             </a>
             @endforeach
         </div>

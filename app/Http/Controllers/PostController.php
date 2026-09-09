@@ -78,4 +78,11 @@ class PostController extends Controller
 
         return view('posts.show', compact('post', 'related', 'comments', 'reactionCounts', 'userReaction', 'isBookmarked', 'sidebarWidgets', 'widgetData'));
     }
+
+    public function share(string $slug)
+    {
+        $post = Post::published()->where('slug', $slug)->firstOrFail();
+        $post->increment('share_count');
+        return response()->json(['share_count' => $post->share_count]);
+    }
 }

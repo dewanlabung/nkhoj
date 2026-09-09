@@ -22,11 +22,13 @@ use App\Http\Controllers\SocialPageController;
 
 // Public routes
 Route::get('/', [HomeController::class, 'index']);
+Route::get('/leaderboard', [HomeController::class, 'leaderboard']);
 Route::get('/health', fn() => response()->json(['status' => 'ok', 'app' => 'nkhoj', 'time' => now()->toIso8601String()]));
 Route::get('/search', [SearchController::class, 'index']);
 Route::get('/category/{slug}', [CategoryController::class, 'show']);
 Route::get('/tag/{slug}', [TagController::class, 'show']);
 Route::get('/posts/{slug}', [PostController::class, 'show']);
+Route::post('/posts/{slug}/share', [PostController::class, 'share']);
 
 // SEO
 Route::get('/sitemap.xml', [SitemapController::class, 'index']);
@@ -82,6 +84,7 @@ Route::middleware('auth')->group(function () {
 // Notifications (auth only)
 Route::middleware('auth')->prefix('notifications')->group(function () {
     Route::get('/', [NotificationController::class, 'index']);
+    Route::get('/recent', [NotificationController::class, 'recent']);
     Route::post('/{id}/read', [NotificationController::class, 'markRead']);
     Route::get('/count', [NotificationController::class, 'unreadCount']);
 });
