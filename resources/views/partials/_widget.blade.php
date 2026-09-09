@@ -135,4 +135,90 @@
         {{ $settings['site_description'] ?? 'नेपालको अग्रणी बहु-ब्लग र समाचार प्लेटफर्म। हजारौं नेपाली पाठकसँग आफ्नो कथा साझा गर्नुहोस्।' }}
     </p>
 </div>
+
+@elseif($type === 'category_grid')
+@php
+$cfg = $widget->config ?? [];
+$showSearch = $cfg['show_search'] ?? true;
+$searchPlaceholder = $cfg['search_placeholder'] ?? 'Search topics…';
+$cats = $cfg['categories'] ?? [
+    ['slug' => 'science',    'label' => 'Science',     'icon' => '🔬', 'color' => 'bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40',    'text' => 'text-blue-700 dark:text-blue-300'],
+    ['slug' => 'it',         'label' => 'IT',           'icon' => '💻', 'color' => 'bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40', 'text' => 'text-purple-700 dark:text-purple-300'],
+    ['slug' => 'technology', 'label' => 'Technology',  'icon' => '⚙️', 'color' => 'bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700',       'text' => 'text-gray-700 dark:text-gray-300'],
+    ['slug' => 'health',     'label' => 'Health',       'icon' => '❤️', 'color' => 'bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40',          'text' => 'text-red-700 dark:text-red-300'],
+    ['slug' => 'finance',    'label' => 'Finance',      'icon' => '💰', 'color' => 'bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40',   'text' => 'text-green-700 dark:text-green-300'],
+    ['slug' => 'sports',     'label' => 'Sports',       'icon' => '⚽', 'color' => 'bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/40', 'text' => 'text-orange-700 dark:text-orange-300'],
+    ['slug' => 'politics',   'label' => 'Politics',     'icon' => '🏛️', 'color' => 'bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/40', 'text' => 'text-indigo-700 dark:text-indigo-300'],
+    ['slug' => 'education',  'label' => 'Education',    'icon' => '📚', 'color' => 'bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/40', 'text' => 'text-yellow-700 dark:text-yellow-300'],
+    ['slug' => 'travel',     'label' => 'Travel',       'icon' => '✈️', 'color' => 'bg-cyan-50 dark:bg-cyan-900/20 hover:bg-cyan-100 dark:hover:bg-cyan-900/40',      'text' => 'text-cyan-700 dark:text-cyan-300'],
+];
+@endphp
+<div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-4"
+     x-data="{ q: '' }">
+    <h3 class="font-bold text-gray-900 dark:text-white mb-3 text-sm flex items-center gap-1.5">
+        <span>🗂</span> {{ $title }}
+    </h3>
+    <div class="grid grid-cols-3 gap-2 mb-3">
+        @foreach($cats as $cat)
+        <a href="/category/{{ $cat['slug'] }}"
+           x-show="!q || '{{ strtolower($cat['label']) }}'.includes(q.toLowerCase())"
+           class="flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-colors cursor-pointer {{ $cat['color'] }}">
+            <span class="text-2xl leading-none">{{ $cat['icon'] }}</span>
+            <span class="text-[10px] font-semibold leading-tight text-center {{ $cat['text'] }}">{{ $cat['label'] }}</span>
+        </a>
+        @endforeach
+    </div>
+    @if($showSearch)
+    <div class="relative">
+        <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input x-model="q" type="text" placeholder="{{ $searchPlaceholder }}"
+            class="w-full pl-8 pr-3 py-2 text-xs bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all">
+    </div>
+    @endif
+</div>
+
+@elseif($type === 'social_proof')
+@php
+$cfg = $widget->config ?? [];
+$readerCount = $cfg['reader_count'] ?? '12,400';
+$readerLabel = $cfg['reader_label'] ?? 'monthly readers';
+$stats = $cfg['stats'] ?? [
+    ['platform' => 'Facebook',  'icon' => '📘', 'count' => '8.2K',  'label' => 'Followers', 'url' => '#', 'color' => 'bg-blue-600'],
+    ['platform' => 'YouTube',   'icon' => '▶️', 'count' => '3.1K',  'label' => 'Subscribers', 'url' => '#', 'color' => 'bg-red-600'],
+    ['platform' => 'Instagram', 'icon' => '📸', 'count' => '1.5K',  'label' => 'Followers', 'url' => '#', 'color' => 'bg-pink-600'],
+];
+@endphp
+<div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-4">
+    <h3 class="font-bold text-gray-900 dark:text-white mb-3 text-sm">🌐 {{ $title }}</h3>
+
+    {{-- Headline reader count --}}
+    <div class="flex items-center gap-3 bg-brand-50 dark:bg-brand-900/20 rounded-xl px-4 py-3 mb-3">
+        <div class="w-10 h-10 rounded-full bg-brand-500 flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+        </div>
+        <div>
+            <p class="text-lg font-black text-brand-600 dark:text-brand-400 leading-none">{{ $readerCount }}</p>
+            <p class="text-xs text-brand-500 dark:text-brand-400">{{ $readerLabel }}</p>
+        </div>
+    </div>
+
+    {{-- Social stat rows --}}
+    <div class="space-y-2">
+        @foreach($stats as $stat)
+        <a href="{{ $stat['url'] ?? '#' }}" target="_blank" rel="noopener"
+           class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <span class="w-8 h-8 {{ $stat['color'] }} rounded-lg flex items-center justify-center text-sm flex-shrink-0 text-white font-bold">{{ $stat['icon'] }}</span>
+            <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold text-gray-800 dark:text-gray-200">{{ $stat['platform'] }}</p>
+                <p class="text-xs text-gray-400">{{ $stat['label'] }}</p>
+            </div>
+            <span class="text-sm font-black text-gray-700 dark:text-gray-300">{{ $stat['count'] }}</span>
+        </a>
+        @endforeach
+    </div>
+</div>
 @endif

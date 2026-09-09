@@ -26,6 +26,8 @@ class Widget extends Model
             'follow_us'          => 'Follow Us',
             'newsletter'         => 'Newsletter Signup',
             'about_us'           => 'About Us',
+            'category_grid'      => 'Category Grid (Icon Tiles)',
+            'social_proof'       => 'Social Proof (Reader Stats)',
         ];
     }
 
