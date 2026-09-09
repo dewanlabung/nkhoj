@@ -10,6 +10,17 @@
 <script type="application/ld+json">
 {
     "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ url('/') }}"},
+        {"@type": "ListItem", "position": 2, "name": "{{ addslashes($post->category->name_en) }}", "item": "{{ url('/category/'.$post->category->slug) }}"},
+        {"@type": "ListItem", "position": 3, "name": "{{ addslashes($post->title) }}", "item": "{{ url('/posts/'.$post->slug) }}"}
+    ]
+}
+</script>
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
     "@type": "NewsArticle",
     "headline": "{{ addslashes($post->seo_title ?? $post->title) }}",
     "description": "{{ addslashes($post->seo_desc ?? $post->excerpt) }}",

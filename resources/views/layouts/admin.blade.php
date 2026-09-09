@@ -517,15 +517,15 @@
                 ['key'=>'question',           'label'=>'Ask Question',     'desc'=>'Post a Q&A question for community answers',       'icon'=>'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z','url'=>'/ask-question',                      'color'=>'amber'],
             ];
             $colorMap = [
-                'indigo'=>'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-500 border-indigo-100 dark:border-indigo-800/40 hover:border-indigo-300',
-                'blue'  =>'bg-blue-50 dark:bg-blue-900/20 text-blue-500 border-blue-100 dark:border-blue-800/40 hover:border-blue-300',
-                'cyan'  =>'bg-cyan-50 dark:bg-cyan-900/20 text-cyan-500 border-cyan-100 dark:border-cyan-800/40 hover:border-cyan-300',
-                'violet'=>'bg-violet-50 dark:bg-violet-900/20 text-violet-500 border-violet-100 dark:border-violet-800/40 hover:border-violet-300',
-                'pink'  =>'bg-pink-50 dark:bg-pink-900/20 text-pink-500 border-pink-100 dark:border-pink-800/40 hover:border-pink-300',
-                'green' =>'bg-green-50 dark:bg-green-900/20 text-green-500 border-green-100 dark:border-green-800/40 hover:border-green-300',
-                'orange'=>'bg-orange-50 dark:bg-orange-900/20 text-orange-500 border-orange-100 dark:border-orange-800/40 hover:border-orange-300',
-                'teal'  =>'bg-teal-50 dark:bg-teal-900/20 text-teal-500 border-teal-100 dark:border-teal-800/40 hover:border-teal-300',
-                'amber' =>'bg-amber-50 dark:bg-amber-900/20 text-amber-500 border-amber-100 dark:border-amber-800/40 hover:border-amber-300',
+                'indigo'=>'bg-blue-500',
+                'blue'  =>'bg-orange-500',
+                'cyan'  =>'bg-teal-500',
+                'violet'=>'bg-yellow-400',
+                'pink'  =>'bg-purple-500',
+                'green' =>'bg-indigo-500',
+                'orange'=>'bg-red-500',
+                'teal'  =>'bg-violet-500',
+                'amber' =>'bg-emerald-500',
             ];
             // Filter by content settings toggles
             try {
@@ -540,19 +540,19 @@
                 return !empty($_fe[$f['key']]);
             }));
             @endphp
-            <div class="grid grid-cols-3 gap-4">
+            <div class="grid grid-cols-3 gap-3">
                 @foreach($formats as $fmt)
                 @php $c = $colorMap[$fmt['color']]; @endphp
                 <a href="{{ $fmt['url'] }}"
-                    class="group flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-gray-100 dark:border-gray-700 hover:shadow-md transition-all text-center cursor-pointer"
+                    class="group flex flex-col items-center gap-3 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-500 hover:shadow-md transition-all text-center cursor-pointer bg-white dark:bg-gray-800"
                     onclick="document.getElementById('format-chooser').classList.add('hidden')"
                     title="{{ $fmt['desc'] }}">
-                    <div class="w-12 h-12 rounded-xl {{ $c }} flex items-center justify-center flex-shrink-0 transition-all">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="{{ $fmt['icon'] }}"/></svg>
+                    <div class="w-14 h-14 rounded-2xl {{ $c }} shadow-md flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                        <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="{{ $fmt['icon'] }}"/></svg>
                     </div>
                     <div>
                         <p class="text-xs font-semibold text-gray-800 dark:text-white leading-tight">{{ $fmt['label'] }}</p>
-                        <p class="text-[10px] text-gray-400 mt-0.5 leading-snug">{{ $fmt['desc'] }}</p>
+                        <p class="text-[10px] text-gray-400 mt-1 leading-snug">{{ $fmt['desc'] }}</p>
                     </div>
                 </a>
                 @endforeach
