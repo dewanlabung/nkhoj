@@ -59,7 +59,7 @@ class HomeController extends Controller
         if ($widgetTypes->contains('voting_poll')) {
             $widgetData['voting_poll'] = Poll::with('options')->latest()->first();
         }
-        if ($widgetTypes->contains('follow_us') || $widgetTypes->contains('about_us')) {
+        if ($widgetTypes->contains('follow_us') || $widgetTypes->contains('about_us') || $widgetTypes->contains('social_proof')) {
             $path = storage_path('app/site_settings.json');
             $widgetData['settings'] = File::exists($path)
                 ? (json_decode(File::get($path), true) ?? []) : [];
