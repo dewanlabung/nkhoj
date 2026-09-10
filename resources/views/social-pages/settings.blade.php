@@ -18,54 +18,75 @@
         <h1 class="font-bold text-gray-900 text-lg">Settings & privacy</h1>
     </div>
 
-    <form method="POST" action="/pages/{{ $page->slug }}/settings" enctype="multipart/form-data" class="max-w-xl mx-auto px-4 py-6 space-y-4">
+    <form method="POST" action="/pages/{{ $page->slug }}/settings" enctype="multipart/form-data" class="max-w-xl mx-auto px-4 py-6 space-y-1">
         @csrf @method('PUT')
 
         @if(session('success'))
-        <div class="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 text-sm">{{ session('success') }}</div>
+        <div class="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 text-sm mb-4">{{ session('success') }}</div>
         @endif
         @if($errors->any())
-        <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
+        <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm mb-4">
             <ul class="list-disc list-inside space-y-1">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
         </div>
         @endif
 
-        {{-- Cover photo --}}
-        <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-            <div class="px-4 py-3 border-b border-gray-100"><p class="font-bold text-gray-900">Cover photo</p></div>
-            <div class="p-4">
-                <div class="relative h-28 rounded-xl overflow-hidden bg-gray-200 mb-3">
-                    @if($page->cover_url)
-                        <img src="{{ $page->cover_url }}" class="w-full h-full object-cover" id="cover-preview">
-                    @else
-                        <img src="" class="w-full h-full object-cover hidden" id="cover-preview">
-                        <div class="w-full h-full flex items-center justify-center text-gray-400">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                        </div>
-                    @endif
-                </div>
-                <label class="cursor-pointer flex items-center gap-2 text-blue-600 text-sm font-semibold">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                    Upload cover photo
-                    <input type="file" name="cover" accept="image/*" class="hidden" onchange="previewImage(this, 'cover-preview')">
-                </label>
-            </div>
+        {{-- ══════════════════════════════════════════════════════════
+             GROUP 1: Page setup
+        ══════════════════════════════════════════════════════════ --}}
+        <div class="pt-2 pb-1 px-1">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Page setup</p>
         </div>
 
-        {{-- Page details --}}
+        {{-- Page name --}}
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-            <div class="px-4 py-3 border-b border-gray-100"><p class="font-bold text-gray-900">Page details</p></div>
-            <div class="p-4 space-y-4">
-                <div class="flex items-center gap-4">
-                    <div class="w-16 h-16 rounded-full overflow-hidden bg-gray-200">
-                        <img src="{{ $page->avatar }}" alt="" class="w-full h-full object-cover" id="avatar-preview">
+            <a href="#page-name-section" class="px-4 py-4 flex items-center justify-between hover:bg-gray-50 transition">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2"/></svg>
                     </div>
-                    <label class="cursor-pointer flex items-center gap-2 text-blue-600 text-sm font-semibold">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                        Change profile photo
-                        <input type="file" name="avatar" accept="image/*" class="hidden" onchange="previewImage(this, 'avatar-preview')">
-                    </label>
+                    <div>
+                        <p class="font-semibold text-gray-900 text-sm">Name</p>
+                        <p class="text-gray-400 text-xs">{{ $page->name }}</p>
+                    </div>
                 </div>
+            </a>
+        </div>
+
+        {{-- Identity details (expanded card) --}}
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden" id="page-name-section">
+            <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0M12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                <p class="font-bold text-gray-900">Page identity</p>
+            </div>
+            <div class="p-4 space-y-4">
+                {{-- Avatar + cover --}}
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <div class="w-16 h-16 rounded-full overflow-hidden bg-gray-200 ring-2 ring-gray-100">
+                            <img src="{{ $page->avatar }}" alt="" class="w-full h-full object-cover" id="avatar-preview">
+                        </div>
+                        <label class="absolute bottom-0 right-0 bg-gray-100 hover:bg-gray-200 rounded-full p-1 cursor-pointer shadow border border-white transition">
+                            <svg class="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <input type="file" name="avatar" accept="image/*" class="hidden" onchange="previewImage(this,'avatar-preview')">
+                        </label>
+                    </div>
+                    <div class="flex-1">
+                        <div class="relative h-20 rounded-xl overflow-hidden bg-gray-200 mb-2">
+                            @if($page->cover_url)
+                                <img src="{{ $page->cover_url }}" class="w-full h-full object-cover" id="cover-preview">
+                            @else
+                                <img src="" class="w-full h-full object-cover hidden" id="cover-preview">
+                                <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs">No cover</div>
+                            @endif
+                        </div>
+                        <label class="cursor-pointer flex items-center gap-1.5 text-blue-600 text-xs font-semibold">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                            Change cover photo
+                            <input type="file" name="cover" accept="image/*" class="hidden" onchange="previewImage(this,'cover-preview')">
+                        </label>
+                    </div>
+                </div>
+
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Page name</label>
                     <input type="text" name="name" value="{{ old('name', $page->name) }}" required maxlength="150"
@@ -88,7 +109,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Categories <span class="text-gray-400 font-normal text-xs">(up to 3)</span></label>
-                    <div class="flex flex-wrap gap-2" x-data="{ selected: {{ json_encode($pageCategories) }} }"
+                    <div class="flex flex-wrap gap-2"
                          @change="if(document.querySelectorAll('input[name=\'categories[]\']:checked').length > 3) $event.target.checked = false">
                         @foreach($categories as $cat)
                         <label class="cursor-pointer">
@@ -102,14 +123,22 @@
                         </label>
                         @endforeach
                     </div>
-                    <p class="text-xs text-gray-400 mt-1">Select up to 3 categories that describe your page.</p>
                 </div>
             </div>
         </div>
 
-        {{-- Contact info --}}
+        {{-- ══════════════════════════════════════════════════════════
+             GROUP 2: Contact & location
+        ══════════════════════════════════════════════════════════ --}}
+        <div class="pt-4 pb-1 px-1">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Contact & location</p>
+        </div>
+
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-            <div class="px-4 py-3 border-b border-gray-100"><p class="font-bold text-gray-900">Contact info</p></div>
+            <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                <p class="font-bold text-gray-900">Contact info</p>
+            </div>
             <div class="p-4 space-y-3">
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Website</label>
@@ -129,9 +158,11 @@
             </div>
         </div>
 
-        {{-- Location & Map --}}
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-            <div class="px-4 py-3 border-b border-gray-100"><p class="font-bold text-gray-900">Location & Map</p></div>
+            <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <p class="font-bold text-gray-900">Location & Map</p>
+            </div>
             <div class="p-4 space-y-3">
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Address / Location name</label>
@@ -143,9 +174,7 @@
                     <div class="flex gap-2">
                         <input type="text" id="geocode-input" placeholder="Type address and search..."
                                class="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
-                        <button type="button" onclick="geocodeAddress()" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition">
-                            Search
-                        </button>
+                        <button type="button" onclick="geocodeAddress()" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition">Search</button>
                     </div>
                     <p class="text-xs text-gray-400 mt-1">Or click the map to set a pin</p>
                 </div>
@@ -165,9 +194,11 @@
             </div>
         </div>
 
-        {{-- Business Hours --}}
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-            <div class="px-4 py-3 border-b border-gray-100"><p class="font-bold text-gray-900">Business Hours</p></div>
+            <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <p class="font-bold text-gray-900">Business Hours</p>
+            </div>
             <div class="p-4 space-y-3">
                 @php
                     $daysMap = ['mon'=>'Monday','tue'=>'Tuesday','wed'=>'Wednesday','thu'=>'Thursday','fri'=>'Friday','sat'=>'Saturday','sun'=>'Sunday'];
@@ -200,11 +231,48 @@
             </div>
         </div>
 
-        {{-- Action Button --}}
+        {{-- ══════════════════════════════════════════════════════════
+             GROUP 3: Audience & visibility
+        ══════════════════════════════════════════════════════════ --}}
+        <div class="pt-4 pb-1 px-1">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Audience & visibility</p>
+        </div>
+
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-            <div class="px-4 py-3 border-b border-gray-100">
-                <p class="font-bold text-gray-900">Action button</p>
-                <p class="text-xs text-gray-400 mt-0.5">A button shown on your page for visitors to take action (Book Now, Contact, etc.)</p>
+            <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                <p class="font-bold text-gray-900">Page and tagging</p>
+            </div>
+            <div class="p-4 space-y-4">
+                <label class="flex items-center justify-between gap-3 cursor-pointer">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-900">Allow tagging</p>
+                        <p class="text-xs text-gray-400">Let other users tag this page in their posts</p>
+                    </div>
+                    <div class="relative flex-shrink-0">
+                        <input type="checkbox" name="allow_tagging" value="1" class="sr-only peer"
+                            {{ $page->allow_tagging ? 'checked' : '' }}>
+                        <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 transition"></div>
+                        <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition peer-checked:translate-x-5"></div>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        {{-- ══════════════════════════════════════════════════════════
+             GROUP 4: Monetization & CTAs
+        ══════════════════════════════════════════════════════════ --}}
+        <div class="pt-4 pb-1 px-1">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Monetization & CTAs</p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                <div>
+                    <p class="font-bold text-gray-900">Action button</p>
+                    <p class="text-xs text-gray-400">Button shown on your page header (Book Now, Contact, etc.)</p>
+                </div>
             </div>
             <div class="p-4 space-y-3" x-data="{ type: '{{ $page->action_button_type }}' }">
                 <div>
@@ -238,11 +306,13 @@
             </div>
         </div>
 
-        {{-- Donation button --}}
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-            <div class="px-4 py-3 border-b border-gray-100">
-                <p class="font-bold text-gray-900">Donation button</p>
-                <p class="text-xs text-gray-400 mt-0.5">Add a fundraising or support link so followers can contribute.</p>
+            <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                <div>
+                    <p class="font-bold text-gray-900">Donation button</p>
+                    <p class="text-xs text-gray-400">Add a fundraising or support link for followers to contribute</p>
+                </div>
             </div>
             <div class="p-4 space-y-3">
                 <div>
@@ -260,59 +330,75 @@
             </div>
         </div>
 
-        {{-- Privacy & visibility --}}
-        <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-            <div class="px-4 py-3 border-b border-gray-100">
-                <p class="font-bold text-gray-900">Privacy & visibility</p>
-            </div>
-            <div class="p-4 space-y-4">
-                <label class="flex items-center justify-between gap-3 cursor-pointer">
-                    <div>
-                        <p class="text-sm font-semibold text-gray-900">Allow tagging</p>
-                        <p class="text-xs text-gray-400">Let other users tag this page in their posts</p>
-                    </div>
-                    <div class="relative">
-                        <input type="checkbox" name="allow_tagging" value="1" class="sr-only peer"
-                            {{ $page->allow_tagging ? 'checked' : '' }}>
-                        <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 transition"></div>
-                        <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition peer-checked:translate-x-5"></div>
-                    </div>
-                </label>
-            </div>
-        </div>
-
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition">
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition mt-4">
             Save changes
         </button>
     </form>
 
-    {{-- Archive page (separate from main form) --}}
-    <div class="max-w-xl mx-auto px-4 pb-8">
-        <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-red-100">
-            <div class="px-4 py-3 border-b border-gray-100">
-                <p class="font-bold text-gray-900">Archive page</p>
-                <p class="text-xs text-gray-400 mt-0.5">Temporarily hide this page from the public. You can restore it at any time.</p>
-            </div>
-            <div class="p-4">
+    {{-- ══════════════════════════════════════════════════════════
+         GROUP 5: Page status (separate from main form)
+    ══════════════════════════════════════════════════════════ --}}
+    <div class="max-w-xl mx-auto px-4 pb-2 pt-2">
+        <div class="pt-2 pb-1 px-1">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Page status</p>
+        </div>
+    </div>
+
+    <div class="max-w-xl mx-auto px-4 space-y-1 pb-10">
+
+        {{-- Archive page --}}
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-4 py-4 flex items-center gap-3">
+                <div class="w-9 h-9 bg-amber-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                </div>
+                <div class="flex-1">
+                    <p class="font-semibold text-gray-900 text-sm">Archive page</p>
+                    <p class="text-xs text-gray-400">Temporarily hide from public. Restore anytime.</p>
+                </div>
                 @if($page->is_archived ?? false)
-                <p class="text-sm text-amber-700 font-medium mb-3">This page is currently archived and not visible to the public.</p>
-                <form method="POST" action="/pages/{{ $page->slug }}/unarchive">
-                    @csrf
-                    <button type="submit" class="px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-xl transition">
-                        Restore page
-                    </button>
-                </form>
+                    <form method="POST" action="/pages/{{ $page->slug }}/unarchive">
+                        @csrf
+                        <button type="submit" class="text-sm font-semibold text-green-600 hover:underline">Restore</button>
+                    </form>
                 @else
-                <p class="text-sm text-gray-600 mb-3">Your page will be hidden from search and discovery while archived.</p>
-                <form method="POST" action="/pages/{{ $page->slug }}/archive" onsubmit="return confirm('Archive this page? It will be hidden from the public until you restore it.')">
-                    @csrf
-                    <button type="submit" class="px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-semibold rounded-xl transition border border-red-200">
-                        Archive page
-                    </button>
-                </form>
+                    <form method="POST" action="/pages/{{ $page->slug }}/archive" onsubmit="return confirm('Archive this page?')">
+                        @csrf
+                        <button type="submit" class="text-sm font-semibold text-amber-600 hover:underline">Archive</button>
+                    </form>
                 @endif
             </div>
+            @if($page->is_archived ?? false)
+            <div class="px-4 pb-3">
+                <p class="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2 font-medium">This page is archived and not visible to the public.</p>
+            </div>
+            @endif
         </div>
+
+        {{-- Page management history link --}}
+        <a href="/pages/{{ $page->slug }}/activity-log" class="bg-white rounded-2xl shadow-sm overflow-hidden flex items-center gap-3 px-4 py-4 hover:bg-gray-50 transition">
+            <div class="w-9 h-9 bg-indigo-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            </div>
+            <div class="flex-1">
+                <p class="font-semibold text-gray-900 text-sm">Page management history</p>
+                <p class="text-xs text-gray-400">History of actions taken by people who manage this page</p>
+            </div>
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </a>
+
+        {{-- Blocked users link --}}
+        <a href="/pages/{{ $page->slug }}/blocked-users" class="bg-white rounded-2xl shadow-sm overflow-hidden flex items-center gap-3 px-4 py-4 hover:bg-gray-50 transition">
+            <div class="w-9 h-9 bg-red-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+            </div>
+            <div class="flex-1">
+                <p class="font-semibold text-gray-900 text-sm">Blocking</p>
+                <p class="text-xs text-gray-400">Manage who is blocked from this page</p>
+            </div>
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </a>
+
     </div>
 </div>
 
