@@ -833,6 +833,8 @@ class SocialPageController extends Controller
             'action_button_type'  => 'nullable|string|max:30',
             'action_button_text'  => 'nullable|string|max:60',
             'action_button_url'   => 'nullable|url|max:300',
+            'donation_url'        => 'nullable|url|max:300',
+            'donation_label'      => 'nullable|string|max:60',
             'allow_tagging'       => 'nullable|boolean',
             'username'            => ['nullable','string','max:60','regex:/^[a-z0-9._-]+$/i',
                                       Rule::unique('social_pages','username')->ignore($page->id)],
@@ -878,6 +880,8 @@ class SocialPageController extends Controller
             'action_button_type'  => $data['action_button_type'] ?? null,
             'action_button_text'  => $data['action_button_text'] ?? null,
             'action_button_url'   => $data['action_button_url'] ?? null,
+            'donation_url'        => $data['donation_url'] ?? null,
+            'donation_label'      => $data['donation_label'] ?? null,
             'allow_tagging'       => $request->boolean('allow_tagging', true),
             'username'            => $data['username'] ? strtolower(trim($data['username'])) : $page->username,
         ]);

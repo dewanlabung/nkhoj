@@ -26,6 +26,21 @@
         </form>
     </div>
 
+    @if(!$query && $trending->isNotEmpty())
+    {{-- Trending searches (shown when search box is empty) --}}
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-5">
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">🔥 ट्रेन्डिङ खोजहरू</p>
+        <div class="flex flex-wrap gap-2">
+            @foreach($trending as $trend)
+            <a href="/search?q={{ urlencode($trend) }}"
+               class="px-3 py-1.5 bg-gray-50 hover:bg-brand-50 hover:text-brand-700 border border-gray-200 hover:border-brand-300 rounded-full text-sm text-gray-700 font-semibold transition">
+                🔍 {{ $trend }}
+            </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     @if($query)
 
     {{-- Type filter tabs --}}

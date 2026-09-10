@@ -20,6 +20,7 @@ class Post extends Model
         'event_schedule', 'event_highlights', 'event_speakers',
         'event_registration_type', 'event_faq',
         'optional_url', 'sources', 'article_faq',
+        'is_sensitive', 'is_promoted', 'promoted_until', 'repost_of_id',
     ];
 
     protected function casts(): array
@@ -38,7 +39,15 @@ class Post extends Model
             'event_faq'        => 'array',
             'sources'          => 'array',
             'article_faq'      => 'array',
+            'is_sensitive'     => 'boolean',
+            'is_promoted'      => 'boolean',
+            'promoted_until'   => 'datetime',
         ];
+    }
+
+    public function repost(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Post::class, 'repost_of_id');
     }
 
     public function author()

@@ -174,6 +174,13 @@
                     {{ $page->action_button_text ?: $page->action_button_type }}
                 </a>
                 @endif
+                {{-- Donation button --}}
+                @if($page->donation_url)
+                <a href="{{ $page->donation_url }}" target="_blank" rel="noopener"
+                    class="flex-shrink-0 flex items-center justify-center gap-1.5 bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 px-3 rounded-xl transition text-sm whitespace-nowrap">
+                    ❤️ {{ $page->donation_label ?: 'Donate' }}
+                </a>
+                @endif
                 {{-- "..." three-dot menu --}}
                 <div class="relative" x-data="{ open: false }" @click.outside="open = false">
                     <button @click="open = !open"
