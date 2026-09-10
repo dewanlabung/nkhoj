@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\Post;
 use App\Models\Question;
+use App\Models\Recipe;
 use App\Models\SearchLog;
 use App\Models\SocialPage;
 use App\Models\User;
@@ -26,6 +27,7 @@ class SearchController extends Controller
             'events'   => 0,
             'users'    => 0,
             'questions'=> 0,
+            'recipes'  => 0,
         ];
 
         $trending = DB::table('search_logs')
@@ -45,10 +47,11 @@ class SearchController extends Controller
                     ->orWhere('body', 'like', $like))
                 ->count();
 
+            // social_pages.categories is a JSON array; search name, page_type, bio instead
             $counts['pages'] = SocialPage::where('status', 'active')
                 ->where(fn($q) => $q->where('name', 'like', $like)
-                    ->orWhere('category', 'like', $like)
-                    ->orWhere('description', 'like', $like))
+                    ->orWhere('page_type', 'like', $like)
+                    ->orWhere('bio', 'like', $like))
                 ->count();
 
             $counts['events'] = Event::where('is_published', true)
@@ -67,9 +70,15 @@ class SearchController extends Controller
                 ->orWhere('content', 'like', $like))
                 ->count();
 
+            $counts['recipes'] = Recipe::where('is_published', true)
+                ->where(fn($q) => $q->where('title', 'like', $like)
+                    ->orWhere('description', 'like', $like)
+                    ->orWhere('cuisine_type', 'like', $like)
+                    ->orWhere('meal_type', 'like', $like))
+                ->count();
+
             $counts['all'] = array_sum(array_values($counts));
 
-            // Log the search query
             DB::table('search_logs')->insert([
                 'user_id'       => auth()->id(),
                 'query'         => $query,
@@ -84,14 +93,16 @@ class SearchController extends Controller
                     ->where(fn($q) => $q->where('title', 'like', $like)
                         ->orWhere('excerpt', 'like', $like)
                         ->orWhere('body', 'like', $like))
+                    ->orderByRaw("CASE WHEN title LIKE ? THEN 0 ELSE 1 END", [$like])
                     ->orderByDesc('published_at')
                     ->paginate(12)
                     ->withQueryString(),
 
                 'pages' => SocialPage::where('status', 'active')
                     ->where(fn($q) => $q->where('name', 'like', $like)
-                        ->orWhere('category', 'like', $like)
-                        ->orWhere('description', 'like', $like))
+                        ->orWhere('page_type', 'like', $like)
+                        ->orWhere('bio', 'like', $like))
+                    ->orderByRaw("CASE WHEN name LIKE ? THEN 0 ELSE 1 END", [$like])
                     ->orderByDesc('followers_count')
                     ->paginate(12)
                     ->withQueryString(),
@@ -101,6 +112,7 @@ class SearchController extends Controller
                         ->orWhere('description', 'like', $like)
                         ->orWhere('venue', 'like', $like)
                         ->orWhere('organizer', 'like', $like))
+                    ->orderByRaw("CASE WHEN title LIKE ? THEN 0 ELSE 1 END", [$like])
                     ->orderBy('starts_at')
                     ->paginate(12)
                     ->withQueryString(),
@@ -108,6 +120,7 @@ class SearchController extends Controller
                 'users' => User::where(fn($q) => $q->where('name', 'like', $like)
                     ->orWhere('username', 'like', $like)
                     ->orWhere('bio', 'like', $like))
+                    ->orderByRaw("CASE WHEN name LIKE ? OR username LIKE ? THEN 0 ELSE 1 END", [$like, $like])
                     ->latest()
                     ->paginate(12)
                     ->withQueryString(),
@@ -115,6 +128,18 @@ class SearchController extends Controller
                 'questions' => Question::with(['user', 'category'])
                     ->where(fn($q) => $q->where('title', 'like', $like)
                         ->orWhere('content', 'like', $like))
+                    ->orderByRaw("CASE WHEN title LIKE ? THEN 0 ELSE 1 END", [$like])
+                    ->latest()
+                    ->paginate(12)
+                    ->withQueryString(),
+
+                'recipes' => Recipe::with('author')
+                    ->where('is_published', true)
+                    ->where(fn($q) => $q->where('title', 'like', $like)
+                        ->orWhere('description', 'like', $like)
+                        ->orWhere('cuisine_type', 'like', $like)
+                        ->orWhere('meal_type', 'like', $like))
+                    ->orderByRaw("CASE WHEN title LIKE ? THEN 0 ELSE 1 END", [$like])
                     ->latest()
                     ->paginate(12)
                     ->withQueryString(),
@@ -133,14 +158,16 @@ class SearchController extends Controller
                 ->published()
                 ->where(fn($q) => $q->where('title', 'like', $like)
                     ->orWhere('excerpt', 'like', $like))
+                ->orderByRaw("CASE WHEN title LIKE ? THEN 0 ELSE 1 END", [$like])
                 ->orderByDesc('published_at')
                 ->limit(4)
                 ->get(),
 
             'pages' => SocialPage::where('status', 'active')
                 ->where(fn($q) => $q->where('name', 'like', $like)
-                    ->orWhere('category', 'like', $like)
-                    ->orWhere('description', 'like', $like))
+                    ->orWhere('page_type', 'like', $like)
+                    ->orWhere('bio', 'like', $like))
+                ->orderByRaw("CASE WHEN name LIKE ? THEN 0 ELSE 1 END", [$like])
                 ->orderByDesc('followers_count')
                 ->limit(4)
                 ->get(),
@@ -149,19 +176,31 @@ class SearchController extends Controller
                 ->where(fn($q) => $q->where('title', 'like', $like)
                     ->orWhere('description', 'like', $like)
                     ->orWhere('venue', 'like', $like))
+                ->orderByRaw("CASE WHEN title LIKE ? THEN 0 ELSE 1 END", [$like])
                 ->orderBy('starts_at')
                 ->limit(4)
                 ->get(),
 
             'users' => User::where(fn($q) => $q->where('name', 'like', $like)
                 ->orWhere('username', 'like', $like))
+                ->orderByRaw("CASE WHEN name LIKE ? THEN 0 ELSE 1 END", [$like])
                 ->limit(4)
                 ->get(),
 
             'questions' => Question::with('user')
                 ->where(fn($q) => $q->where('title', 'like', $like)
                     ->orWhere('content', 'like', $like))
+                ->orderByRaw("CASE WHEN title LIKE ? THEN 0 ELSE 1 END", [$like])
                 ->latest()
+                ->limit(4)
+                ->get(),
+
+            'recipes' => Recipe::with('author')
+                ->where('is_published', true)
+                ->where(fn($q) => $q->where('title', 'like', $like)
+                    ->orWhere('description', 'like', $like)
+                    ->orWhere('cuisine_type', 'like', $like))
+                ->orderByRaw("CASE WHEN title LIKE ? THEN 0 ELSE 1 END", [$like])
                 ->limit(4)
                 ->get(),
         ];
