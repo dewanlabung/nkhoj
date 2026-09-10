@@ -542,6 +542,30 @@
         </div>
         @endif
 
+        {{-- Tag-based recommendations --}}
+        @if(isset($tagRecommended) && $tagRecommended->count())
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+            <h3 class="font-bold text-gray-900 mb-4 text-sm">तपाईंलाई मन पर्न सक्छ</h3>
+            <div class="space-y-3">
+                @foreach($tagRecommended as $rec)
+                <a href="/posts/{{ $rec->slug }}" class="flex gap-3 group">
+                    @if($rec->thumbnail_url)
+                    <img src="{{ $rec->thumbnail_url }}" loading="lazy" alt="" class="w-14 h-10 object-cover rounded-lg flex-shrink-0">
+                    @else
+                    <div class="w-14 h-10 rounded-lg bg-indigo-50 flex-shrink-0 flex items-center justify-center text-indigo-400 font-bold text-xs">
+                        {{ strtoupper(substr($rec->title, 0, 1)) }}
+                    </div>
+                    @endif
+                    <div>
+                        <p class="text-sm font-medium text-gray-800 group-hover:text-brand-600 line-clamp-2 transition-colors font-nepali leading-snug">{{ $rec->title }}</p>
+                        <p class="text-xs text-gray-400 mt-0.5">{{ $rec->category?->name_ne ?? $rec->category?->name_en }}</p>
+                    </div>
+                </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
         {{-- Tags --}}
         @if($post->tags->count())
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">

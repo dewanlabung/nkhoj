@@ -2,6 +2,16 @@
 @section('title', $recipe->title . ' – Nkhoj Recipes')
 
 @push('head')
+<meta property="og:title" content="{{ $recipe->title }}">
+<meta property="og:type" content="article">
+<meta property="og:url" content="{{ url('/recipes/' . ($recipe->slug ?? $recipe->uuid)) }}">
+@if($recipe->thumbnail_url)<meta property="og:image" content="{{ $recipe->thumbnail_url }}">@endif
+@if($recipe->description)<meta property="og:description" content="{{ Str::limit(strip_tags($recipe->description), 160) }}">@endif
+<meta property="og:site_name" content="Nkhoj">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ $recipe->title }}">
+@if($recipe->description)<meta name="twitter:description" content="{{ Str::limit(strip_tags($recipe->description), 160) }}">@endif
+@if($recipe->thumbnail_url)<meta name="twitter:image" content="{{ $recipe->thumbnail_url }}">@endif
 <script type="application/ld+json">
 {
     "@context": "https://schema.org",
@@ -85,6 +95,69 @@
                     @endauth
                 </div>
             </div>
+
+            {{-- Star Rating --}}
+            @auth
+            <div x-data="{
+                hover: 0,
+                selected: {{ optional(auth()->user()->recipeRatings()->where('recipe_id', $recipe->id)->first())->rating ?? 0 }},
+                avg: {{ $recipe->rating_avg }},
+                count: {{ $recipe->ratings_count }},
+                review: '',
+                submitting: false,
+                submitted: false,
+                async submit() {
+                    if (!this.selected) return;
+                    this.submitting = true;
+                    const res = await fetch('/recipe/{{ $recipe->id }}/rate', {
+                        method: 'POST',
+                        headers: {'Content-Type':'application/json','X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content},
+                        body: JSON.stringify({rating: this.selected, review: this.review})
+                    });
+                    const data = await res.json();
+                    this.avg = data.rating_avg;
+                    this.count = data.ratings_count;
+                    this.submitting = false;
+                    this.submitted = true;
+                }
+            }" class="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-4 mb-6">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-bold text-sm text-gray-800 dark:text-white">यो रेसिपी कस्तो लाग्यो?</h3>
+                    <div class="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
+                        <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <span x-text="avg > 0 ? avg + ' (' + count + ')' : 'अझै रेटिङ छैन'"></span>
+                    </div>
+                </div>
+                <div class="flex gap-1 mb-3">
+                    @for($i = 1; $i <= 5; $i++)
+                    <button @mouseenter="hover = {{ $i }}" @mouseleave="hover = 0" @click="selected = {{ $i }}"
+                        class="text-2xl transition-transform hover:scale-110 focus:outline-none"
+                        :class="(hover || selected) >= {{ $i }} ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'">★</button>
+                    @endfor
+                </div>
+                <template x-if="selected > 0 && !submitted">
+                    <div>
+                        <textarea x-model="review" rows="2" placeholder="समीक्षा लेख्नुहोस् (ऐच्छिक)…"
+                            class="w-full text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-white px-3 py-2 mb-2 focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none"></textarea>
+                        <button @click="submit()" :disabled="submitting"
+                            class="px-4 py-1.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition-colors">
+                            <span x-show="!submitting">Submit</span>
+                            <span x-show="submitting">Saving…</span>
+                        </button>
+                    </div>
+                </template>
+                <template x-if="submitted">
+                    <p class="text-sm text-green-600 dark:text-green-400 font-medium">✓ रेटिङ सेभ भयो!</p>
+                </template>
+            </div>
+            @else
+            @if($recipe->ratings_count > 0)
+            <div class="flex items-center gap-2 mb-4 text-sm text-gray-600 dark:text-gray-400">
+                <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                {{ $recipe->rating_avg }} ({{ $recipe->ratings_count }} ratings)
+            </div>
+            @endif
+            @endauth
 
             @if($recipe->description)
             <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed mb-6">{{ $recipe->description }}</p>

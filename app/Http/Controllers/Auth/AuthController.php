@@ -26,7 +26,14 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-            try { LoginHistory::record(Auth::id(), 'email'); } catch (\Throwable) {}
+            $user = Auth::user();
+            if ($user->two_factor_enabled) {
+                // Store user ID for 2FA challenge and log out temporarily
+                session(['2fa_user_id' => $user->id, '2fa_remember' => $request->boolean('remember')]);
+                Auth::logout();
+                return redirect('/two-factor-challenge');
+            }
+            try { LoginHistory::record($user->id, 'email'); } catch (\Throwable) {}
             return redirect()->intended('/dashboard');
         }
 

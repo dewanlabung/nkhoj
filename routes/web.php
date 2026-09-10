@@ -94,13 +94,21 @@ Route::middleware('auth')->prefix('notifications')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/account/settings', fn() => redirect('/account/personal-info'));
     Route::get('/account/password', fn() => redirect('/account/security'));
+    Route::get('/two-factor/setup',    [\App\Http\Controllers\TwoFactorController::class, 'setup']);
+    Route::post('/two-factor/confirm', [\App\Http\Controllers\TwoFactorController::class, 'confirm']);
+    Route::post('/two-factor/disable', [\App\Http\Controllers\TwoFactorController::class, 'disable']);
 });
+
+// 2FA challenge (guest only — user is temporarily logged out)
+Route::get('/two-factor-challenge',  [\App\Http\Controllers\TwoFactorController::class, 'challenge'])->middleware('guest');
+Route::post('/two-factor-challenge', [\App\Http\Controllers\TwoFactorController::class, 'verify'])->middleware('guest');
 
 // Admin panel
 Route::middleware('auth')->prefix('admin')->group(function () {
     // Dashboard
     Route::get('/', [AdminController::class, 'index']);
     Route::get('/analytics', [AdminController::class, 'analytics']);
+    Route::get('/search-analytics', [AdminController::class, 'searchAnalytics']);
 
     // Users
     Route::get('/users',                          [AdminController::class, 'users']);
@@ -522,6 +530,7 @@ Route::get('/recipe/create',             [\App\Http\Controllers\RecipeController
 Route::post('/recipe',                   [\App\Http\Controllers\RecipeController::class, 'store'])->middleware('auth');
 Route::get('/recipe/{slug}',             [\App\Http\Controllers\RecipeController::class, 'show']);
 Route::post('/recipe/{recipe}/like',     [\App\Http\Controllers\RecipeController::class, 'like'])->middleware('auth');
+Route::post('/recipe/{recipe}/rate',     [\App\Http\Controllers\RecipeController::class, 'rate'])->middleware('throttle:5,1')->middleware('auth');
 
 // Events community
 Route::get('/events',                    [\App\Http\Controllers\EventController::class, 'index']);

@@ -33,6 +33,11 @@ class Recipe extends Model
         return $this->hasMany(RecipeLike::class);
     }
 
+    public function ratings()
+    {
+        return $this->hasMany(RecipeRating::class);
+    }
+
     public function getTotalTimeAttribute(): int
     {
         return ($this->prep_time ?? 0) + ($this->cook_time ?? 0);

@@ -23,6 +23,8 @@ use App\Models\User;
 use App\Models\AiPostTopic;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
@@ -83,6 +85,40 @@ class AdminController extends Controller
     }
 
     // ── Analytics ─────────────────────────────────────────────
+    public function searchAnalytics()
+    {
+        $this->requireAdmin();
+
+        $topQueries = DB::table('search_logs')
+            ->select('query', DB::raw('COUNT(*) as total'), DB::raw('AVG(results_count) as avg_results'))
+            ->where('created_at', '>=', now()->subDays(30))
+            ->groupBy('query')
+            ->orderByDesc('total')
+            ->limit(20)
+            ->get();
+
+        $zeroResults = DB::table('search_logs')
+            ->select('query', DB::raw('COUNT(*) as total'))
+            ->where('results_count', 0)
+            ->where('created_at', '>=', now()->subDays(30))
+            ->groupBy('query')
+            ->orderByDesc('total')
+            ->limit(20)
+            ->get();
+
+        $dailyVolume = DB::table('search_logs')
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as total'))
+            ->where('created_at', '>=', now()->subDays(14))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        $totalSearches = DB::table('search_logs')->where('created_at', '>=', now()->subDays(30))->count();
+        $uniqueSearchers = DB::table('search_logs')->where('created_at', '>=', now()->subDays(30))->distinct('user_id')->count('user_id');
+
+        return view('admin.search-analytics', compact('topQueries', 'zeroResults', 'dailyVolume', 'totalSearches', 'uniqueSearchers'));
+    }
+
     public function analytics()
     {
         $this->requireAdmin();
@@ -316,6 +352,7 @@ class AdminController extends Controller
         $data = $request->validate(['name_en' => 'required|string|max:100', 'name_ne' => 'nullable|string|max:100', 'slug' => 'nullable|string|max:100', 'sort_order' => 'nullable|integer']);
         $data['slug'] = $data['slug'] ?: Str::slug($data['name_en']);
         Category::create($data);
+        Cache::forget('home_categories');
         return back()->with('success', 'Category added.');
     }
 
@@ -330,6 +367,7 @@ class AdminController extends Controller
             'is_exclusive' => 'nullable|boolean',
             'color'        => 'nullable|string|max:20',
         ]));
+        Cache::forget('home_categories');
         return back()->with('success', 'Category updated.');
     }
 
@@ -347,6 +385,7 @@ class AdminController extends Controller
     {
         $this->requireAdmin();
         Category::findOrFail($id)->delete();
+        Cache::forget('home_categories');
         return back()->with('success', 'Category deleted.');
     }
 
@@ -380,6 +419,7 @@ class AdminController extends Controller
             'status'       => $data['status'],
             'published_at' => ($data['status'] === 'published' && !$post->published_at) ? now() : $post->published_at,
         ]);
+        $this->flushPostCaches();
         return back()->with('success', 'Status updated.');
     }
 
@@ -387,6 +427,7 @@ class AdminController extends Controller
     {
         $this->requireAdmin();
         Post::findOrFail($id)->delete();
+        $this->flushPostCaches();
         return back()->with('success', 'Post deleted.');
     }
 
@@ -926,6 +967,7 @@ class AdminController extends Controller
             'display_order'   => 'nullable|integer|min:0|max:999',
         ]);
         Widget::create($data + ['is_active' => true, 'display_order' => $data['display_order'] ?? 0]);
+        $this->flushWidgetCaches();
         return back()->with('success', 'Widget created.');
     }
 
@@ -949,6 +991,7 @@ class AdminController extends Controller
             'display_order'   => 'nullable|integer|min:0|max:999',
         ]);
         Widget::findOrFail($id)->update($data + ['is_active' => $request->boolean('is_active'), 'display_order' => $data['display_order'] ?? 0]);
+        $this->flushWidgetCaches();
         return redirect('/admin/widgets')->with('success', 'Widget updated.');
     }
 
@@ -956,7 +999,23 @@ class AdminController extends Controller
     {
         $this->requireAdmin();
         Widget::findOrFail($id)->delete();
+        $this->flushWidgetCaches();
         return back()->with('success', 'Widget deleted.');
+    }
+
+    private function flushPostCaches(): void
+    {
+        foreach (['home_hero_strip', 'home_editors_pick', 'home_trending', 'widget_popular_posts', 'widget_recommended_posts', 'widget_trending_now', 'widget_comment_highlights'] as $key) {
+            Cache::forget($key);
+        }
+    }
+
+    private function flushWidgetCaches(): void
+    {
+        foreach (['widgets_sidebar', 'widgets_home_top', 'widgets_home_bottom'] as $key) {
+            Cache::forget($key);
+        }
+        $this->flushPostCaches();
     }
 
     // ── SEO ───────────────────────────────────────────────────

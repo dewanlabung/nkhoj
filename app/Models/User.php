@@ -36,9 +36,12 @@ class User extends Authenticatable
         'reward_system',
         'profile_view_count',
         'extra_permissions',
+        'two_factor_secret',
+        'two_factor_enabled',
+        'two_factor_confirmed_at',
     ];
 
-    protected $hidden = ['password', 'remember_token'];
+    protected $hidden = ['password', 'remember_token', 'two_factor_secret'];
 
     protected function casts(): array
     {
@@ -51,7 +54,9 @@ class User extends Authenticatable
             'social_links'       => 'array',
             'extra_permissions'  => 'array',
             'password'           => 'hashed',
-            'balance'            => 'decimal:2',
+            'balance'                  => 'decimal:2',
+            'two_factor_enabled'       => 'boolean',
+            'two_factor_confirmed_at'  => 'datetime',
         ];
     }
 
@@ -165,6 +170,11 @@ class User extends Authenticatable
     public function answers()
     {
         return $this->hasMany(\App\Models\Answer::class);
+    }
+
+    public function recipeRatings()
+    {
+        return $this->hasMany(\App\Models\RecipeRating::class);
     }
 
     public function loginHistories()

@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Notification;
+use App\Jobs\CreateNotification;
+use App\Mail\NewFollowerMail;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class ProfileController extends Controller
 {
@@ -65,11 +67,13 @@ class ProfileController extends Controller
         } else {
             auth()->user()->following()->attach($userId);
             $action = 'followed';
-            Notification::create([
-                'user_id' => $userId,
-                'type'    => 'follow',
-                'data'    => ['follower' => auth()->user()->name, 'username' => auth()->user()->username],
+            CreateNotification::dispatch($userId, 'follow', [
+                'follower' => auth()->user()->name,
+                'username' => auth()->user()->username,
             ]);
+            if ($target->email) {
+                Mail::to($target->email)->queue(new NewFollowerMail($target, auth()->user()));
+            }
         }
 
         return response()->json(['action' => $action, 'count' => $target->followers()->count()]);
