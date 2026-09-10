@@ -170,19 +170,43 @@
         @endif
         @endauth
 
+        {{-- Announcement banner --}}
+        @if($page->announcement)
+        <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4 flex items-start gap-3">
+            <svg class="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 3a1 1 0 00-1.447-.894L8.763 6H5a3 3 0 000 6h.28l1.771 5.316A1 1 0 008 18h1a1 1 0 001-1v-4.382l6.553 3.276A1 1 0 0018 15V3z" clip-rule="evenodd"/></svg>
+            <p class="text-sm text-amber-800">{{ $page->announcement }}</p>
+        </div>
+        @endif
+
+        {{-- Highlights --}}
+        @if($page->highlights && count($page->highlights))
+        <div class="flex gap-2 overflow-x-auto pb-1 mb-4 -mx-1 px-1">
+            @foreach($page->highlights as $hl)
+            <a href="{{ $hl['url'] ?? '#' }}" target="_blank"
+               class="flex-shrink-0 flex flex-col items-center gap-1 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-2.5 text-center hover:bg-gray-100 transition min-w-[80px]">
+                <span class="text-xl">{{ $hl['icon'] ?? '🔗' }}</span>
+                <span class="text-xs font-semibold text-gray-700 truncate max-w-[80px]">{{ $hl['title'] ?? '' }}</span>
+            </a>
+            @endforeach
+        </div>
+        @endif
+
         @if($page->bio)
             <p class="text-gray-700 text-sm mb-4">{{ $page->bio }}</p>
         @endif
 
         {{-- Tabs --}}
         <div class="border-b border-gray-200 flex gap-1 mb-6 overflow-x-auto">
-            @foreach(['posts' => 'Posts', 'events' => 'Events', 'reviews' => 'Reviews', 'about' => 'About', 'followers' => 'Followers'] as $tab => $label)
+            @foreach(['posts'=>'Posts','photos'=>'Photos','qna'=>'Q&A','products'=>'Shop','events'=>'Events','reviews'=>'Reviews','about'=>'About'] as $tab => $label)
                 <button @click="activeTab = '{{ $tab }}'"
                     class="pb-3 px-3 text-sm font-semibold whitespace-nowrap transition"
                     :class="activeTab === '{{ $tab }}' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'">
                     {{ $label }}
                     @if($tab === 'reviews' && $page->reviews_count > 0)
                         <span class="ml-1 text-xs bg-gray-100 px-1.5 py-0.5 rounded-full">{{ $page->reviews_count }}</span>
+                    @endif
+                    @if($tab === 'photos' && $photos->total() > 0)
+                        <span class="ml-1 text-xs bg-gray-100 px-1.5 py-0.5 rounded-full">{{ $photos->total() }}</span>
                     @endif
                 </button>
             @endforeach
@@ -192,31 +216,75 @@
         <div x-show="activeTab === 'posts'">
             {{-- Create post form (managers only) --}}
             @if($isManager)
-            <div class="bg-gray-50 rounded-2xl p-4 mb-4 border border-gray-200" x-data="{ postType: 'text', showForm: false }">
+            <div class="bg-gray-50 rounded-2xl p-4 mb-4 border border-gray-200"
+                 x-data="{ postType: 'text', postFormat: 'standard', showForm: false, pollOptions: ['', ''] }">
                 <button @click="showForm = !showForm" class="w-full text-left text-sm text-gray-500 bg-white rounded-xl px-4 py-3 border border-gray-200 hover:bg-gray-50 transition">
-                    What's on your mind? Share a post, photo or event...
+                    What's on your mind? Post, Article, Poll, Q&amp;A, Photo, Event...
                 </button>
                 <div x-show="showForm" x-cloak class="mt-3">
                     <form method="POST" action="/pages/{{ $page->slug }}/posts" enctype="multipart/form-data" class="space-y-3">
                         @csrf
-                        <div class="flex gap-2 flex-wrap">
+                        {{-- Format tabs --}}
+                        <div class="flex gap-2 flex-wrap border-b border-gray-200 pb-2">
+                            @foreach(['standard'=>'📝 Post','article'=>'📰 Article','poll'=>'📊 Poll','qna'=>'❓ Q&A'] as $fmt => $lbl)
+                            <button type="button" @click="postFormat = '{{ $fmt }}'; postType = (postFormat === 'standard') ? 'text' : 'text'"
+                                class="px-3 py-1.5 rounded-full text-xs font-semibold transition"
+                                :class="postFormat === '{{ $fmt }}' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'">{{ $lbl }}</button>
+                            @endforeach
+                        </div>
+                        {{-- Media type tabs (only for standard post) --}}
+                        <div x-show="postFormat === 'standard'" class="flex gap-2 flex-wrap">
                             @foreach(['text' => '✏️ Text', 'photo' => '📷 Photo', 'video' => '🎬 Video', 'event' => '📅 Event'] as $t => $l)
                             <button type="button" @click="postType = '{{ $t }}'"
                                 class="px-3 py-1.5 rounded-full text-xs font-semibold transition"
-                                :class="postType === '{{ $t }}' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'">{{ $l }}</button>
+                                :class="postType === '{{ $t }}' ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-700'">{{ $l }}</button>
                             @endforeach
                         </div>
-                        <input type="hidden" name="type" :value="postType">
-                        <textarea name="body" rows="3" placeholder="Write something..."
-                            class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 resize-none"></textarea>
-                        <div x-show="postType === 'photo'">
+                        <input type="hidden" name="post_format" :value="postFormat">
+                        <input type="hidden" name="type" :value="postFormat !== 'standard' ? 'text' : postType">
+
+                        {{-- Article title --}}
+                        <div x-show="postFormat === 'article'">
+                            <input type="text" name="article_title" placeholder="Article headline..."
+                                class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 font-semibold">
+                        </div>
+
+                        {{-- Body (standard / article / qna question) --}}
+                        <div x-show="postFormat !== 'poll'">
+                            <textarea name="body" rows="3"
+                                :placeholder="postFormat === 'article' ? 'Write your article...' : postFormat === 'qna' ? 'Post a question for your community...' : 'Write something...'"
+                                class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 resize-none"></textarea>
+                        </div>
+
+                        {{-- Poll --}}
+                        <div x-show="postFormat === 'poll'" class="space-y-2">
+                            <textarea name="body" rows="2" placeholder="Poll question..."
+                                class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 resize-none"></textarea>
+                            <template x-for="(opt, i) in pollOptions" :key="i">
+                                <div class="flex gap-2 items-center">
+                                    <input type="text" :name="'poll_options[' + i + ']'"
+                                        x-model="pollOptions[i]"
+                                        :placeholder="'Option ' + (i+1)"
+                                        class="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                                    <button type="button" x-show="pollOptions.length > 2"
+                                        @click="pollOptions.splice(i, 1)"
+                                        class="text-gray-400 hover:text-red-500 p-1">×</button>
+                                </div>
+                            </template>
+                            <button type="button" x-show="pollOptions.length < 6"
+                                @click="pollOptions.push('')"
+                                class="text-sm text-blue-600 font-semibold hover:underline">+ Add option</button>
+                        </div>
+
+                        {{-- Photo / Video / Event (standard only) --}}
+                        <div x-show="postFormat === 'standard' && postType === 'photo'">
                             <input type="file" name="image" accept="image/*" class="text-sm text-gray-600">
                         </div>
-                        <div x-show="postType === 'video'" class="space-y-2">
+                        <div x-show="postFormat === 'standard' && postType === 'video'" class="space-y-2">
                             <input type="url" name="video_url" placeholder="Video URL (YouTube, etc.)"
                                 class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
                         </div>
-                        <div x-show="postType === 'event'" class="space-y-2">
+                        <div x-show="postFormat === 'standard' && postType === 'event'" class="space-y-2">
                             <input type="text" name="event_title" placeholder="Event title"
                                 class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
                             <div class="grid grid-cols-2 gap-2">
@@ -315,6 +383,21 @@
                             </div>
                         </div>
 
+                        {{-- Article title --}}
+                        @if(($post->post_format ?? 'standard') === 'article' && $post->article_title)
+                        <div class="px-4 mb-2">
+                            <span class="text-xs font-bold text-purple-600 uppercase tracking-wide bg-purple-50 px-2 py-0.5 rounded-full">Article</span>
+                            <h2 class="text-lg font-bold text-gray-900 mt-1 leading-snug">{{ $post->article_title }}</h2>
+                        </div>
+                        @endif
+
+                        {{-- QnA format label --}}
+                        @if(($post->post_format ?? 'standard') === 'qna')
+                        <div class="px-4 mb-1">
+                            <span class="text-xs font-bold text-green-600 uppercase tracking-wide bg-green-50 px-2 py-0.5 rounded-full">Q&amp;A</span>
+                        </div>
+                        @endif
+
                         {{-- Event card --}}
                         @if($post->type === 'event')
                         <div class="mx-4 bg-blue-50 rounded-xl p-3 mb-3">
@@ -349,6 +432,33 @@
                                     Watch Video
                                 </a>
                             </div>
+                        @endif
+
+                        {{-- Poll options --}}
+                        @if(($post->post_format ?? 'standard') === 'poll' && $post->pollOptions->count())
+                        @php
+                            $totalVotes = $post->pollVotes->count();
+                            $userVotedOption = $userVoteMap[$post->id] ?? null;
+                        @endphp
+                        <div class="px-4 mb-3 space-y-2" x-data="{ voted: {{ $userVotedOption ?? 'null' }}, total: {{ $totalVotes }} }">
+                            @foreach($post->pollOptions as $opt)
+                            @php $pct = $totalVotes > 0 ? round($opt->votes_count / $totalVotes * 100) : 0; @endphp
+                            <button type="button"
+                                @auth onclick="votePoll('{{ $page->slug }}', {{ $post->id }}, {{ $opt->id }}, this)" @else onclick="window.location='/login'" @endauth
+                                data-opt-id="{{ $opt->id }}"
+                                class="relative w-full text-left rounded-xl border-2 px-4 py-2.5 text-sm font-medium overflow-hidden transition
+                                    {{ $userVotedOption == $opt->id ? 'border-blue-500 text-blue-700' : 'border-gray-200 text-gray-700 hover:border-blue-300' }}">
+                                <div class="absolute inset-0 bg-blue-100 transition-all" style="width: {{ $pct }}%; opacity:{{ $userVotedOption ? '1' : '0' }}"></div>
+                                <span class="relative flex justify-between">
+                                    <span>{{ $opt->text }}</span>
+                                    @if($userVotedOption)
+                                    <span class="text-xs text-gray-500">{{ $pct }}%</span>
+                                    @endif
+                                </span>
+                            </button>
+                            @endforeach
+                            <p class="text-xs text-gray-400 text-right">{{ $totalVotes }} {{ Str::plural('vote', $totalVotes) }}</p>
+                        </div>
                         @endif
 
                         {{-- Reaction summary bar --}}
@@ -583,6 +693,61 @@
         {{-- ========== TAB: About ========== --}}
         <div x-show="activeTab === 'about'">
             <div class="space-y-5">
+                {{-- Manager: Announcement editor --}}
+                @if($isManager)
+                <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4" x-data="{ show: false }">
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm font-bold text-amber-800">📢 Announcement</p>
+                        <button @click="show = !show" class="text-xs text-amber-600 font-semibold hover:underline">Edit</button>
+                    </div>
+                    <div x-show="show" x-cloak class="mt-3">
+                        <form method="POST" action="/pages/{{ $page->slug }}/announcement">
+                            @csrf
+                            <textarea name="announcement" rows="2" placeholder="Post an announcement to your followers..."
+                                class="w-full border border-amber-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500 resize-none mb-2">{{ $page->announcement }}</textarea>
+                            <div class="flex gap-2">
+                                <button type="submit" class="px-4 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold rounded-lg transition">Save</button>
+                                <button type="submit" name="announcement" value=""
+                                    class="px-4 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition">Clear</button>
+                            </div>
+                        </form>
+                    </div>
+                    @if(!$page->announcement)
+                    <p class="text-xs text-amber-600 mt-1">No announcement set</p>
+                    @endif
+                </div>
+
+                {{-- Manager: Highlights editor --}}
+                <div class="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm" x-data="{ showHl: false, highlights: {{ json_encode($page->highlights ?? []) }} }">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-sm font-bold text-gray-900">🔗 Highlights</p>
+                        <button @click="showHl = !showHl" class="text-xs text-blue-600 font-semibold hover:underline">Edit</button>
+                    </div>
+                    <div x-show="showHl" x-cloak>
+                        <form method="POST" action="/pages/{{ $page->slug }}/highlights" class="space-y-2">
+                            @csrf
+                            <template x-for="(hl, i) in highlights" :key="i">
+                                <div class="flex gap-2">
+                                    <input type="text" :name="'highlights[' + i + '][icon]'" x-model="hl.icon" placeholder="🔗" maxlength="5"
+                                        class="w-12 border border-gray-300 rounded-lg px-2 py-1.5 text-sm text-center focus:outline-none focus:border-blue-500">
+                                    <input type="text" :name="'highlights[' + i + '][title]'" x-model="hl.title" placeholder="Label" required
+                                        class="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500">
+                                    <input type="url" :name="'highlights[' + i + '][url]'" x-model="hl.url" placeholder="https://..." required
+                                        class="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500">
+                                    <button type="button" @click="highlights.splice(i, 1)" class="text-gray-400 hover:text-red-500 px-1">×</button>
+                                </div>
+                            </template>
+                            <div class="flex gap-2">
+                                <button type="button" x-show="highlights.length < 6"
+                                    @click="highlights.push({ icon: '', title: '', url: '' })"
+                                    class="text-xs text-blue-600 font-semibold hover:underline">+ Add highlight</button>
+                                <button type="submit" class="ml-auto px-4 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                @endif
+
                 {{-- Details --}}
                 <div class="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
                     <h3 class="font-bold text-gray-900 mb-3">Details</h3>
@@ -721,6 +886,188 @@
             </div>
         </div>
 
+        {{-- ========== TAB: Photos ========== --}}
+        <div x-show="activeTab === 'photos'">
+            @if($photos->count())
+                <div class="grid grid-cols-3 gap-1">
+                    @foreach($photos as $photo)
+                    <a href="{{ $photo->image_url }}" target="_blank" class="aspect-square overflow-hidden rounded-lg bg-gray-100 block">
+                        <img src="{{ $photo->image_url }}" class="w-full h-full object-cover hover:opacity-90 transition" alt="">
+                    </a>
+                    @endforeach
+                </div>
+                <div class="mt-4">{{ $photos->links() }}</div>
+            @else
+                <div class="text-center py-16">
+                    <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    </div>
+                    <p class="text-gray-500 font-medium">No photos yet</p>
+                </div>
+            @endif
+        </div>
+
+        {{-- ========== TAB: Q&A ========== --}}
+        <div x-show="activeTab === 'qna'">
+            {{-- Submit question --}}
+            @auth
+            @if(!$isManager)
+            <div class="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-5">
+                <form method="POST" action="/pages/{{ $page->slug }}/qna" class="flex gap-2">
+                    @csrf
+                    <input type="text" name="question" placeholder="Ask something..." required maxlength="500"
+                        class="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
+                    <button type="submit" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm transition flex-shrink-0">Ask</button>
+                </form>
+            </div>
+            @endif
+            @endauth
+
+            {{-- Manager: show all including unanswered + add answer form --}}
+            @if($qnaItems->count())
+            <div class="space-y-4">
+                @foreach($qnaItems as $item)
+                <div class="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
+                    <div class="flex items-start gap-3 mb-2">
+                        <span class="text-xl mt-0.5">❓</span>
+                        <div class="flex-1">
+                            <p class="font-semibold text-gray-900 text-sm">{{ $item->question }}</p>
+                            @if($item->asker)
+                            <p class="text-xs text-gray-400 mt-0.5">{{ $item->asker->name }} · {{ $item->created_at->diffForHumans() }}</p>
+                            @else
+                            <p class="text-xs text-gray-400 mt-0.5">Anonymous · {{ $item->created_at->diffForHumans() }}</p>
+                            @endif
+                        </div>
+                        @if($isManager)
+                        <form method="POST" action="/pages/{{ $page->slug }}/qna/{{ $item->id }}" onsubmit="return confirm('Delete?')">
+                            @csrf @method('DELETE')
+                            <button class="text-gray-300 hover:text-red-500 text-xs transition">✕</button>
+                        </form>
+                        @endif
+                    </div>
+                    @if($item->answer)
+                    <div class="bg-blue-50 rounded-xl px-4 py-3 mt-2">
+                        <p class="text-xs font-bold text-blue-700 mb-1">{{ $page->name }} answered:</p>
+                        <p class="text-sm text-gray-800">{{ $item->answer }}</p>
+                    </div>
+                    @endif
+                    @if($isManager)
+                    <form method="POST" action="/pages/{{ $page->slug }}/qna/{{ $item->id }}/answer"
+                        class="mt-3" x-data="{ show: false }">
+                        @csrf
+                        <button type="button" @click="show = !show" class="text-xs text-blue-600 font-semibold hover:underline">
+                            {{ $item->answer ? '✏️ Edit answer' : '💬 Answer' }}
+                        </button>
+                        <div x-show="show" x-cloak class="mt-2 space-y-2">
+                            <textarea name="answer" rows="2" placeholder="Your answer..."
+                                class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500 resize-none">{{ $item->answer }}</textarea>
+                            <div class="flex gap-2 items-center">
+                                <label class="flex items-center gap-1.5 text-xs text-gray-600 cursor-pointer">
+                                    <input type="checkbox" name="is_featured" {{ $item->is_featured ? 'checked' : '' }} class="rounded">
+                                    Feature this Q&amp;A
+                                </label>
+                                <button type="submit" class="ml-auto px-4 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition">Save</button>
+                            </div>
+                        </div>
+                    </form>
+                    @endif
+                </div>
+                @endforeach
+            </div>
+            <div class="mt-4">{{ $qnaItems->links() }}</div>
+            @else
+            <div class="text-center py-16">
+                <p class="text-gray-500 font-medium">No questions yet</p>
+                @auth
+                @if(!$isManager)
+                <p class="text-sm text-gray-400 mt-1">Be the first to ask!</p>
+                @endif
+                @endauth
+            </div>
+            @endif
+        </div>
+
+        {{-- ========== TAB: Shop / Products ========== --}}
+        <div x-show="activeTab === 'products'">
+            {{-- Manager: add product form --}}
+            @if($isManager)
+            <div class="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-5" x-data="{ showForm: false }">
+                <button @click="showForm = !showForm" class="text-sm font-semibold text-blue-600 hover:underline">+ Add product / service</button>
+                <div x-show="showForm" x-cloak class="mt-3">
+                    <form method="POST" action="/pages/{{ $page->slug }}/products" enctype="multipart/form-data" class="space-y-3">
+                        @csrf
+                        <input type="text" name="name" placeholder="Product name" required
+                            class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
+                        <textarea name="description" rows="2" placeholder="Description (optional)"
+                            class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 resize-none"></textarea>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="number" name="price" placeholder="Price" step="0.01" min="0"
+                                class="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                            <select name="currency" class="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                                <option value="NPR">NPR</option>
+                                <option value="USD">USD</option>
+                                <option value="INR">INR</option>
+                            </select>
+                        </div>
+                        <input type="url" name="link_url" placeholder="Link URL (optional)"
+                            class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
+                        <div>
+                            <label class="text-xs text-gray-500 mb-1 block">Product image</label>
+                            <input type="file" name="image" accept="image/*" class="text-sm text-gray-600">
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl transition text-sm">Add product</button>
+                    </form>
+                </div>
+            </div>
+            @endif
+
+            @if($products->count())
+            <div class="grid grid-cols-2 gap-3">
+                @foreach($products as $product)
+                <div class="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm flex flex-col">
+                    @if($product->image_url)
+                    <img src="{{ $product->image_url }}" class="w-full h-36 object-cover bg-gray-100" alt="{{ $product->name }}">
+                    @else
+                    <div class="w-full h-36 bg-gray-100 flex items-center justify-center">
+                        <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                    </div>
+                    @endif
+                    <div class="p-3 flex flex-col flex-1">
+                        <p class="font-bold text-gray-900 text-sm leading-tight">{{ $product->name }}</p>
+                        @if($product->description)
+                        <p class="text-xs text-gray-500 mt-1 line-clamp-2">{{ $product->description }}</p>
+                        @endif
+                        @if($product->price !== null)
+                        <p class="text-sm font-bold text-blue-600 mt-2">{{ $product->currency }} {{ number_format($product->price, 2) }}</p>
+                        @endif
+                        <div class="mt-auto pt-2 flex gap-1.5">
+                            @if($product->link_url)
+                            <a href="{{ $product->link_url }}" target="_blank"
+                               class="flex-1 text-center text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-1.5 transition">
+                                View →
+                            </a>
+                            @endif
+                            @if($isManager)
+                            <form method="POST" action="/pages/{{ $page->slug }}/products/{{ $product->id }}" onsubmit="return confirm('Remove?')">
+                                @csrf @method('DELETE')
+                                <button class="px-2 py-1.5 text-xs text-red-500 hover:bg-red-50 rounded-lg transition">✕</button>
+                            </form>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            @else
+            <div class="text-center py-16">
+                <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                </div>
+                <p class="text-gray-500 font-medium">No products yet</p>
+            </div>
+            @endif
+        </div>
+
         {{-- ========== TAB: Followers ========== --}}
         <div x-show="activeTab === 'followers'">
             <p class="text-gray-500 text-sm text-center py-12">
@@ -853,12 +1200,47 @@ function reactPost(btn, slug, postId, reaction) {
     });
 }
 
+function votePoll(slug, postId, optionId, btn) {
+    fetch(`/pages/${slug}/posts/${postId}/vote`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ option_id: optionId })
+    }).then(r => r.json()).then(data => {
+        const container = btn.closest('[x-data]');
+        const allBtns = container.querySelectorAll('[data-opt-id]');
+        allBtns.forEach(b => {
+            const oid = parseInt(b.dataset.optId);
+            const opt = data.options.find(o => o.id === oid);
+            const bar = b.querySelector('div');
+            const pctEl = b.querySelector('span span:last-child');
+            if (opt) {
+                if (bar) bar.style.width = opt.votes + ' / ' + data.total_votes * 100 + '%';
+                if (pctEl && data.voted_option_id) {
+                    const pct = data.total_votes > 0 ? Math.round(opt.votes / data.total_votes * 100) : 0;
+                    pctEl.textContent = pct + '%';
+                    if (bar) bar.style.width = pct + '%';
+                    bar.style.opacity = '1';
+                }
+            }
+            b.classList.toggle('border-blue-500', oid === data.voted_option_id);
+            b.classList.toggle('text-blue-700', oid === data.voted_option_id);
+            b.classList.toggle('border-gray-200', oid !== data.voted_option_id);
+        });
+        const totalEl = container.querySelector('p');
+        if (totalEl) totalEl.textContent = data.total_votes + ' ' + (data.total_votes === 1 ? 'vote' : 'votes');
+    });
+}
+
 function loadComments(slug, postId, alpineData) {
     if (alpineData.commentLoaded) return;
     fetch(`/pages/${slug}/posts/${postId}/comments`, {
         headers: { 'Accept': 'application/json' }
     }).then(r => r.json()).then(data => {
-        alpineData.comments = data.comments || [];
+        alpineData.comments = Array.isArray(data) ? data : (data.comments || []);
         alpineData.commentLoaded = true;
     });
 }

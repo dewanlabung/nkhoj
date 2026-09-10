@@ -5,9 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Bookmark;
 use App\Models\PageAdmin;
 use App\Models\PageCategory;
+use App\Models\PagePollOption;
+use App\Models\PagePollVote;
 use App\Models\PagePost;
 use App\Models\PagePostComment;
 use App\Models\PagePostLike;
+use App\Models\PageProduct;
+use App\Models\PageQna;
 use App\Models\PageReport;
 use App\Models\PageReview;
 use App\Models\PageVerificationRequest;
@@ -226,15 +230,29 @@ class SocialPageController extends Controller
         $pinnedPost  = $page->pinned_post_id ? $page->pinnedPost()->with('author')->first() : null;
         $posts       = PagePost::where('social_page_id', $page->id)
                             ->where('id', '!=', $page->pinned_post_id ?? 0)
+                            ->with(['pollOptions', 'pollVotes'])
                             ->latest()->paginate(12);
         $reviews     = $page->reviews()->with('user')->latest()->paginate(10);
         $events      = PagePost::where('social_page_id', $page->id)->where('type', 'event')
                             ->where('event_start', '>=', now())->orderBy('event_start')->limit(5)->get();
+        $photos      = PagePost::where('social_page_id', $page->id)->where('type', 'photo')
+                            ->whereNotNull('image_url')->latest()->paginate(24);
+        $qnaItems    = PageQna::where('social_page_id', $page->id)->where('is_visible', true)
+                            ->with(['asker', 'answerer'])->latest()->paginate(20);
+        $products    = PageProduct::where('social_page_id', $page->id)->where('is_available', true)
+                            ->orderBy('sort_order')->get();
         $isOpen      = $page->isOpenNow();
+        $userVoteMap = [];
+        if ($user) {
+            $postIds = $posts->pluck('id');
+            $votes   = PagePollVote::whereIn('page_post_id', $postIds)->where('user_id', $user->id)->get();
+            $userVoteMap = $votes->keyBy('page_post_id')->map->page_poll_option_id->toArray();
+        }
 
         return view('social-pages.show', compact(
             'page', 'isOwner', 'isManager', 'userRole', 'isFollowing', 'isSaved',
-            'posts', 'reviews', 'userReview', 'events', 'isOpen', 'pinnedPost'
+            'posts', 'reviews', 'userReview', 'events', 'isOpen', 'pinnedPost',
+            'photos', 'qnaItems', 'products', 'userVoteMap'
         ));
     }
 
@@ -270,6 +288,8 @@ class SocialPageController extends Controller
 
         $data = $request->validate([
             'type'             => 'required|in:text,photo,video,event',
+            'post_format'      => 'nullable|in:standard,article,poll,qna',
+            'article_title'    => 'nullable|string|max:255',
             'body'             => 'nullable|string|max:5000',
             'image'            => 'nullable|image|max:4096',
             'video_url'        => 'nullable|url|max:500',
@@ -278,6 +298,8 @@ class SocialPageController extends Controller
             'event_end'        => 'nullable|date|after:event_start',
             'event_venue'      => 'nullable|string|max:255',
             'event_ticket_url' => 'nullable|url|max:500',
+            'poll_options'     => 'nullable|array|min:2|max:6',
+            'poll_options.*'   => 'required|string|max:200',
         ]);
 
         $imageUrl = null;
@@ -288,10 +310,18 @@ class SocialPageController extends Controller
             $imageUrl = '/uploads/pages/' . $filename;
         }
 
-        PagePost::create([
+        $postFormat = $data['post_format'] ?? 'standard';
+        $type = $data['type'];
+        if ($postFormat === 'article') $type = 'text';
+        if ($postFormat === 'poll')    $type = 'text';
+        if ($postFormat === 'qna')     $type = 'text';
+
+        $post = PagePost::create([
             'social_page_id'   => $page->id,
             'user_id'          => auth()->id(),
-            'type'             => $data['type'],
+            'type'             => $type,
+            'post_format'      => $postFormat,
+            'article_title'    => $data['article_title'] ?? null,
             'body'             => $data['body'] ?? null,
             'image_url'        => $imageUrl,
             'video_url'        => $data['video_url'] ?? null,
@@ -301,6 +331,16 @@ class SocialPageController extends Controller
             'event_venue'      => $data['event_venue'] ?? null,
             'event_ticket_url' => $data['event_ticket_url'] ?? null,
         ]);
+
+        if ($postFormat === 'poll' && !empty($data['poll_options'])) {
+            foreach (array_values($data['poll_options']) as $i => $optText) {
+                PagePollOption::create([
+                    'page_post_id' => $post->id,
+                    'text'         => $optText,
+                    'sort_order'   => $i,
+                ]);
+            }
+        }
 
         return back()->with('success', 'Post published!');
     }
@@ -811,6 +851,158 @@ class SocialPageController extends Controller
         ]);
 
         return back()->with('success', 'Page settings updated!');
+    }
+
+    // ─── Poll Voting ───────────────────────────────────────────────────────────
+
+    public function votePoll(Request $request, string $slug, int $postId)
+    {
+        $page   = SocialPage::where('slug', $slug)->where('is_active', true)->firstOrFail();
+        $post   = PagePost::where('id', $postId)->where('social_page_id', $page->id)->firstOrFail();
+        $data   = $request->validate(['option_id' => 'required|integer']);
+        $option = PagePollOption::where('id', $data['option_id'])->where('page_post_id', $postId)->firstOrFail();
+
+        $existing = PagePollVote::where('page_post_id', $postId)->where('user_id', auth()->id())->first();
+        if ($existing) {
+            if ($existing->page_poll_option_id === $option->id) {
+                // un-vote
+                $existing->delete();
+                $option->decrement('votes_count');
+                $votedId = null;
+            } else {
+                // switch vote
+                PagePollOption::where('id', $existing->page_poll_option_id)->decrement('votes_count');
+                $existing->update(['page_poll_option_id' => $option->id]);
+                $option->increment('votes_count');
+                $votedId = $option->id;
+            }
+        } else {
+            PagePollVote::create(['page_post_id' => $postId, 'page_poll_option_id' => $option->id, 'user_id' => auth()->id()]);
+            $option->increment('votes_count');
+            $votedId = $option->id;
+        }
+
+        $totalVotes = PagePollVote::where('page_post_id', $postId)->count();
+        $options    = PagePollOption::where('page_post_id', $postId)->orderBy('sort_order')
+                        ->get()->map(fn($o) => ['id' => $o->id, 'text' => $o->text, 'votes' => $o->votes_count]);
+
+        return response()->json(['voted_option_id' => $votedId, 'total_votes' => $totalVotes, 'options' => $options]);
+    }
+
+    // ─── Q&A ──────────────────────────────────────────────────────────────────
+
+    public function storeQna(Request $request, string $slug)
+    {
+        $page = SocialPage::where('slug', $slug)->where('is_active', true)->firstOrFail();
+        $data = $request->validate(['question' => 'required|string|max:500']);
+
+        PageQna::create([
+            'social_page_id' => $page->id,
+            'user_id'        => auth()->id() ?: null,
+            'question'       => $data['question'],
+        ]);
+
+        return back()->with('success', 'Your question has been submitted!');
+    }
+
+    public function answerQna(Request $request, string $slug, int $qnaId)
+    {
+        $page = SocialPage::where('slug', $slug)->where('is_active', true)->firstOrFail();
+        abort_unless($page->isManagedBy(auth()->user()), 403);
+
+        $item = PageQna::where('id', $qnaId)->where('social_page_id', $page->id)->firstOrFail();
+        $data = $request->validate([
+            'answer'      => 'required|string|max:2000',
+            'is_featured' => 'boolean',
+        ]);
+
+        $item->update([
+            'answer'      => $data['answer'],
+            'answered_by' => auth()->id(),
+            'is_featured' => $request->boolean('is_featured'),
+        ]);
+
+        return back()->with('success', 'Answer saved.');
+    }
+
+    public function deleteQna(string $slug, int $qnaId)
+    {
+        $page = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isManagedBy(auth()->user()), 403);
+        PageQna::where('id', $qnaId)->where('social_page_id', $page->id)->delete();
+        return back()->with('success', 'Question deleted.');
+    }
+
+    // ─── Products ──────────────────────────────────────────────────────────────
+
+    public function storeProduct(Request $request, string $slug)
+    {
+        $page = SocialPage::where('slug', $slug)->where('is_active', true)->firstOrFail();
+        abort_unless($page->isManagedBy(auth()->user()), 403);
+
+        $data = $request->validate([
+            'name'        => 'required|string|max:200',
+            'description' => 'nullable|string|max:1000',
+            'price'       => 'nullable|numeric|min:0',
+            'currency'    => 'nullable|string|max:10',
+            'image'       => 'nullable|image|max:2048',
+            'link_url'    => 'nullable|url|max:500',
+        ]);
+
+        $imageUrl = null;
+        if ($request->hasFile('image')) {
+            $file     = $request->file('image');
+            $filename = time() . '_prod.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/pages'), $filename);
+            $imageUrl = '/uploads/pages/' . $filename;
+        }
+
+        $count = PageProduct::where('social_page_id', $page->id)->count();
+        PageProduct::create([
+            'social_page_id' => $page->id,
+            'name'           => $data['name'],
+            'description'    => $data['description'] ?? null,
+            'price'          => $data['price'] ?? null,
+            'currency'       => $data['currency'] ?? 'NPR',
+            'image_url'      => $imageUrl,
+            'link_url'       => $data['link_url'] ?? null,
+            'sort_order'     => $count,
+        ]);
+
+        return back()->with('success', 'Product added!');
+    }
+
+    public function deleteProduct(string $slug, int $productId)
+    {
+        $page = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isManagedBy(auth()->user()), 403);
+        PageProduct::where('id', $productId)->where('social_page_id', $page->id)->delete();
+        return back()->with('success', 'Product removed.');
+    }
+
+    // ─── Announcement & Highlights ─────────────────────────────────────────────
+
+    public function updateAnnouncement(Request $request, string $slug)
+    {
+        $page = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isManagedBy(auth()->user()), 403);
+        $data = $request->validate(['announcement' => 'nullable|string|max:500']);
+        $page->update(['announcement' => $data['announcement'] ?? null]);
+        return back()->with('success', 'Announcement updated.');
+    }
+
+    public function updateHighlights(Request $request, string $slug)
+    {
+        $page = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isManagedBy(auth()->user()), 403);
+        $data = $request->validate([
+            'highlights'          => 'nullable|array|max:6',
+            'highlights.*.title'  => 'required|string|max:100',
+            'highlights.*.url'    => 'required|url|max:500',
+            'highlights.*.icon'   => 'nullable|string|max:10',
+        ]);
+        $page->update(['highlights' => $data['highlights'] ?? []]);
+        return back()->with('success', 'Highlights updated.');
     }
 
     // ─── My Pages ──────────────────────────────────────────────────────────────
