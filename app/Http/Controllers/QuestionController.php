@@ -8,6 +8,7 @@ use App\Models\Answer;
 use App\Models\Category;
 use App\Models\Tag;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class QuestionController extends Controller
@@ -45,7 +46,9 @@ class QuestionController extends Controller
     public function index(Request $request)
     {
         $tab = $request->get('tab', 'new');
-        $query = Question::with(['user', 'category'])
+        $search = $request->get('q', '');
+
+        $query = Question::with(['user', 'category', 'tags'])
             ->withCount('answers')
             ->where('status', '!=', 'pending');
 
@@ -54,14 +57,30 @@ class QuestionController extends Controller
             if ($cat) $query->where('category_id', $cat->id);
         }
 
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('content', 'like', "%{$search}%");
+            });
+        }
+
         $questions = match($tab) {
-            'trending' => $query->orderByDesc('views_count')->paginate(15),
-            'must-read'=> $query->where('answers_count', '>', 2)->orderByDesc('answers_count')->paginate(15),
-            'hot'      => $query->orderByDesc('answers_count')->paginate(15),
-            default    => $query->latest()->paginate(15),
+            'trending'  => $query->orderByDesc('views_count')->paginate(15),
+            'must-read' => $query->where('answers_count', '>', 0)->orderByDesc('answers_count')->paginate(15),
+            'top'       => $query->orderByDesc('votes')->paginate(15),
+            'hot'       => $query->get()->sortByDesc(function ($q) {
+                                $ageHours = max(1, $q->created_at->diffInHours(now()));
+                                return $q->votes / pow($ageHours + 2, 1.5);
+                            })->values()->pipe(fn($col) => new \Illuminate\Pagination\LengthAwarePaginator(
+                                $col->forPage(\Illuminate\Pagination\Paginator::resolveCurrentPage(), 15),
+                                $col->count(), 15,
+                                \Illuminate\Pagination\Paginator::resolveCurrentPage(),
+                                ['path' => $request->url(), 'query' => $request->query()]
+                            )),
+            default     => $query->latest()->paginate(15),
         };
 
-        return view('questions.index', array_merge(compact('questions', 'tab'), $this->sidebarData()));
+        return view('questions.index', array_merge(compact('questions', 'tab', 'search'), $this->sidebarData()));
     }
 
     public function show(string $slug)
@@ -80,7 +99,28 @@ class QuestionController extends Controller
             ->limit(5)
             ->get();
 
-        return view('questions.show', array_merge(compact('question', 'relatedQuestions'), $this->sidebarData()));
+        // Current user's vote states for Reddit-style UI
+        $userQuestionVote = null;
+        $userAnswerVotes  = [];
+        $userId = auth()->id();
+        $sessionKey = session()->getId();
+
+        if ($userId) {
+            $qv = DB::table('question_votes')
+                ->where('question_id', $question->id)->where('user_id', $userId)->value('vote');
+            $userQuestionVote = $qv;
+
+            $avRows = DB::table('answer_votes')
+                ->whereIn('answer_id', $question->answers->pluck('id'))
+                ->where('user_id', $userId)
+                ->pluck('vote', 'answer_id');
+            $userAnswerVotes = $avRows->toArray();
+        }
+
+        return view('questions.show', array_merge(
+            compact('question', 'relatedQuestions', 'userQuestionVote', 'userAnswerVotes'),
+            $this->sidebarData()
+        ));
     }
 
     public function create()
@@ -187,18 +227,59 @@ class QuestionController extends Controller
 
     public function voteAnswer(Request $request, int $answerId)
     {
-        $answer = Answer::findOrFail($answerId);
-        $delta  = $request->input('vote') === 'up' ? 1 : -1;
-        $answer->increment('votes', $delta);
-        return response()->json(['votes' => $answer->votes]);
+        $answer  = Answer::findOrFail($answerId);
+        $newVote = $request->input('vote') === 'up' ? 1 : -1;
+        $userId  = auth()->id();
+
+        $existing = DB::table('answer_votes')
+            ->where('answer_id', $answerId)
+            ->where('user_id', $userId)
+            ->first();
+
+        if ($existing) {
+            if ($existing->vote === $newVote) {
+                // toggle off
+                DB::table('answer_votes')->where('id', $existing->id)->delete();
+                $answer->decrement('votes', $newVote);
+                $newVote = 0;
+            } else {
+                DB::table('answer_votes')->where('id', $existing->id)->update(['vote' => $newVote]);
+                $answer->increment('votes', $newVote * 2);
+            }
+        } else {
+            DB::table('answer_votes')->insert(['answer_id' => $answerId, 'user_id' => $userId, 'vote' => $newVote, 'created_at' => now()]);
+            $answer->increment('votes', $newVote);
+        }
+
+        return response()->json(['votes' => $answer->fresh()->votes, 'userVote' => $newVote]);
     }
 
     public function voteQuestion(Request $request, int $questionId)
     {
         $question = Question::findOrFail($questionId);
-        $delta    = $request->input('vote') === 'up' ? 1 : -1;
-        $question->increment('votes', $delta);
-        return response()->json(['votes' => $question->votes]);
+        $newVote  = $request->input('vote') === 'up' ? 1 : -1;
+        $userId   = auth()->id();
+
+        $existing = DB::table('question_votes')
+            ->where('question_id', $questionId)
+            ->where('user_id', $userId)
+            ->first();
+
+        if ($existing) {
+            if ($existing->vote === $newVote) {
+                DB::table('question_votes')->where('id', $existing->id)->delete();
+                $question->decrement('votes', $newVote);
+                $newVote = 0;
+            } else {
+                DB::table('question_votes')->where('id', $existing->id)->update(['vote' => $newVote]);
+                $question->increment('votes', $newVote * 2);
+            }
+        } else {
+            DB::table('question_votes')->insert(['question_id' => $questionId, 'user_id' => $userId, 'vote' => $newVote, 'created_at' => now()]);
+            $question->increment('votes', $newVote);
+        }
+
+        return response()->json(['votes' => $question->fresh()->votes, 'userVote' => $newVote]);
     }
 
     public function edit(int $id)
