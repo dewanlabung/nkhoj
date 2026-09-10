@@ -330,6 +330,16 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('/ai-content/settings',                 [AdminController::class, 'updateGeminiSettings']);
     Route::post('/ai-content/drafts/{post}/publish',    [AdminController::class, 'publishAiDraft']);
     Route::delete('/ai-content/drafts/{post}',          [AdminController::class, 'deleteAiDraft']);
+
+    // Social Pages (admin module)
+    Route::get('/social-pages',                          [AdminController::class, 'adminSocialPages']);
+    Route::post('/social-pages/{id}/action',             [AdminController::class, 'adminSocialPageAction']);
+
+    // Page Categories
+    Route::get('/page-categories',                       [AdminController::class, 'adminPageCategories']);
+    Route::post('/page-categories',                      [AdminController::class, 'adminPageCategoryStore']);
+    Route::post('/page-categories/{id}/toggle',          [AdminController::class, 'adminPageCategoryToggle']);
+    Route::delete('/page-categories/{id}',               [AdminController::class, 'adminPageCategoryDelete']);
 });
 
 // ── Account Portal (account.dewanlabung.com.np OR /account/*) ──────────────
@@ -423,6 +433,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/pages/{slug}/posts',                       [SocialPageController::class, 'storePost']);
     Route::delete('/pages/{slug}/posts/{postId}',            [SocialPageController::class, 'deletePost']);
     Route::post('/pages/{slug}/posts/{postId}/like',         [SocialPageController::class, 'likePost']);
+    Route::post('/pages/{slug}/posts/{postId}/react',        [SocialPageController::class, 'reactPost']);
+    Route::get('/pages/{slug}/posts/{postId}/comments',      [SocialPageController::class, 'loadComments']);
+    Route::post('/pages/{slug}/posts/{postId}/comments',     [SocialPageController::class, 'storeComment']);
+    Route::delete('/pages/{slug}/posts/{postId}/comments/{commentId}', [SocialPageController::class, 'deleteComment']);
     Route::post('/pages/{slug}/posts/{postId}/pin',          [SocialPageController::class, 'pinPost']);
     Route::delete('/pages/{slug}/posts/{postId}/pin',        [SocialPageController::class, 'unpinPost']);
     Route::post('/pages/{slug}/posts/{postId}/report',       [SocialPageController::class, 'report'])->defaults('type', 'post');

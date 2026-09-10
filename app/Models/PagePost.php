@@ -9,7 +9,7 @@ class PagePost extends Model
     protected $fillable = [
         'social_page_id', 'user_id', 'type', 'body', 'image_url', 'video_url',
         'event_title', 'event_start', 'event_end', 'event_venue', 'event_ticket_url',
-        'likes_count',
+        'likes_count', 'comments_count',
     ];
 
     protected $casts = [
@@ -32,9 +32,32 @@ class PagePost extends Model
         return $this->hasMany(PagePostLike::class);
     }
 
+    public function comments()
+    {
+        return $this->hasMany(PagePostComment::class);
+    }
+
     public function isLikedBy(?User $user): bool
     {
         if (!$user) return false;
         return $this->likes()->where('user_id', $user->id)->exists();
+    }
+
+    public function reactionBy(?User $user): ?string
+    {
+        if (!$user) return null;
+        $like = $this->likes()->where('user_id', $user->id)->first();
+        return $like?->reaction;
+    }
+
+    public function topReactions(int $limit = 3): array
+    {
+        return $this->likes()
+            ->selectRaw('reaction, COUNT(*) as cnt')
+            ->groupBy('reaction')
+            ->orderByDesc('cnt')
+            ->limit($limit)
+            ->pluck('cnt', 'reaction')
+            ->toArray();
     }
 }

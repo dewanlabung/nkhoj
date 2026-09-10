@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Bookmark;
 use App\Models\PageAdmin;
+use App\Models\PageCategory;
 use App\Models\PagePost;
+use App\Models\PagePostComment;
 use App\Models\PagePostLike;
 use App\Models\PageReport;
 use App\Models\PageReview;
@@ -57,7 +59,7 @@ class SocialPageController extends Controller
         }
 
         $pages      = $query->paginate(24)->withQueryString();
-        $categories = SocialPage::CATEGORIES;
+        $categories = PageCategory::active()->pluck('name')->toArray() ?: SocialPage::CATEGORIES;
 
         return view('social-pages.discover', compact('pages', 'myPages', 'categories'));
     }
@@ -100,7 +102,7 @@ class SocialPageController extends Controller
 
     public function create()
     {
-        $categories = SocialPage::CATEGORIES;
+        $categories = PageCategory::active()->pluck('name')->toArray() ?: SocialPage::CATEGORIES;
         return view('social-pages.create', compact('categories'));
     }
 
@@ -287,6 +289,110 @@ class SocialPageController extends Controller
         }
 
         return response()->json(['liked' => $liked, 'likes_count' => $post->fresh()->likes_count]);
+    }
+
+    // POST /pages/{slug}/posts/{postId}/react
+    public function reactPost(Request $request, string $slug, int $postId)
+    {
+        $valid = ['like', 'love', 'haha', 'wow', 'sad', 'angry'];
+        $reaction = $request->input('reaction', 'like');
+        if (!in_array($reaction, $valid)) {
+            $reaction = 'like';
+        }
+
+        $page = SocialPage::where('slug', $slug)->where('is_active', true)->firstOrFail();
+        $post = PagePost::where('id', $postId)->where('social_page_id', $page->id)->firstOrFail();
+
+        $existing = PagePostLike::where('page_post_id', $postId)->where('user_id', auth()->id())->first();
+
+        if ($existing) {
+            if ($existing->reaction === $reaction) {
+                // Toggle off
+                $existing->delete();
+                $post->decrement('likes_count');
+                return response()->json([
+                    'reaction'    => null,
+                    'likes_count' => $post->fresh()->likes_count,
+                ]);
+            }
+            // Switch reaction
+            $existing->update(['reaction' => $reaction]);
+        } else {
+            PagePostLike::create(['page_post_id' => $postId, 'user_id' => auth()->id(), 'reaction' => $reaction]);
+            $post->increment('likes_count');
+        }
+
+        return response()->json([
+            'reaction'    => $reaction,
+            'likes_count' => $post->fresh()->likes_count,
+        ]);
+    }
+
+    // GET /pages/{slug}/posts/{postId}/comments
+    public function loadComments(string $slug, int $postId)
+    {
+        $page = SocialPage::where('slug', $slug)->where('is_active', true)->firstOrFail();
+        $post = PagePost::where('id', $postId)->where('social_page_id', $page->id)->firstOrFail();
+
+        $comments = $post->comments()->with('author')->latest()->limit(50)->get()
+            ->map(fn($c) => [
+                'id'         => $c->id,
+                'body'       => $c->body,
+                'time'       => $c->created_at->diffForHumans(),
+                'author'     => $c->author->name,
+                'avatar'     => $c->author->avatar ?? null,
+                'user_id'    => $c->user_id,
+            ]);
+
+        return response()->json($comments);
+    }
+
+    // POST /pages/{slug}/posts/{postId}/comments
+    public function storeComment(Request $request, string $slug, int $postId)
+    {
+        $request->validate(['body' => 'required|string|max:1000']);
+
+        $page = SocialPage::where('slug', $slug)->where('is_active', true)->firstOrFail();
+        $post = PagePost::where('id', $postId)->where('social_page_id', $page->id)->firstOrFail();
+
+        $comment = \App\Models\PagePostComment::create([
+            'page_post_id' => $post->id,
+            'user_id'      => auth()->id(),
+            'body'         => $request->input('body'),
+        ]);
+        $post->increment('comments_count');
+
+        return response()->json([
+            'id'      => $comment->id,
+            'body'    => $comment->body,
+            'time'    => $comment->created_at->diffForHumans(),
+            'author'  => auth()->user()->name,
+            'avatar'  => auth()->user()->avatar ?? null,
+            'user_id' => auth()->id(),
+            'comments_count' => $post->fresh()->comments_count,
+        ]);
+    }
+
+    // DELETE /pages/{slug}/posts/{postId}/comments/{commentId}
+    public function deleteComment(string $slug, int $postId, int $commentId)
+    {
+        $page = SocialPage::where('slug', $slug)->firstOrFail();
+        $post = PagePost::where('id', $postId)->where('social_page_id', $page->id)->firstOrFail();
+
+        $comment = \App\Models\PagePostComment::where('id', $commentId)
+            ->where('page_post_id', $postId)
+            ->firstOrFail();
+
+        // Allow: comment author, page manager
+        abort_unless(
+            $comment->user_id === auth()->id() || $page->isManagedBy(auth()->user()),
+            403
+        );
+
+        $comment->delete();
+        $post->decrement('comments_count');
+
+        return response()->json(['deleted' => true, 'comments_count' => $post->fresh()->comments_count]);
     }
 
     // POST /pages/{slug}/posts/{postId}/pin
@@ -578,7 +684,7 @@ class SocialPageController extends Controller
         $pendingInvites = PageAdmin::where('social_page_id', $page->id)
                               ->whereNotNull('accepted_at')->count();
 
-        $categories = SocialPage::CATEGORIES;
+        $categories = PageCategory::active()->pluck('name')->toArray() ?: SocialPage::CATEGORIES;
 
         return view('social-pages.dashboard', compact(
             'page', 'isOwner', 'userRole',
@@ -593,7 +699,7 @@ class SocialPageController extends Controller
     public function settings(string $slug)
     {
         $page = SocialPage::where('slug', $slug)->where('user_id', auth()->id())->firstOrFail();
-        $categories = SocialPage::CATEGORIES;
+        $categories = PageCategory::active()->pluck('name')->toArray() ?: SocialPage::CATEGORIES;
         return view('social-pages.settings', compact('page', 'categories'));
     }
 

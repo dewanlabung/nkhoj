@@ -107,7 +107,65 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
                 <span id="share-label">Share</span>
             </button>
+
+            {{-- "..." menu (report, copy link) --}}
+            <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+                <button @click="open = !open"
+                    class="flex items-center justify-center w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 transition">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z"/></svg>
+                </button>
+                <div x-show="open" x-cloak
+                    class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden py-1">
+                    <button onclick="sharePage()" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2.5">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+                        Share page
+                    </button>
+                    <button onclick="copyPageUrl()" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2.5">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                        Copy link
+                    </button>
+                    @auth
+                    @if(!$isOwner)
+                    <hr class="my-1 border-gray-100">
+                    <button onclick="showReportPage()" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        Report page
+                    </button>
+                    @endif
+                    @endauth
+                </div>
+            </div>
         </div>
+
+        {{-- Report page modal --}}
+        @auth
+        @if(!$isOwner)
+        <div id="report-page-modal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4 hidden">
+            <div class="bg-white rounded-2xl w-full max-w-sm">
+                <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                    <h3 class="font-bold text-gray-900">Report this page</h3>
+                    <button onclick="hideReportPage()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <form method="POST" action="/pages/{{ $page->slug }}/report" class="p-5 space-y-3">
+                    @csrf
+                    <div class="space-y-2">
+                        @foreach(['spam'=>'Spam','inappropriate'=>'Inappropriate content','harassment'=>'Harassment','fake'=>'Fake / impersonation','other'=>'Other'] as $val => $lbl)
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="radio" name="reason" value="{{ $val }}" class="accent-blue-600" @if($loop->first) checked @endif>
+                            <span class="text-sm text-gray-700">{{ $lbl }}</span>
+                        </label>
+                        @endforeach
+                    </div>
+                    <textarea name="details" rows="2" placeholder="Additional details (optional)"
+                        class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 resize-none"></textarea>
+                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-xl text-sm transition">Submit Report</button>
+                </form>
+            </div>
+        </div>
+        @endif
+        @endauth
 
         @if($page->bio)
             <p class="text-gray-700 text-sm mb-4">{{ $page->bio }}</p>
@@ -129,8 +187,8 @@
 
         {{-- ========== TAB: Posts ========== --}}
         <div x-show="activeTab === 'posts'">
-            {{-- Create post form (owner only) --}}
-            @if($isOwner)
+            {{-- Create post form (managers only) --}}
+            @if($isManager)
             <div class="bg-gray-50 rounded-2xl p-4 mb-4 border border-gray-200" x-data="{ postType: 'text', showForm: false }">
                 <button @click="showForm = !showForm" class="w-full text-left text-sm text-gray-500 bg-white rounded-xl px-4 py-3 border border-gray-200 hover:bg-gray-50 transition">
                     What's on your mind? Share a post, photo or event...
@@ -178,70 +236,217 @@
             @endif
 
             @if($posts->count())
-                <div class="space-y-4">
+                <div class="space-y-0">
                     @foreach($posts as $post)
-                    <div class="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
-                        <div class="flex items-center gap-2 mb-3">
-                            <img src="{{ $page->avatar }}" class="w-9 h-9 rounded-full object-cover">
-                            <div>
-                                <p class="font-semibold text-sm text-gray-900">{{ $page->name }}</p>
+                    @php
+                        $myReaction = auth()->check() ? $post->reactionBy(auth()->user()) : null;
+                        $topReactions = $post->topReactions(3);
+                        $reactionEmojis = ['like'=>'👍','love'=>'❤️','haha'=>'😂','wow'=>'😮','sad'=>'😢','angry'=>'😡'];
+                        $isManager = $isOwner || in_array($userRole, ['admin','editor','moderator']);
+                    @endphp
+                    <div class="bg-white border-b border-gray-100 py-4" x-data="{ showComments: false, commentLoaded: false, comments: [], commentBody: '' }">
+                        {{-- Post header --}}
+                        <div class="flex items-center gap-2.5 px-4 mb-3">
+                            <img src="{{ $page->avatar }}" class="w-10 h-10 rounded-full object-cover flex-shrink-0">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-1.5">
+                                    <p class="font-bold text-sm text-gray-900">{{ $page->name }}</p>
+                                    @if($page->is_verified)
+                                        <svg class="w-3.5 h-3.5 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                    @endif
+                                </div>
                                 <p class="text-xs text-gray-400">{{ $post->created_at->diffForHumans() }}</p>
                             </div>
-                            @if($isOwner)
-                            <form method="POST" action="/pages/{{ $page->slug }}/posts/{{ $post->id }}" class="ml-auto">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="text-gray-400 hover:text-red-500 text-xs" onclick="return confirm('Delete this post?')">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            {{-- Post "..." menu --}}
+                            <div class="relative flex-shrink-0" x-data="{ postMenuOpen: false }" @click.outside="postMenuOpen = false">
+                                <button @click="postMenuOpen = !postMenuOpen" class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z"/></svg>
                                 </button>
-                            </form>
-                            @endif
+                                <div x-show="postMenuOpen" x-cloak
+                                    class="absolute right-0 mt-1 w-44 bg-white border border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden py-1">
+                                    <button onclick="copyPostUrl('{{ $page->slug }}', {{ $post->id }})"
+                                        class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                        Copy link
+                                    </button>
+                                    @auth
+                                    @if($isManager)
+                                        @if($page->pinned_post_id === $post->id)
+                                        <form method="POST" action="/pages/{{ $page->slug }}/posts/{{ $post->id }}/pin">
+                                            @csrf @method('DELETE')
+                                            <button class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                Unpin post
+                                            </button>
+                                        </form>
+                                        @elseif($isOwner)
+                                        <form method="POST" action="/pages/{{ $page->slug }}/posts/{{ $post->id }}/pin">
+                                            @csrf
+                                            <button class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+                                                Pin post
+                                            </button>
+                                        </form>
+                                        @endif
+                                        <hr class="my-1 border-gray-100">
+                                        <form method="POST" action="/pages/{{ $page->slug }}/posts/{{ $post->id }}" onsubmit="return confirm('Delete this post?')">
+                                            @csrf @method('DELETE')
+                                            <button class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                Delete post
+                                            </button>
+                                        </form>
+                                    @else
+                                        <hr class="my-1 border-gray-100">
+                                        <form method="POST" action="/pages/{{ $page->slug }}/posts/{{ $post->id }}/report">
+                                            @csrf
+                                            <input type="hidden" name="reason" value="spam">
+                                            <button class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                                Report post
+                                            </button>
+                                        </form>
+                                    @endif
+                                    @endauth
+                                </div>
+                            </div>
                         </div>
 
+                        {{-- Event card --}}
                         @if($post->type === 'event')
-                            <div class="bg-blue-50 rounded-xl p-3 mb-3">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                    <span class="text-xs font-semibold text-blue-700 uppercase">Event</span>
-                                </div>
-                                <p class="font-bold text-gray-900">{{ $post->event_title }}</p>
-                                @if($post->event_start)
-                                    <p class="text-sm text-gray-600 mt-1">📅 {{ $post->event_start->format('D, M j Y · g:i A') }}</p>
-                                @endif
-                                @if($post->event_venue)
-                                    <p class="text-sm text-gray-600">📍 {{ $post->event_venue }}</p>
-                                @endif
-                                @if($post->event_ticket_url)
-                                    <a href="{{ $post->event_ticket_url }}" target="_blank" class="inline-block mt-2 text-xs text-blue-600 font-semibold hover:underline">Get Tickets →</a>
-                                @endif
+                        <div class="mx-4 bg-blue-50 rounded-xl p-3 mb-3">
+                            <div class="flex items-center gap-2 mb-1">
+                                <svg class="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                <span class="text-xs font-bold text-blue-700 uppercase tracking-wide">Event</span>
                             </div>
+                            <p class="font-bold text-gray-900">{{ $post->event_title }}</p>
+                            @if($post->event_start)
+                                <p class="text-sm text-gray-600 mt-1">📅 {{ $post->event_start->format('D, M j Y · g:i A') }}</p>
+                            @endif
+                            @if($post->event_venue)
+                                <p class="text-sm text-gray-600">📍 {{ $post->event_venue }}</p>
+                            @endif
+                            @if($post->event_ticket_url)
+                                <a href="{{ $post->event_ticket_url }}" target="_blank" class="inline-block mt-2 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition">Get Tickets →</a>
+                            @endif
+                        </div>
                         @endif
 
+                        {{-- Post body --}}
                         @if($post->body)
-                            <p class="text-sm text-gray-800 mb-3 whitespace-pre-line">{{ $post->body }}</p>
+                            <p class="px-4 text-sm text-gray-800 mb-3 whitespace-pre-line leading-relaxed">{{ $post->body }}</p>
                         @endif
                         @if($post->image_url)
-                            <img src="{{ $post->image_url }}" class="w-full rounded-xl mb-3 object-cover max-h-80" alt="">
+                            <img src="{{ $post->image_url }}" class="w-full mb-3 object-cover max-h-96" alt="">
                         @endif
                         @if($post->video_url)
-                            <div class="mb-3">
+                            <div class="px-4 mb-3">
                                 <a href="{{ $post->video_url }}" target="_blank" class="inline-flex items-center gap-2 text-blue-600 text-sm font-semibold hover:underline">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
                                     Watch Video
                                 </a>
                             </div>
                         @endif
 
-                        {{-- Like button --}}
+                        {{-- Reaction summary bar --}}
+                        @if($post->likes_count > 0)
+                        <div class="px-4 pb-2 flex items-center justify-between text-xs text-gray-500">
+                            <div class="flex items-center gap-1">
+                                @foreach($topReactions as $r => $cnt)
+                                    <span>{{ $reactionEmojis[$r] ?? '👍' }}</span>
+                                @endforeach
+                                <span class="ml-1">{{ $post->likes_count }}</span>
+                            </div>
+                            <span>{{ $post->comments_count }} {{ Str::plural('comment', $post->comments_count) }}</span>
+                        </div>
+                        @endif
+
+                        {{-- Action bar --}}
+                        <div class="px-4 pt-2 border-t border-gray-100 flex items-center gap-0.5">
+                            @auth
+                            {{-- Reaction button with hover picker --}}
+                            <div class="relative group flex-1"
+                                 x-data="{ pickerOpen: false }"
+                                 @mouseenter="pickerOpen = true"
+                                 @mouseleave="pickerOpen = false">
+                                <button
+                                    onclick="reactPost(this, '{{ $page->slug }}', {{ $post->id }}, '{{ $myReaction ?? 'like' }}')"
+                                    data-reaction="{{ $myReaction }}"
+                                    class="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl text-sm font-semibold transition select-none
+                                           {{ $myReaction ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:bg-gray-100' }}">
+                                    <span class="reaction-emoji text-base">{{ $myReaction ? ($reactionEmojis[$myReaction] ?? '👍') : '👍' }}</span>
+                                    <span class="reaction-label">{{ $myReaction ? ucfirst($myReaction) : 'Like' }}</span>
+                                </button>
+                                {{-- Emoji picker popover --}}
+                                <div x-show="pickerOpen" x-cloak
+                                    class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-white border border-gray-200 rounded-2xl shadow-xl px-3 py-2 flex gap-1 z-30 whitespace-nowrap">
+                                    @foreach($reactionEmojis as $rKey => $rEmoji)
+                                    <button type="button"
+                                        onclick="reactPost(document.querySelector('[data-post-id=\'{{ $post->id }}\']'), '{{ $page->slug }}', {{ $post->id }}, '{{ $rKey }}'); pickerOpen = false"
+                                        class="text-2xl hover:scale-125 transition-transform p-1 rounded-lg hover:bg-gray-50"
+                                        title="{{ ucfirst($rKey) }}">{{ $rEmoji }}</button>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            {{-- Comment button --}}
+                            <button
+                                @click="showComments = !showComments; if(!commentLoaded){ loadComments('{{ $page->slug }}', {{ $post->id }}, $data) }"
+                                class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-100 transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                Comment
+                            </button>
+                            @else
+                            <a href="/login" class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-100 transition">
+                                <span class="text-base">👍</span> Like
+                            </a>
+                            @endauth
+
+                            {{-- Share post --}}
+                            <button onclick="copyPostUrl('{{ $page->slug }}', {{ $post->id }})"
+                                class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-100 transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+                                Share
+                            </button>
+                        </div>
+
+                        {{-- Comment section --}}
                         @auth
-                        <button onclick="likePost(this, '{{ $page->slug }}', {{ $post->id }})"
-                            data-liked="{{ $post->isLikedBy(auth()->user()) ? 'true' : 'false' }}"
-                            class="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-xl transition
-                                   {{ $post->isLikedBy(auth()->user()) ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
-                            <svg class="w-4 h-4" fill="{{ $post->isLikedBy(auth()->user()) ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/>
-                            </svg>
-                            <span class="like-count">{{ $post->likes_count }}</span> Like
-                        </button>
+                        <div x-show="showComments" x-cloak class="border-t border-gray-100 mt-2 px-4 pt-3 pb-1" data-post-id="{{ $post->id }}">
+                            {{-- Comment list --}}
+                            <div class="space-y-2.5 mb-3" x-ref="commentList">
+                                <template x-for="c in comments" :key="c.id">
+                                    <div class="flex gap-2.5">
+                                        <img :src="c.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(c.author) + '&size=32&background=e5e7eb&color=6b7280'"
+                                            class="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-gray-200"
+                                            onerror="this.src='https://ui-avatars.com/api/?name=U&size=32&background=e5e7eb&color=6b7280'">
+                                        <div class="flex-1">
+                                            <div class="bg-gray-100 rounded-2xl px-3 py-2">
+                                                <p class="text-xs font-bold text-gray-900" x-text="c.author"></p>
+                                                <p class="text-sm text-gray-800 mt-0.5" x-text="c.body"></p>
+                                            </div>
+                                            <p class="text-xs text-gray-400 mt-1 ml-1" x-text="c.time"></p>
+                                        </div>
+                                    </div>
+                                </template>
+                                <p x-show="comments.length === 0 && commentLoaded" class="text-xs text-gray-400 text-center py-2">No comments yet. Be first!</p>
+                            </div>
+                            {{-- Comment input --}}
+                            <div class="flex gap-2 items-start">
+                                <img src="{{ auth()->user()->avatar ?? 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->name ?? 'U').'&size=32&background=e5e7eb&color=6b7280' }}"
+                                    class="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-gray-200">
+                                <div class="flex-1 flex gap-2">
+                                    <input type="text" x-model="commentBody"
+                                        placeholder="Write a comment..."
+                                        class="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        @keydown.enter="postComment('{{ $page->slug }}', {{ $post->id }}, $data)">
+                                    <button @click="postComment('{{ $page->slug }}', {{ $post->id }}, $data)"
+                                        class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                         @endauth
                     </div>
                     @endforeach
@@ -563,6 +768,95 @@ function sharePage() {
             if (lbl) { lbl.textContent = 'Copied!'; setTimeout(() => lbl.textContent = 'Share', 2000); }
         });
     }
+}
+
+function copyPageUrl() {
+    navigator.clipboard.writeText('{{ url("/pages/".$page->slug) }}').then(() => {
+        showToast('Link copied!');
+    });
+}
+
+function showReportPage() {
+    document.getElementById('report-page-modal').classList.remove('hidden');
+}
+
+function hideReportPage() {
+    document.getElementById('report-page-modal').classList.add('hidden');
+}
+
+function copyPostUrl(slug, postId) {
+    const url = window.location.origin + '/pages/' + slug + '#post-' + postId;
+    navigator.clipboard.writeText(url).then(() => showToast('Link copied!'));
+}
+
+function reactPost(btn, slug, postId, reaction) {
+    fetch(`/pages/${slug}/posts/${postId}/react`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ reaction })
+    }).then(r => r.json()).then(data => {
+        const card = btn.closest('[id^="post-"]');
+        if (!card) return;
+        const countEl = card.querySelector('.reaction-count');
+        if (countEl) countEl.textContent = data.likes_count;
+        const reactionBar = card.querySelector('.reaction-bar');
+        if (reactionBar && data.top_reactions) {
+            const emojis = { like:'👍', love:'❤️', haha:'😂', wow:'😮', sad:'😢', angry:'😡' };
+            const parts = Object.entries(data.top_reactions).slice(0,3).map(([r,c]) => `<span>${emojis[r]||'👍'}</span>`).join('');
+            reactionBar.innerHTML = parts + `<span class="ml-1 text-gray-500 text-xs">${data.likes_count}</span>`;
+        }
+        if (data.reacted) {
+            btn.classList.add('text-blue-600');
+        } else {
+            btn.classList.remove('text-blue-600');
+        }
+    });
+}
+
+function loadComments(slug, postId, alpineData) {
+    if (alpineData.commentLoaded) return;
+    fetch(`/pages/${slug}/posts/${postId}/comments`, {
+        headers: { 'Accept': 'application/json' }
+    }).then(r => r.json()).then(data => {
+        alpineData.comments = data.comments || [];
+        alpineData.commentLoaded = true;
+    });
+}
+
+function postComment(slug, postId, alpineData) {
+    const body = alpineData.commentBody.trim();
+    if (!body) return;
+    fetch(`/pages/${slug}/posts/${postId}/comments`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ body })
+    }).then(r => r.json()).then(data => {
+        if (data.comment) {
+            alpineData.comments.push(data.comment);
+            alpineData.commentBody = '';
+            const card = document.getElementById('post-' + postId);
+            if (card) {
+                const ccEl = card.querySelector('.comment-count');
+                if (ccEl) ccEl.textContent = parseInt(ccEl.textContent || '0') + 1;
+            }
+        }
+    });
+}
+
+function showToast(msg) {
+    const t = document.createElement('div');
+    t.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-sm px-4 py-2 rounded-full shadow-lg z-50 transition-opacity';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 400); }, 2000);
 }
 </script>
 @endsection
