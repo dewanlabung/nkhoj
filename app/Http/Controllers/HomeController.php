@@ -7,6 +7,7 @@ use App\Models\Comment;
 use App\Models\Poll;
 use App\Models\Post;
 use App\Models\Tag;
+use App\Models\User;
 use App\Models\Widget;
 use Illuminate\Support\Facades\File;
 
@@ -97,6 +98,29 @@ class HomeController extends Controller
             'sidebarWidgets', 'homeTopWidgets', 'homeBottomWidgets',
             'widgetData'
         ));
+    }
+
+    public function leaderboard()
+    {
+        $topByFollowers = User::withCount('followers')
+            ->where('role', '!=', 'reader')
+            ->orderByDesc('followers_count')
+            ->limit(10)
+            ->get();
+
+        $topByViews = User::withSum(['posts as total_views' => fn($q) => $q->published()], 'view_count')
+            ->where('role', '!=', 'reader')
+            ->orderByDesc('total_views')
+            ->limit(10)
+            ->get();
+
+        $topByPosts = User::withCount(['posts as published_posts_count' => fn($q) => $q->published()])
+            ->where('role', '!=', 'reader')
+            ->orderByDesc('published_posts_count')
+            ->limit(10)
+            ->get();
+
+        return view('leaderboard', compact('topByFollowers', 'topByViews', 'topByPosts'));
     }
 
     public function followingFeed()

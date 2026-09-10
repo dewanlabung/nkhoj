@@ -257,26 +257,29 @@
 
                 {{-- ═══════════════════ SHARE + BOOKMARK ═══════════════════ --}}
                 <div class="mt-6 pt-4 border-t border-gray-100 flex items-center gap-3 flex-wrap">
+                    <div x-data="{ shares: {{ $post->share_count ?? 0 }}, trackShare() { fetch('/posts/{{ $post->slug }}/share', { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content } }).then(r=>r.json()).then(d=>{ this.shares=d.share_count; }).catch(()=>{}); } }" class="flex flex-wrap items-center gap-2 w-full">
                     <span class="text-sm text-gray-500 font-medium">Share:</span>
                     <a href="https://wa.me/?text={{ urlencode($post->title . ' ' . url()->current()) }}"
-                        target="_blank" rel="noopener"
+                        target="_blank" rel="noopener" @click="trackShare()"
                         class="px-3 py-1.5 text-xs font-medium bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors">
                         WhatsApp
                     </a>
                     <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(url()->current()) }}"
-                        target="_blank"
+                        target="_blank" @click="trackShare()"
                         class="px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors">
                         Facebook
                     </a>
                     <a href="https://twitter.com/intent/tweet?text={{ urlencode($post->title) }}&url={{ urlencode(url()->current()) }}"
-                        target="_blank"
+                        target="_blank" @click="trackShare()"
                         class="px-3 py-1.5 text-xs font-medium bg-sky-50 text-sky-600 rounded-lg hover:bg-sky-100 transition-colors">
                         Twitter/X
                     </a>
-                    <button onclick="navigator.clipboard.writeText(window.location.href).then(()=>this.textContent='Copied!')"
+                    <button @click="navigator.clipboard.writeText(window.location.href).then(()=>{ $el.textContent='Copied!'; trackShare(); setTimeout(()=>$el.textContent='Copy Link',2000); })"
                         class="px-3 py-1.5 text-xs font-medium bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors">
                         Copy Link
                     </button>
+                    <span x-show="shares > 0" class="text-xs text-gray-400 ml-1" x-text="shares + ' shares'"></span>
+                    </div>
 
                     @auth
                     {{-- Bookmark button --}}

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Notification;
 use App\Models\Post;
 use App\Models\Tag;
 use Illuminate\Http\Request;
@@ -160,6 +161,10 @@ class DashboardController extends Controller
         $post = Post::create($postData);
         $this->syncTags($post, $data['tags'] ?? '');
 
+        if ($post->status === 'published') {
+            $this->notifyFollowersOfNewPost($post);
+        }
+
         $label = $isEvent ? 'Event' : 'Article';
         return redirect('/dashboard')->with('success', "{$label} saved!");
     }
@@ -258,7 +263,30 @@ class DashboardController extends Controller
 
         $this->syncTags($post, $data['tags'] ?? '');
 
+        if ($post->wasChanged('status') && $post->status === 'published') {
+            $this->notifyFollowersOfNewPost($post);
+        }
+
         return redirect('/dashboard')->with('success', 'Article updated!');
+    }
+
+    private function notifyFollowersOfNewPost(Post $post): void
+    {
+        $author   = auth()->user();
+        $followers = $author->followers()->pluck('users.id');
+        $payload  = [
+            'post_slug'    => $post->slug,
+            'post_title'   => $post->title,
+            'author_name'  => $author->name,
+            'author_username' => $author->username,
+        ];
+        foreach ($followers as $followerId) {
+            Notification::create([
+                'user_id' => $followerId,
+                'type'    => 'new_post',
+                'data'    => $payload,
+            ]);
+        }
     }
 
     private function textToBlocks(string $text): array
