@@ -31,10 +31,12 @@
         @endif
 
         {{-- GROUP 1: Page setup --}}
-        <div class="pt-1 pb-0 px-1">
+        <div x-data="{ open: true }">
+        <div @click="open = !open" class="pt-1 pb-1 px-1 flex items-center justify-between cursor-pointer select-none">
             <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Page setup</p>
+            <svg class="w-3.5 h-3.5 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
         </div>
-        <div class="space-y-1">
+        <div x-show="open" x-cloak class="space-y-1">
 
         {{-- Page name --}}
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
@@ -135,12 +137,15 @@
         </div>
 
         </div>
+        </div>
 
         {{-- GROUP 2: Contact & location --}}
-        <div class="pt-3 pb-0 px-1">
+        <div x-data="{ open: true }">
+        <div @click="open = !open" class="pt-3 pb-1 px-1 flex items-center justify-between cursor-pointer select-none">
             <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Contact &amp; location</p>
+            <svg class="w-3.5 h-3.5 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
         </div>
-        <div class="space-y-1">
+        <div x-show="open" x-cloak class="space-y-1">
 
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
             <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
@@ -260,11 +265,15 @@
 
         </div>
 
-        {{-- GROUP 3: Audience & visibility --}}
-        <div class="pt-3 pb-0 px-1">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Audience &amp; visibility</p>
         </div>
-        <div class="space-y-1">
+
+        {{-- GROUP 3: Audience & visibility --}}
+        <div x-data="{ open: true }">
+        <div @click="open = !open" class="pt-3 pb-1 px-1 flex items-center justify-between cursor-pointer select-none">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Audience &amp; visibility</p>
+            <svg class="w-3.5 h-3.5 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div x-show="open" x-cloak class="space-y-1">
 
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
             <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
@@ -323,12 +332,15 @@
         </div>
 
         </div>
+        </div>
 
         {{-- GROUP 4: Monetization & CTAs --}}
-        <div class="pt-3 pb-0 px-1">
+        <div x-data="{ open: true }">
+        <div @click="open = !open" class="pt-3 pb-1 px-1 flex items-center justify-between cursor-pointer select-none">
             <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Monetization &amp; CTAs</p>
+            <svg class="w-3.5 h-3.5 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
         </div>
-        <div class="space-y-1">
+        <div x-show="open" x-cloak class="space-y-1">
 
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
             <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
@@ -395,6 +407,7 @@
         </div>
 
         </div>
+        </div>
 
         <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition mt-4">
             Save changes
@@ -403,10 +416,12 @@
 
     {{-- GROUP 5: Page status (separate from main form) --}}
     <div class="max-w-xl mx-auto px-4 pt-3 pb-10">
-        <div class="pt-1 pb-0 px-1 mb-1">
+        <div x-data="{ open: true }">
+        <div @click="open = !open" class="pt-1 pb-1 px-1 flex items-center justify-between cursor-pointer select-none">
             <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Page status</p>
+            <svg class="w-3.5 h-3.5 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
         </div>
-        <div class="space-y-1">
+        <div x-show="open" x-cloak class="space-y-1">
 
         {{-- Archive page --}}
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
@@ -461,7 +476,8 @@
             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </a>
 
-    </div>
+        </div>
+        </div>
     </div>
 </div>
 
