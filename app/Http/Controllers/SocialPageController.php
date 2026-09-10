@@ -108,16 +108,34 @@ class SocialPageController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'name'         => 'required|string|max:150',
-            'page_type'    => 'required|in:creator,business',
-            'categories'   => 'nullable|array|max:3',
-            'categories.*' => 'nullable|string|max:100',
-            'bio'          => 'nullable|string|max:500',
-            'website'      => 'nullable|url|max:255',
-            'location'     => 'nullable|string|max:255',
-            'phone'        => 'nullable|string|max:50',
-        ]);
+        if ($request->expectsJson()) {
+            $data = $request->validate([
+                'name'         => 'required|string|max:150',
+                'username'     => ['nullable','string','max:60','regex:/^[a-z0-9._-]+$/i',
+                                   'unique:social_pages,username'],
+                'page_type'    => 'required|in:creator,business',
+                'categories'   => 'nullable|array|max:3',
+                'categories.*' => 'nullable|string|max:100',
+                'bio'          => 'nullable|string|max:500',
+                'website'      => 'nullable|url|max:255',
+                'location'     => 'nullable|string|max:255',
+                'phone'        => 'nullable|string|max:50',
+                'social_links' => 'nullable|array',
+            ]);
+        } else {
+            $data = $request->validate([
+                'name'         => 'required|string|max:150',
+                'username'     => ['nullable','string','max:60','regex:/^[a-z0-9._-]+$/i',
+                                   'unique:social_pages,username'],
+                'page_type'    => 'required|in:creator,business',
+                'categories'   => 'nullable|array|max:3',
+                'categories.*' => 'nullable|string|max:100',
+                'bio'          => 'nullable|string|max:500',
+                'website'      => 'nullable|url|max:255',
+                'location'     => 'nullable|string|max:255',
+                'phone'        => 'nullable|string|max:50',
+            ]);
+        }
 
         $slug = Str::slug($data['name']);
         $base = $slug ?: 'page';
@@ -126,22 +144,52 @@ class SocialPageController extends Controller
             $slug = "{$base}-{$i}"; $i++;
         }
 
+        $username = null;
+        if (!empty($data['username'])) {
+            $username = strtolower(trim($data['username']));
+        }
+
         $page = SocialPage::create([
-            'uuid'       => Str::uuid(),
-            'user_id'    => auth()->id(),
-            'name'       => $data['name'],
-            'slug'       => $slug,
-            'page_type'  => $data['page_type'],
-            'categories' => array_values(array_filter($data['categories'] ?? [])),
-            'bio'        => $data['bio'] ?? null,
-            'website'    => $data['website'] ?? null,
-            'location'   => $data['location'] ?? null,
-            'phone'      => $data['phone'] ?? null,
-            'status'     => 'active',
+            'uuid'         => Str::uuid(),
+            'user_id'      => auth()->id(),
+            'name'         => $data['name'],
+            'slug'         => $slug,
+            'username'     => $username,
+            'page_type'    => $data['page_type'],
+            'categories'   => array_values(array_filter($data['categories'] ?? [])),
+            'bio'          => $data['bio'] ?? null,
+            'website'      => $data['website'] ?? null,
+            'location'     => $data['location'] ?? null,
+            'phone'        => $data['phone'] ?? null,
+            'social_links' => $data['social_links'] ?? null,
+            'status'       => 'active',
         ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success'  => true,
+                'redirect' => "/pages/{$page->slug}/dashboard",
+            ]);
+        }
 
         return redirect("/pages/{$page->slug}/dashboard")
             ->with('success', 'Your page has been created!');
+    }
+
+    public function checkUsername(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $username = strtolower(trim($request->input('username', '')));
+        if (!$username || !preg_match('/^[a-z0-9._-]+$/', $username)) {
+            return response()->json(['available' => false, 'message' => 'Only letters, numbers, dots, dashes, underscores.']);
+        }
+        if (strlen($username) < 3) {
+            return response()->json(['available' => false, 'message' => 'At least 3 characters.']);
+        }
+        $taken = SocialPage::where('username', $username)->exists();
+        return response()->json([
+            'available' => !$taken,
+            'message'   => $taken ? 'Already taken.' : 'Available!',
+        ]);
     }
 
     // ─── Public Profile ────────────────────────────────────────────────────────
@@ -150,7 +198,7 @@ class SocialPageController extends Controller
     {
         $page = SocialPage::where('slug', $slug)
             ->where('is_active', true)
-            ->where('status', 'active')
+            ->where(fn ($q) => $q->where('status', 'active')->orWhereNull('status'))
             ->firstOrFail();
 
         // record daily view

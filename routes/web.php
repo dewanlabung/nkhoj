@@ -427,6 +427,7 @@ Route::middleware('auth')->group(function () {
     // Create
     Route::get('/pages/create',                              [SocialPageController::class, 'create']);
     Route::post('/pages',                                    [SocialPageController::class, 'store']);
+    Route::get('/api/pages/check-username',                  [SocialPageController::class, 'checkUsername']);
     // Follow
     Route::post('/pages/{slug}/follow',                      [SocialPageController::class, 'follow'])->name('pages.follow');
     // Posts

@@ -25,15 +25,19 @@
         <div class="h-1 bg-blue-600 transition-all duration-300" :style="`width: ${(step / totalSteps) * 100}%`"></div>
     </div>
 
+    {{-- Global error --}}
+    <div x-show="errorMsg" x-cloak class="max-w-xl mx-auto px-4 pt-4">
+        <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm" x-text="errorMsg"></div>
+    </div>
+
     <div class="max-w-xl mx-auto px-4 py-8">
 
-        {{-- STEP 1: Page type (Business vs Creator) --}}
+        {{-- STEP 1: Page type --}}
         <div x-show="step === 1" x-transition>
             <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">What type of page?</h2>
-            <p class="text-gray-500 text-sm mb-6">Choose the type that best fits your goal. This sets up the right tools and features for you.</p>
+            <p class="text-gray-500 text-sm mb-6">Choose the type that best fits your goal.</p>
 
             <div class="space-y-4">
-                {{-- Business --}}
                 <label class="block cursor-pointer" :class="form.page_type === 'business' ? 'ring-2 ring-blue-500 rounded-2xl' : ''">
                     <input type="radio" x-model="form.page_type" value="business" class="sr-only">
                     <div class="border-2 rounded-2xl p-5 transition"
@@ -53,19 +57,17 @@
                                         <div x-show="form.page_type === 'business'" class="w-2 h-2 bg-white rounded-full"></div>
                                     </div>
                                 </div>
-                                <p class="text-gray-500 text-sm mt-1">For companies, brands, local businesses, restaurants, shops, non-profits, and organizations.</p>
+                                <p class="text-gray-500 text-sm mt-1">For companies, brands, local businesses, restaurants, shops, and organizations.</p>
                                 <div class="mt-3 flex flex-wrap gap-2">
                                     <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">📍 Location & hours</span>
                                     <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">🗺️ Map listing</span>
                                     <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">📞 Contact info</span>
-                                    <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">🔍 SEO</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </label>
 
-                {{-- Creator --}}
                 <label class="block cursor-pointer" :class="form.page_type === 'creator' ? 'ring-2 ring-purple-500 rounded-2xl' : ''">
                     <input type="radio" x-model="form.page_type" value="creator" class="sr-only">
                     <div class="border-2 rounded-2xl p-5 transition"
@@ -85,12 +87,11 @@
                                         <div x-show="form.page_type === 'creator'" class="w-2 h-2 bg-white rounded-full"></div>
                                     </div>
                                 </div>
-                                <p class="text-gray-500 text-sm mt-1">For content creators, public figures, artists, influencers, journalists, and personalities building an audience.</p>
+                                <p class="text-gray-500 text-sm mt-1">For content creators, public figures, artists, influencers, and personalities.</p>
                                 <div class="mt-3 flex flex-wrap gap-2">
                                     <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">✨ Creator tools</span>
-                                    <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">📊 Audience insights</span>
                                     <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">🔗 Social links</span>
-                                    <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">🔍 SEO</span>
+                                    <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">📊 Audience insights</span>
                                 </div>
                             </div>
                         </div>
@@ -100,42 +101,71 @@
             <p class="text-gray-400 text-xs text-center mt-4">You can change this setting later in Page Settings.</p>
         </div>
 
-        {{-- STEP 2: Page name --}}
+        {{-- STEP 2: Page name + username --}}
         <div x-show="step === 2" x-transition>
             <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Name your Page</h2>
-            <p class="text-gray-500 text-sm mb-1"
+            <p class="text-gray-500 text-sm mb-6"
                x-text="form.page_type === 'business'
-                   ? 'Use your business name or the name people search for to find you.'
-                   : 'Use your real name or the name you\'re known by online.'">
-            </p>
-            <p class="text-gray-400 text-xs mb-6">This will be your Page's public name and URL.</p>
-
-            <input
-                type="text"
-                x-model="form.name"
-                @input="generateSlug"
-                :placeholder="form.page_type === 'business' ? 'Business or brand name' : 'Your name or creator handle'"
-                class="w-full border border-gray-300 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                maxlength="150"
-                autofocus
-            >
-            <p class="text-gray-400 text-sm mt-2">
-                dewanlabung.com.np/pages/<span class="text-gray-700 font-medium" x-text="form.slug || 'your-page-name'"></span>
+                   ? 'Use your business name as it appears on your signage or website.'
+                   : 'Use your real name or the name your audience knows you by.'">
             </p>
 
-            {{-- Business: show sub-type hint --}}
-            <template x-if="form.page_type === 'business'">
-                <div class="mt-5 p-4 bg-blue-50 rounded-xl border border-blue-100">
-                    <p class="text-xs font-semibold text-blue-700 mb-1">💡 Business tip</p>
-                    <p class="text-xs text-blue-600">Use the official name of your business as it appears on your signage, website, or legal documents for better SEO.</p>
+            <div class="space-y-4">
+                {{-- Display name --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Display Name *</label>
+                    <input
+                        type="text"
+                        x-model="form.name"
+                        @input="onNameInput"
+                        :placeholder="form.page_type === 'business' ? 'e.g. Dewan Café Kathmandu' : 'e.g. Dewan Labung'"
+                        class="w-full border border-gray-300 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        maxlength="150"
+                        autofocus
+                    >
                 </div>
-            </template>
-            <template x-if="form.page_type === 'creator'">
-                <div class="mt-5 p-4 bg-purple-50 rounded-xl border border-purple-100">
-                    <p class="text-xs font-semibold text-purple-700 mb-1">✨ Creator tip</p>
-                    <p class="text-xs text-purple-600">Use the same name you use on TikTok, YouTube, or Instagram so your audience can find you easily.</p>
+
+                {{-- Username handle --}}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                        Page Username <span class="text-gray-400 font-normal normal-case">(your unique @handle)</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-base select-none">@</span>
+                        <input
+                            type="text"
+                            x-model="form.username"
+                            @input="checkUsername"
+                            placeholder="yourpage"
+                            class="w-full border rounded-xl pl-8 pr-10 py-3 text-base focus:outline-none transition"
+                            :class="{
+                                'border-green-400 focus:border-green-500 focus:ring-2 focus:ring-green-100': usernameStatus === 'available',
+                                'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100': usernameStatus === 'taken',
+                                'border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100': usernameStatus === '' || usernameStatus === 'checking'
+                            }"
+                            maxlength="60"
+                        >
+                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm">
+                            <template x-if="usernameStatus === 'checking'">
+                                <svg class="animate-spin w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                            </template>
+                            <template x-if="usernameStatus === 'available'">
+                                <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </template>
+                            <template x-if="usernameStatus === 'taken'">
+                                <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </template>
+                        </span>
+                    </div>
+                    <p class="text-xs mt-1"
+                       :class="usernameStatus === 'available' ? 'text-green-600' : usernameStatus === 'taken' ? 'text-red-500' : 'text-gray-400'"
+                       x-text="usernameMsg || 'Letters, numbers, dots, dashes, underscores only.'">
+                    </p>
+                    <p class="text-gray-400 text-sm mt-2">
+                        dewanlabung.com.np/pages/<span class="text-gray-700 font-medium" x-text="form.slug || 'your-page-name'"></span>
+                    </p>
                 </div>
-            </template>
+            </div>
         </div>
 
         {{-- STEP 3: Categories --}}
@@ -143,12 +173,11 @@
             <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Add categories</h2>
             <p class="text-gray-500 text-sm mb-1"
                x-text="form.page_type === 'business'
-                   ? 'Choose what best describes your business. Helps people find you in search.'
-                   : 'Choose your content niche. Helps the right audience discover you.'">
+                   ? 'Choose what best describes your business.'
+                   : 'Choose your content niche.'">
             </p>
             <p class="text-gray-400 text-xs mb-4">You can add up to 3.</p>
 
-            {{-- Selected chips --}}
             <div class="flex flex-wrap gap-2 border border-gray-300 rounded-xl px-3 py-3 mb-4 min-h-[52px]">
                 <template x-for="(cat, i) in form.categories" :key="i">
                     <span class="inline-flex items-center gap-1 text-sm font-medium px-3 py-1 rounded-full"
@@ -165,7 +194,6 @@
                 </template>
             </div>
 
-            {{-- Category search --}}
             <div x-show="showCatInput" class="mb-4">
                 <input type="text" x-model="catSearch" @input="filterCategories"
                        placeholder="Search categories..."
@@ -197,19 +225,19 @@
             </div>
         </div>
 
-        {{-- STEP 4: Bio / Description --}}
+        {{-- STEP 4: Bio + social links --}}
         <div x-show="step === 4" x-transition>
             <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2"
                 x-text="form.page_type === 'business' ? 'Describe your business' : 'Add a bio'"></h2>
             <p class="text-gray-500 text-sm mb-6"
                x-text="form.page_type === 'business'
-                   ? 'Tell people what products or services you offer. This also helps with SEO.'
-                   : 'Tell your audience what kind of content you create. Be authentic!'">
+                   ? 'Tell people what you offer. This also helps with SEO.'
+                   : 'Tell your audience what content you create.'">
             </p>
             <textarea
                 x-model="form.bio"
                 :placeholder="form.page_type === 'business' ? 'e.g. We offer premium quality products and services in Kathmandu...' : 'e.g. I create tech tutorials and lifestyle content for Nepali audiences...'"
-                rows="5"
+                rows="4"
                 maxlength="500"
                 class="w-full border border-gray-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 resize-none"
             ></textarea>
@@ -218,21 +246,40 @@
             {{-- Business extra fields --}}
             <template x-if="form.page_type === 'business'">
                 <div class="mt-5 space-y-3">
-                    <p class="text-sm font-semibold text-gray-700">Business details <span class="text-gray-400 font-normal">(optional, fill in Settings later)</span></p>
+                    <p class="text-sm font-semibold text-gray-700">Business details <span class="text-gray-400 font-normal">(optional)</span></p>
                     <input type="text" x-model="form.website" placeholder="🌐 Website URL (https://...)"
                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-400">
                     <input type="text" x-model="form.location" placeholder="📍 Location (City, Country)"
                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-400">
                     <input type="text" x-model="form.phone" placeholder="📞 Phone number"
                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-400">
+                    <input type="email" x-model="form.email" placeholder="✉️ Business email"
+                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-400">
+                    <p class="text-sm font-semibold text-gray-700 pt-1">Social links <span class="text-gray-400 font-normal">(optional)</span></p>
+                    <input type="text" x-model="form.social_links.facebook" placeholder="🔵 Facebook page URL"
+                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-400">
+                    <input type="text" x-model="form.social_links.instagram" placeholder="📸 Instagram profile URL"
+                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-pink-400">
+                    <input type="text" x-model="form.social_links.tiktok" placeholder="🎵 TikTok profile URL"
+                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gray-400">
                 </div>
             </template>
 
-            {{-- Creator: social links --}}
+            {{-- Creator social links --}}
             <template x-if="form.page_type === 'creator'">
                 <div class="mt-5 space-y-3">
-                    <p class="text-sm font-semibold text-gray-700">Your social links <span class="text-gray-400 font-normal">(optional)</span></p>
-                    <input type="text" x-model="form.website" placeholder="🔗 Your main link (website, Linktree...)"
+                    <p class="text-sm font-semibold text-gray-700">Your social links <span class="text-gray-400 font-normal">(optional — helps fans find you)</span></p>
+                    <input type="text" x-model="form.social_links.youtube" placeholder="▶️ YouTube channel URL"
+                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400">
+                    <input type="text" x-model="form.social_links.tiktok" placeholder="🎵 TikTok profile URL"
+                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gray-400">
+                    <input type="text" x-model="form.social_links.instagram" placeholder="📸 Instagram profile URL"
+                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-pink-400">
+                    <input type="text" x-model="form.social_links.twitter" placeholder="𝕏 Twitter/X profile URL"
+                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-400">
+                    <input type="text" x-model="form.social_links.facebook" placeholder="🔵 Facebook profile URL"
+                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-400">
+                    <input type="text" x-model="form.website" placeholder="🔗 Main link (website, Linktree...)"
                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-purple-400">
                 </div>
             </template>
@@ -259,8 +306,10 @@
             </template>
             <template x-if="step === totalSteps">
                 <button type="button" @click="submitForm"
-                        class="w-full py-4 rounded-xl font-bold text-lg transition bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-                    Create Page
+                        :disabled="submitting"
+                        class="w-full py-4 rounded-xl font-bold text-lg transition"
+                        :class="submitting ? 'bg-blue-400 text-white cursor-wait' : 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm'">
+                    <span x-text="submitting ? 'Creating...' : 'Create Page'"></span>
                 </button>
             </template>
         </div>
@@ -276,18 +325,26 @@ function pageCreate() {
     return {
         step: 1,
         totalSteps: 4,
-        stepTitles: ['Choose page type', 'Name your page', 'Add categories', 'Add description'],
+        stepTitles: ['Choose page type', 'Name your page', 'Add categories', 'Add description & links'],
         showCatInput: false,
         catSearch: '',
+        submitting: false,
+        errorMsg: '',
+        usernameStatus: '', // '', 'checking', 'available', 'taken'
+        usernameMsg: '',
+        usernameTimer: null,
         form: {
             name: '',
             slug: '',
+            username: '',
             categories: [],
             bio: '',
             page_type: '',
             website: '',
             location: '',
             phone: '',
+            email: '',
+            social_links: { facebook: '', instagram: '', twitter: '', tiktok: '', youtube: '' },
         },
 
         businessCategories: [
@@ -313,15 +370,19 @@ function pageCreate() {
 
         get canProceed() {
             if (this.step === 1) return !!this.form.page_type;
-            if (this.step === 2) return this.form.name.trim().length >= 2;
+            if (this.step === 2) {
+                if (this.form.name.trim().length < 2) return false;
+                if (this.usernameStatus === 'taken') return false;
+                if (this.usernameStatus === 'checking') return false;
+                return true;
+            }
             if (this.step === 3) return this.form.categories.length > 0;
-            return true; // bio optional
+            return true;
         },
 
         nextStep() {
             if (this.canProceed && this.step < this.totalSteps) {
                 this.step++;
-                // Update category suggestions when entering step 3
                 if (this.step === 3) {
                     this.filteredCategories = this.form.page_type === 'creator'
                         ? [...this.creatorCategories]
@@ -330,13 +391,46 @@ function pageCreate() {
             }
         },
 
-        generateSlug() {
+        onNameInput() {
+            // auto-generate slug
             this.form.slug = this.form.name
                 .toLowerCase()
                 .replace(/[^a-z0-9\s-]/g, '')
                 .trim()
                 .replace(/\s+/g, '-')
                 .replace(/-+/g, '-');
+            // auto-suggest username from name if empty
+            if (!this.form.username) {
+                const suggested = this.form.name
+                    .toLowerCase()
+                    .replace(/[^a-z0-9._-]/g, '')
+                    .slice(0, 60);
+                if (suggested.length >= 3) {
+                    this.form.username = suggested;
+                    this.checkUsername();
+                }
+            }
+        },
+
+        checkUsername() {
+            clearTimeout(this.usernameTimer);
+            const u = this.form.username.trim().toLowerCase();
+            if (!u) { this.usernameStatus = ''; this.usernameMsg = ''; return; }
+            if (u.length < 3) { this.usernameStatus = 'taken'; this.usernameMsg = 'At least 3 characters.'; return; }
+            if (!/^[a-z0-9._-]+$/.test(u)) { this.usernameStatus = 'taken'; this.usernameMsg = 'Only letters, numbers, dots, dashes, underscores.'; return; }
+            this.usernameStatus = 'checking';
+            this.usernameMsg = 'Checking...';
+            this.usernameTimer = setTimeout(() => {
+                fetch(`/api/pages/check-username?username=${encodeURIComponent(u)}`, {
+                    headers: { 'Accept': 'application/json' }
+                }).then(r => r.json()).then(data => {
+                    this.usernameStatus = data.available ? 'available' : 'taken';
+                    this.usernameMsg = data.message;
+                }).catch(() => {
+                    this.usernameStatus = '';
+                    this.usernameMsg = '';
+                });
+            }, 400);
         },
 
         addCategory(cat) {
@@ -360,35 +454,54 @@ function pageCreate() {
             }
         },
 
-        submitForm() {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '/pages';
-            const csrf = document.createElement('input');
-            csrf.type = 'hidden'; csrf.name = '_token';
-            csrf.value = document.querySelector('meta[name="csrf-token"]')?.content || '';
-            form.appendChild(csrf);
+        async submitForm() {
+            if (this.submitting) return;
+            this.submitting = true;
+            this.errorMsg = '';
 
-            const fields = {
-                name: this.form.name,
-                page_type: this.form.page_type,
-                bio: this.form.bio,
-                website: this.form.website,
-                location: this.form.location,
-                phone: this.form.phone,
+            // Filter empty social links
+            const socialLinks = {};
+            Object.entries(this.form.social_links).forEach(([k, v]) => {
+                if (v && v.trim()) socialLinks[k] = v.trim();
+            });
+
+            const payload = {
+                name:         this.form.name,
+                username:     this.form.username || null,
+                page_type:    this.form.page_type,
+                categories:   this.form.categories,
+                bio:          this.form.bio,
+                website:      this.form.website,
+                location:     this.form.location,
+                phone:        this.form.phone,
+                social_links: Object.keys(socialLinks).length ? socialLinks : null,
             };
-            Object.entries(fields).forEach(([k, v]) => {
-                const el = document.createElement('input');
-                el.type = 'hidden'; el.name = k; el.value = v;
-                form.appendChild(el);
-            });
-            this.form.categories.forEach((cat, i) => {
-                const el = document.createElement('input');
-                el.type = 'hidden'; el.name = `categories[${i}]`; el.value = cat;
-                form.appendChild(el);
-            });
-            document.body.appendChild(form);
-            form.submit();
+
+            try {
+                const res = await fetch('/pages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    window.location.href = data.redirect;
+                } else if (res.status === 422 && data.errors) {
+                    const first = Object.values(data.errors)[0];
+                    this.errorMsg = Array.isArray(first) ? first[0] : first;
+                    this.submitting = false;
+                } else {
+                    this.errorMsg = data.message || 'Something went wrong. Please try again.';
+                    this.submitting = false;
+                }
+            } catch (e) {
+                this.errorMsg = 'Network error. Please check your connection and try again.';
+                this.submitting = false;
+            }
         },
     };
 }
