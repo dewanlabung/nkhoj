@@ -477,6 +477,25 @@ Route::middleware('auth')->group(function () {
     // Announcement & Highlights
     Route::post('/pages/{slug}/announcement',                [SocialPageController::class, 'updateAnnouncement']);
     Route::post('/pages/{slug}/highlights',                  [SocialPageController::class, 'updateHighlights']);
+    // Archive
+    Route::post('/pages/{slug}/archive',                     [SocialPageController::class, 'archive']);
+    Route::post('/pages/{slug}/unarchive',                   [SocialPageController::class, 'unarchive']);
+    // Blocking
+    Route::get('/pages/{slug}/blocked-users',                [SocialPageController::class, 'blockedUsers']);
+    Route::post('/pages/{slug}/block/{userId}',              [SocialPageController::class, 'blockUser']);
+    Route::delete('/pages/{slug}/block/{userId}',            [SocialPageController::class, 'unblockUser']);
+    // Activity log
+    Route::get('/pages/{slug}/activity-log',                 [SocialPageController::class, 'activityLog']);
+    // Stories
+    Route::get('/pages/{slug}/stories',                      [SocialPageController::class, 'stories']);
+    Route::post('/pages/{slug}/stories',                     [SocialPageController::class, 'storeStory']);
+    Route::delete('/pages/{slug}/stories/{storyId}',         [SocialPageController::class, 'deleteStory']);
+    // Notification preferences (for followers)
+    Route::post('/pages/{slug}/notification-prefs',          [SocialPageController::class, 'updateNotificationPrefs']);
+    // Comments manager
+    Route::get('/pages/{slug}/comments-manager',             [SocialPageController::class, 'commentsManager']);
+    // Follow suggestions API
+    Route::get('/api/pages/{slug}/suggestions',              [SocialPageController::class, 'followSuggestions']);
 });
 Route::get('/pages/{slug}',                         [SocialPageController::class, 'show']);
 

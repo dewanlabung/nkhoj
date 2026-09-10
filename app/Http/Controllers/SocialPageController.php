@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Bookmark;
+use App\Models\PageActivityLog;
 use App\Models\PageAdmin;
+use App\Models\PageBlock;
 use App\Models\PageCategory;
+use App\Models\PageNotificationPref;
 use App\Models\PagePollOption;
 use App\Models\PagePollVote;
 use App\Models\PagePost;
@@ -14,6 +17,7 @@ use App\Models\PageProduct;
 use App\Models\PageQna;
 use App\Models\PageReport;
 use App\Models\PageReview;
+use App\Models\PageStory;
 use App\Models\PageVerificationRequest;
 use App\Models\PageViewLog;
 use App\Models\SocialPage;
@@ -249,10 +253,22 @@ class SocialPageController extends Controller
             $userVoteMap = $votes->keyBy('page_post_id')->map->page_poll_option_id->toArray();
         }
 
+        // Active stories (24h)
+        $activeStories = PageStory::where('social_page_id', $page->id)->active()->latest()->get();
+
+        // Notification prefs for current follower
+        $notifPrefs = ($user && $isFollowing)
+            ? PageNotificationPref::where('user_id', $user->id)->where('social_page_id', $page->id)->first()
+            : null;
+
+        // Is user blocked?
+        $isBlocked = $user ? PageBlock::where('social_page_id', $page->id)->where('blocked_user_id', $user->id)->exists() : false;
+
         return view('social-pages.show', compact(
             'page', 'isOwner', 'isManager', 'userRole', 'isFollowing', 'isSaved',
             'posts', 'reviews', 'userReview', 'events', 'isOpen', 'pinnedPost',
-            'photos', 'qnaItems', 'products', 'userVoteMap'
+            'photos', 'qnaItems', 'products', 'userVoteMap',
+            'activeStories', 'notifPrefs', 'isBlocked'
         ));
     }
 
@@ -796,19 +812,23 @@ class SocialPageController extends Controller
         $page = SocialPage::where('slug', $slug)->where('user_id', auth()->id())->firstOrFail();
 
         $data = $request->validate([
-            'name'           => 'required|string|max:150',
-            'bio'            => 'nullable|string|max:500',
-            'categories'     => 'nullable|array|max:3',
-            'categories.*'   => 'nullable|string|max:100',
-            'website'        => 'nullable|url|max:300',
-            'email'          => 'nullable|email|max:150',
-            'phone'          => 'nullable|string|max:50',
-            'location'       => 'nullable|string|max:200',
-            'lat'            => 'nullable|numeric|between:-90,90',
-            'lng'            => 'nullable|numeric|between:-180,180',
-            'avatar'         => 'nullable|image|max:2048',
-            'cover'          => 'nullable|image|max:4096',
-            'business_hours' => 'nullable|array',
+            'name'                => 'required|string|max:150',
+            'bio'                 => 'nullable|string|max:500',
+            'categories'          => 'nullable|array|max:3',
+            'categories.*'        => 'nullable|string|max:100',
+            'website'             => 'nullable|url|max:300',
+            'email'               => 'nullable|email|max:150',
+            'phone'               => 'nullable|string|max:50',
+            'location'            => 'nullable|string|max:200',
+            'lat'                 => 'nullable|numeric|between:-90,90',
+            'lng'                 => 'nullable|numeric|between:-180,180',
+            'avatar'              => 'nullable|image|max:2048',
+            'cover'               => 'nullable|image|max:4096',
+            'business_hours'      => 'nullable|array',
+            'action_button_type'  => 'nullable|string|max:30',
+            'action_button_text'  => 'nullable|string|max:60',
+            'action_button_url'   => 'nullable|url|max:300',
+            'allow_tagging'       => 'nullable|boolean',
         ]);
 
         if ($request->hasFile('avatar')) {
@@ -836,19 +856,24 @@ class SocialPageController extends Controller
         }
 
         $page->update([
-            'name'           => $data['name'],
-            'bio'            => $data['bio'] ?? null,
-            'categories'     => array_values(array_filter($data['categories'] ?? [])),
-            'website'        => $data['website'] ?? null,
-            'email'          => $data['email'] ?? null,
-            'phone'          => $data['phone'] ?? null,
-            'location'       => $data['location'] ?? null,
-            'lat'            => $data['lat'] ?? $page->lat,
-            'lng'            => $data['lng'] ?? $page->lng,
-            'business_hours' => $hours,
-            'avatar_url'     => $data['avatar_url'] ?? $page->avatar_url,
-            'cover_url'      => $data['cover_url'] ?? $page->cover_url,
+            'name'                => $data['name'],
+            'bio'                 => $data['bio'] ?? null,
+            'categories'          => array_values(array_filter($data['categories'] ?? [])),
+            'website'             => $data['website'] ?? null,
+            'email'               => $data['email'] ?? null,
+            'phone'               => $data['phone'] ?? null,
+            'location'            => $data['location'] ?? null,
+            'lat'                 => $data['lat'] ?? $page->lat,
+            'lng'                 => $data['lng'] ?? $page->lng,
+            'business_hours'      => $hours,
+            'avatar_url'          => $data['avatar_url'] ?? $page->avatar_url,
+            'cover_url'           => $data['cover_url'] ?? $page->cover_url,
+            'action_button_type'  => $data['action_button_type'] ?? null,
+            'action_button_text'  => $data['action_button_text'] ?? null,
+            'action_button_url'   => $data['action_button_url'] ?? null,
+            'allow_tagging'       => $request->boolean('allow_tagging', true),
         ]);
+        PageActivityLog::record($page->id, 'update_settings', 'Page settings updated.');
 
         return back()->with('success', 'Page settings updated!');
     }
@@ -1019,5 +1044,204 @@ class SocialPageController extends Controller
     {
         $pages = SocialPage::where('user_id', auth()->id())->latest()->get();
         return view('social-pages.my-pages', compact('pages'));
+    }
+
+    // ─── Archive ───────────────────────────────────────────────────────────────
+
+    public function archive(string $slug)
+    {
+        $page = SocialPage::where('slug', $slug)->where('user_id', auth()->id())->firstOrFail();
+        $page->update(['is_archived' => true, 'is_active' => false]);
+        PageActivityLog::record($page->id, 'archive', 'Page archived by owner.');
+        return back()->with('success', 'Page archived. It is now hidden from public.');
+    }
+
+    public function unarchive(string $slug)
+    {
+        $page = SocialPage::where('slug', $slug)->where('user_id', auth()->id())->firstOrFail();
+        $page->update(['is_archived' => false, 'is_active' => true]);
+        PageActivityLog::record($page->id, 'unarchive', 'Page restored from archive by owner.');
+        return back()->with('success', 'Page restored and is now public.');
+    }
+
+    // ─── Blocking ──────────────────────────────────────────────────────────────
+
+    public function blockedUsers(string $slug)
+    {
+        $page = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isManagedBy(auth()->user()), 403);
+        $blocks = PageBlock::where('social_page_id', $page->id)
+            ->with('blockedUser')->latest()->paginate(30);
+        return view('social-pages.blocked-users', compact('page', 'blocks'));
+    }
+
+    public function blockUser(Request $request, string $slug, int $userId)
+    {
+        $page = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isManagedBy(auth()->user()), 403);
+        abort_if($userId === $page->user_id, 422, 'Cannot block the page owner.');
+
+        PageBlock::firstOrCreate(['social_page_id' => $page->id, 'blocked_user_id' => $userId]);
+        // Also unfollow
+        $page->followers()->detach($userId);
+        if ($page->followers_count > 0) $page->decrement('followers_count');
+
+        $blockedUser = User::find($userId);
+        PageActivityLog::record($page->id, 'block_user', "Blocked user: {$blockedUser?->name}", ['user_id' => $userId]);
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
+        return back()->with('success', 'User blocked.');
+    }
+
+    public function unblockUser(string $slug, int $userId)
+    {
+        $page = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isManagedBy(auth()->user()), 403);
+
+        PageBlock::where('social_page_id', $page->id)->where('blocked_user_id', $userId)->delete();
+        PageActivityLog::record($page->id, 'unblock_user', "Unblocked user ID {$userId}", ['user_id' => $userId]);
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
+        return back()->with('success', 'User unblocked.');
+    }
+
+    // ─── Activity Log ──────────────────────────────────────────────────────────
+
+    public function activityLog(string $slug)
+    {
+        $page = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isManagedBy(auth()->user()), 403);
+        $logs = PageActivityLog::where('social_page_id', $page->id)
+            ->with('user')->latest()->paginate(50);
+        return view('social-pages.activity-log', compact('page', 'logs'));
+    }
+
+    // ─── Stories ──────────────────────────────────────────────────────────────
+
+    public function stories(string $slug)
+    {
+        $page    = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isManagedBy(auth()->user()), 403);
+        $stories = PageStory::where('social_page_id', $page->id)->latest()->paginate(20);
+        return view('social-pages.stories', compact('page', 'stories'));
+    }
+
+    public function storeStory(Request $request, string $slug)
+    {
+        $page = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isManagedBy(auth()->user()), 403);
+
+        $data = $request->validate([
+            'image'    => 'nullable|image|max:4096',
+            'caption'  => 'nullable|string|max:255',
+            'bg_color' => 'nullable|string|max:20',
+        ]);
+
+        $imageUrl = null;
+        if ($request->hasFile('image')) {
+            $file     = $request->file('image');
+            $filename = time() . '_story.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/stories'), $filename);
+            $imageUrl = '/uploads/stories/' . $filename;
+        }
+
+        $story = PageStory::create([
+            'social_page_id' => $page->id,
+            'user_id'        => auth()->id(),
+            'image_url'      => $imageUrl,
+            'caption'        => $data['caption'] ?? null,
+            'bg_color'       => $data['bg_color'] ?? null,
+            'expires_at'     => now()->addHours(24),
+        ]);
+
+        PageActivityLog::record($page->id, 'create_story', 'Added a new story.');
+        return back()->with('success', 'Story posted! It will expire in 24 hours.');
+    }
+
+    public function deleteStory(string $slug, int $storyId)
+    {
+        $page  = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isManagedBy(auth()->user()), 403);
+        $story = PageStory::where('id', $storyId)->where('social_page_id', $page->id)->firstOrFail();
+        $story->delete();
+        return back()->with('success', 'Story deleted.');
+    }
+
+    // ─── Notification Preferences ──────────────────────────────────────────────
+
+    public function updateNotificationPrefs(Request $request, string $slug)
+    {
+        $page = SocialPage::where('slug', $slug)->where('is_active', true)->firstOrFail();
+
+        // Only followers can set prefs
+        abort_unless($page->isFollowedBy(auth()->user()), 403);
+
+        PageNotificationPref::updateOrCreate(
+            ['user_id' => auth()->id(), 'social_page_id' => $page->id],
+            [
+                'notify_posts'         => $request->boolean('notify_posts'),
+                'notify_events'        => $request->boolean('notify_events'),
+                'notify_announcements' => $request->boolean('notify_announcements'),
+            ]
+        );
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
+        return back()->with('success', 'Notification preferences updated.');
+    }
+
+    // ─── Comments Manager ──────────────────────────────────────────────────────
+
+    public function commentsManager(string $slug)
+    {
+        $page     = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isManagedBy(auth()->user()), 403);
+        $comments = PagePostComment::whereHas('post', fn($q) => $q->where('social_page_id', $page->id))
+            ->with(['post', 'author'])
+            ->latest()
+            ->paginate(30);
+        return view('social-pages.comments-manager', compact('page', 'comments'));
+    }
+
+    // ─── Follow Suggestions ────────────────────────────────────────────────────
+
+    public function followSuggestions(string $slug)
+    {
+        $page = SocialPage::where('slug', $slug)->where('is_active', true)->firstOrFail();
+
+        // Suggest pages in the same categories that the current user doesn't follow yet
+        $categories = $page->categories ?? [];
+        $userId     = auth()->id();
+
+        $followed = $userId
+            ? SocialPage::whereHas('followers', fn($q) => $q->where('user_id', $userId))->pluck('id')
+            : collect();
+
+        $suggestions = SocialPage::where('is_active', true)
+            ->where('id', '!=', $page->id)
+            ->whereNotIn('id', $followed)
+            ->where(function ($q) use ($categories) {
+                foreach ($categories as $cat) {
+                    $q->orWhereJsonContains('categories', $cat);
+                }
+            })
+            ->orderByDesc('followers_count')
+            ->limit(6)
+            ->get(['id', 'name', 'slug', 'avatar_url', 'categories', 'followers_count', 'is_verified']);
+
+        return response()->json($suggestions->map(fn($p) => [
+            'id'              => $p->id,
+            'name'            => $p->name,
+            'slug'            => $p->slug,
+            'avatar'          => $p->avatar,
+            'category'        => $p->first_category,
+            'followers_count' => $p->followers_count,
+            'is_verified'     => $p->is_verified,
+        ]));
     }
 }

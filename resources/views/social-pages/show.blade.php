@@ -167,6 +167,13 @@
                         </button>
                     @endauth
                 @endif
+                {{-- Action Button (e.g. Book Now, Contact Us) --}}
+                @if($page->action_button_type && $page->action_button_url)
+                <a href="{{ $page->action_button_url }}" target="_blank" rel="noopener"
+                    class="flex-shrink-0 flex items-center justify-center gap-1.5 bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-3 rounded-xl transition text-sm whitespace-nowrap">
+                    {{ $page->action_button_text ?: $page->action_button_type }}
+                </a>
+                @endif
                 {{-- "..." three-dot menu --}}
                 <div class="relative" x-data="{ open: false }" @click.outside="open = false">
                     <button @click="open = !open"
@@ -178,6 +185,35 @@
                         style="filter:drop-shadow(0 8px 24px rgba(0,0,0,.15))">
                         @auth
                         @if(!$isOwner)
+                        {{-- Notification prefs --}}
+                        @if($isFollowing)
+                        <div x-data="{ notifOpen: false }" class="border-b border-gray-100">
+                            <button @click="notifOpen = !notifOpen; $event.stopPropagation()"
+                                class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3">
+                                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                                Notification settings
+                            </button>
+                            <div x-show="notifOpen" x-cloak class="px-4 pb-3">
+                                <form method="POST" action="/pages/{{ $page->slug }}/notification-prefs" class="space-y-2">
+                                    @csrf
+                                    @php $prefs = $notifPrefs ?? null; @endphp
+                                    <label class="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">
+                                        <input type="checkbox" name="notify_posts" value="1" class="accent-blue-600 w-4 h-4" {{ ($prefs && $prefs->notify_posts) ? 'checked' : '' }}>
+                                        New posts
+                                    </label>
+                                    <label class="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">
+                                        <input type="checkbox" name="notify_events" value="1" class="accent-blue-600 w-4 h-4" {{ ($prefs && $prefs->notify_events) ? 'checked' : '' }}>
+                                        Events
+                                    </label>
+                                    <label class="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">
+                                        <input type="checkbox" name="notify_announcements" value="1" class="accent-blue-600 w-4 h-4" {{ ($prefs && $prefs->notify_announcements) ? 'checked' : '' }}>
+                                        Announcements
+                                    </label>
+                                    <button type="submit" class="mt-1 w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-1.5 rounded-lg transition">Save</button>
+                                </form>
+                            </div>
+                        </div>
+                        @endif
                         <button id="save-page-btn" onclick="toggleSavePage()" @click="open=false"
                             class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3"
                             data-saved="{{ ($isSaved ?? false) ? 'true' : 'false' }}" data-id="{{ $page->id }}">
@@ -279,6 +315,50 @@
                 </button>
             @endforeach
         </div>
+
+        {{-- ========== Stories Carousel ========== --}}
+        @if(isset($activeStories) && $activeStories->count())
+        <div class="px-4 py-3 overflow-x-auto">
+            <div class="flex gap-3">
+                @foreach($activeStories as $story)
+                <div class="flex-shrink-0 w-20 cursor-pointer" x-data="{ show: false }">
+                    <div @click="show = true"
+                        class="w-20 h-28 rounded-2xl overflow-hidden relative border-2 border-blue-500"
+                        style="{{ $story->image_url ? '' : 'background:'.($story->bg_color ?? '#1877f2') }}">
+                        @if($story->image_url)
+                        <img src="{{ $story->image_url }}" class="w-full h-full object-cover">
+                        @endif
+                        @if($story->caption)
+                        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent px-1 pb-1">
+                            <p class="text-white text-[9px] font-medium truncate">{{ $story->caption }}</p>
+                        </div>
+                        @endif
+                    </div>
+                    {{-- Story viewer modal --}}
+                    <div x-show="show" x-cloak @click="show = false"
+                        class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+                        <div class="max-w-sm w-full" @click.stop>
+                            <div class="rounded-2xl overflow-hidden relative aspect-[9/16]"
+                                style="{{ $story->image_url ? '' : 'background:'.($story->bg_color ?? '#1877f2') }}">
+                                @if($story->image_url)
+                                <img src="{{ $story->image_url }}" class="w-full h-full object-cover">
+                                @endif
+                                @if($story->caption)
+                                <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                                    <p class="text-white text-base font-medium">{{ $story->caption }}</p>
+                                </div>
+                                @endif
+                                <button @click="show = false" class="absolute top-3 right-3 w-8 h-8 bg-black/40 rounded-full flex items-center justify-center text-white">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
 
         {{-- ========== TAB: Posts ========== --}}
         <div x-show="activeTab === 'posts'">
