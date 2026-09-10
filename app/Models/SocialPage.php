@@ -22,7 +22,8 @@ class SocialPage extends Model
 
     protected $fillable = [
         'uuid', 'user_id', 'name', 'slug', 'username', 'page_type', 'categories',
-        'bio', 'avatar_url', 'cover_url', 'website', 'email', 'phone', 'social_links',
+        'bio', 'announcement', 'highlights',
+        'avatar_url', 'cover_url', 'website', 'email', 'phone', 'social_links',
         'location', 'lat', 'lng', 'business_hours',
         'followers_count', 'rating_avg', 'reviews_count', 'views_count',
         'is_verified', 'is_active', 'status', 'disabled_reason', 'pinned_post_id',
@@ -32,6 +33,7 @@ class SocialPage extends Model
         'categories'     => 'array',
         'business_hours' => 'array',
         'social_links'   => 'array',
+        'highlights'     => 'array',
         'is_verified'    => 'boolean',
         'is_active'      => 'boolean',
         'lat'            => 'float',
@@ -78,6 +80,16 @@ class SocialPage extends Model
     public function reports(): HasMany
     {
         return $this->hasMany(PageReport::class, 'social_page_id');
+    }
+
+    public function products(): HasMany
+    {
+        return $this->hasMany(PageProduct::class)->orderBy('sort_order');
+    }
+
+    public function qna(): HasMany
+    {
+        return $this->hasMany(PageQna::class)->where('is_visible', true)->latest();
     }
 
     public function pinnedPost(): BelongsTo

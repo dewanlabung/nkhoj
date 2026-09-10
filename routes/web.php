@@ -465,6 +465,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/pages/{slug}/dashboard',                    [SocialPageController::class, 'dashboard']);
     Route::get('/pages/{slug}/settings',                     [SocialPageController::class, 'settings']);
     Route::put('/pages/{slug}/settings',                     [SocialPageController::class, 'updateSettings']);
+    // Poll voting
+    Route::post('/pages/{slug}/posts/{postId}/vote',         [SocialPageController::class, 'votePoll']);
+    // Q&A
+    Route::post('/pages/{slug}/qna',                         [SocialPageController::class, 'storeQna']);
+    Route::post('/pages/{slug}/qna/{qnaId}/answer',          [SocialPageController::class, 'answerQna']);
+    Route::delete('/pages/{slug}/qna/{qnaId}',               [SocialPageController::class, 'deleteQna']);
+    // Products
+    Route::post('/pages/{slug}/products',                    [SocialPageController::class, 'storeProduct']);
+    Route::delete('/pages/{slug}/products/{productId}',      [SocialPageController::class, 'deleteProduct']);
+    // Announcement & Highlights
+    Route::post('/pages/{slug}/announcement',                [SocialPageController::class, 'updateAnnouncement']);
+    Route::post('/pages/{slug}/highlights',                  [SocialPageController::class, 'updateHighlights']);
 });
 Route::get('/pages/{slug}',                         [SocialPageController::class, 'show']);
 
