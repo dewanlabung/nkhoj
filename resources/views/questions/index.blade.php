@@ -182,6 +182,22 @@
         </div>
         @endif
 
+        {{-- Popular Tags --}}
+        @if($popularTags->count())
+        <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
+            <h3 class="font-bold text-gray-900 dark:text-white text-sm mb-3">Popular Tags</h3>
+            <div class="flex flex-wrap gap-1.5">
+                @foreach($popularTags as $tag)
+                <a href="/questions?tag={{ $tag->slug }}"
+                    class="inline-flex items-center gap-1 text-xs px-2.5 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-brand-50 dark:hover:bg-brand-900/20 hover:text-brand-600 dark:hover:text-brand-400 text-gray-600 dark:text-gray-300 rounded-full transition-colors {{ request('tag') === $tag->slug ? 'bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 font-semibold' : '' }}">
+                    {{ $tag->name_en }}
+                    <span class="text-[10px] text-gray-400 dark:text-gray-500">{{ $tag->questions_count }}</span>
+                </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
         {{-- Top Members --}}
         @if($topMembers->count())
         <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">

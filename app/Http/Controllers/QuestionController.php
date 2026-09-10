@@ -40,6 +40,11 @@ class QuestionController extends Controller
                 ->orderByDesc('questions_count')
                 ->limit(10)
                 ->get(),
+            'popularTags' => Tag::withCount('questions')
+                ->having('questions_count', '>', 0)
+                ->orderByDesc('questions_count')
+                ->limit(20)
+                ->get(),
         ];
     }
 
