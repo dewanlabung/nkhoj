@@ -23,21 +23,8 @@ class TechQnaSeeder extends Seeder
             return;
         }
 
-        // Create a couple of extra users for variety
-        $user2 = User::firstOrCreate(['email' => 'techuser1@nkhoj.com'], [
-            'uuid'     => Str::uuid(),
-            'name'     => 'Rajesh Adhikari',
-            'username' => 'rajesh_it',
-            'password' => bcrypt('password'),
-            'role'     => 'reader',
-        ]);
-        $user3 = User::firstOrCreate(['email' => 'techuser2@nkhoj.com'], [
-            'uuid'     => Str::uuid(),
-            'name'     => 'Sita Thapa',
-            'username' => 'sita_dev',
-            'password' => bcrypt('password'),
-            'role'     => 'reader',
-        ]);
+        $user2 = $admin;
+        $user3 = $admin;
 
         // Ensure Tech & IT categories exist
         $techCat = Category::firstOrCreate(['slug' => 'technology'], [
