@@ -19,4 +19,9 @@ class Tag extends Model
     {
         return $this->belongsToMany(Post::class);
     }
+
+    public function questions()
+    {
+        return $this->belongsToMany(Question::class, 'question_tag');
+    }
 }

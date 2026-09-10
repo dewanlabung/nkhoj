@@ -390,16 +390,23 @@ Route::post('/series', [\App\Http\Controllers\PostSeriesController::class, 'stor
 Route::get('/series/{series:slug}', [\App\Http\Controllers\PostSeriesController::class, 'show']);
 
 // Questions (public)
-Route::get('/questions',                      [\App\Http\Controllers\QuestionController::class, 'index']);
-Route::get('/ask-question',                   [\App\Http\Controllers\QuestionController::class, 'create']);
-Route::post('/ask-question',                  [\App\Http\Controllers\QuestionController::class, 'store'])->middleware('auth');
-Route::get('/questions/{slug}',               [\App\Http\Controllers\QuestionController::class, 'show']);
-Route::post('/questions/{id}/answers',        [\App\Http\Controllers\QuestionController::class, 'storeAnswer'])->middleware('auth');
-Route::post('/questions/{id}/best/{answer}',  [\App\Http\Controllers\QuestionController::class, 'markBestAnswer'])->middleware('auth');
-Route::post('/questions/{id}/vote',           [\App\Http\Controllers\QuestionController::class, 'voteQuestion']);
-Route::get('/questions/{id}/edit',            [\App\Http\Controllers\QuestionController::class, 'edit'])->middleware('auth');
-Route::put('/questions/{id}',                 [\App\Http\Controllers\QuestionController::class, 'update'])->middleware('auth');
-Route::post('/answers/{id}/vote',             [\App\Http\Controllers\QuestionController::class, 'voteAnswer']);
+Route::get('/questions',                          [\App\Http\Controllers\QuestionController::class, 'index']);
+Route::get('/ask-question',                       [\App\Http\Controllers\QuestionController::class, 'create']);
+Route::post('/ask-question',                      [\App\Http\Controllers\QuestionController::class, 'store'])->middleware('auth');
+Route::get('/questions/{slug}',                   [\App\Http\Controllers\QuestionController::class, 'show']);
+Route::post('/questions/{id}/answers',            [\App\Http\Controllers\QuestionController::class, 'storeAnswer'])->middleware('auth');
+Route::post('/questions/{id}/best/{answer}',      [\App\Http\Controllers\QuestionController::class, 'markBestAnswer'])->middleware('auth');
+Route::post('/questions/{id}/vote',               [\App\Http\Controllers\QuestionController::class, 'voteQuestion'])->middleware('auth');
+Route::post('/questions/{id}/follow',             [\App\Http\Controllers\QuestionController::class, 'toggleFollow'])->middleware('auth');
+Route::post('/questions/{id}/bookmark',           [\App\Http\Controllers\QuestionController::class, 'toggleBookmark'])->middleware('auth');
+Route::post('/questions/{id}/flag',               [\App\Http\Controllers\QuestionController::class, 'flagQuestion'])->middleware('auth');
+Route::post('/questions/{id}/close',              [\App\Http\Controllers\QuestionController::class, 'closeQuestion'])->middleware('auth');
+Route::post('/questions/{id}/reopen',             [\App\Http\Controllers\QuestionController::class, 'reopenQuestion'])->middleware('auth');
+Route::get('/questions/{id}/edit',                [\App\Http\Controllers\QuestionController::class, 'edit'])->middleware('auth');
+Route::put('/questions/{id}',                     [\App\Http\Controllers\QuestionController::class, 'update'])->middleware('auth');
+Route::post('/answers/{id}/vote',                 [\App\Http\Controllers\QuestionController::class, 'voteAnswer'])->middleware('auth');
+Route::post('/answers/{id}/comments',             [\App\Http\Controllers\QuestionController::class, 'storeComment'])->middleware('auth');
+Route::put('/answers/{id}',                       [\App\Http\Controllers\QuestionController::class, 'updateAnswer'])->middleware('auth');
 
 // Social Pages (Facebook-style pages)
 Route::get('/pages',                            [SocialPageController::class, 'index']);
