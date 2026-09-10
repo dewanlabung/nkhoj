@@ -409,17 +409,25 @@ Route::post('/answers/{id}/comments',             [\App\Http\Controllers\Questio
 Route::put('/answers/{id}',                       [\App\Http\Controllers\QuestionController::class, 'updateAnswer'])->middleware('auth');
 
 // Social Pages (Facebook-style pages)
-Route::get('/pages',                            [SocialPageController::class, 'index']);
-Route::get('/pages/start',                      [SocialPageController::class, 'intro']);
+Route::get('/pages',                                [SocialPageController::class, 'index']);
+Route::get('/pages/map',                            [SocialPageController::class, 'mapView']);
+Route::get('/api/pages/map-pins',                   [SocialPageController::class, 'mapPins']);
+Route::get('/pages/start',                          [SocialPageController::class, 'intro']);
 Route::middleware('auth')->group(function () {
-    Route::get('/pages/create',                 [SocialPageController::class, 'create']);
-    Route::post('/pages',                       [SocialPageController::class, 'store']);
-    Route::post('/pages/{slug}/follow',         [SocialPageController::class, 'follow'])->name('pages.follow');
-    Route::get('/pages/{slug}/dashboard',       [SocialPageController::class, 'dashboard']);
-    Route::get('/pages/{slug}/settings',        [SocialPageController::class, 'settings']);
-    Route::put('/pages/{slug}/settings',        [SocialPageController::class, 'updateSettings']);
+    Route::get('/pages/create',                     [SocialPageController::class, 'create']);
+    Route::post('/pages',                           [SocialPageController::class, 'store']);
+    Route::post('/pages/{slug}/follow',             [SocialPageController::class, 'follow'])->name('pages.follow');
+    Route::post('/pages/{slug}/posts',              [SocialPageController::class, 'storePost']);
+    Route::delete('/pages/{slug}/posts/{postId}',   [SocialPageController::class, 'deletePost']);
+    Route::post('/pages/{slug}/posts/{postId}/like',[SocialPageController::class, 'likePost']);
+    Route::post('/pages/{slug}/reviews',            [SocialPageController::class, 'storeReview']);
+    Route::delete('/pages/{slug}/reviews',          [SocialPageController::class, 'deleteReview']);
+    Route::post('/pages/{slug}/request-verification', [SocialPageController::class, 'requestVerification']);
+    Route::get('/pages/{slug}/dashboard',           [SocialPageController::class, 'dashboard']);
+    Route::get('/pages/{slug}/settings',            [SocialPageController::class, 'settings']);
+    Route::put('/pages/{slug}/settings',            [SocialPageController::class, 'updateSettings']);
 });
-Route::get('/pages/{slug}',                     [SocialPageController::class, 'show']);
+Route::get('/pages/{slug}',                         [SocialPageController::class, 'show']);
 
 // Dashboard (auth required)
 Route::middleware('auth')->prefix('dashboard')->group(function () {
