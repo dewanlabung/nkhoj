@@ -59,6 +59,9 @@
                         <span class="text-xs px-2 py-0.5 bg-red-100 text-red-600 rounded-full font-semibold">Closed</span>
                     @endif
                 </div>
+                @if($page->username)
+                <p class="text-gray-400 text-xs">@{{ $page->username }}</p>
+                @endif
                 <p class="text-gray-500 text-sm">
                     {{ number_format($page->followers_count) }} followers
                     @if($page->first_category) &middot; {{ $page->first_category }} @endif
@@ -614,8 +617,41 @@
                             {{ $page->phone }}
                         </div>
                         @endif
+                        @if($page->username)
+                        <div class="flex items-center gap-3 text-gray-600">
+                            <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            <span class="text-gray-500">@{{ $page->username }}</span>
+                        </div>
+                        @endif
                     </div>
                 </div>
+
+                {{-- Social Links --}}
+                @if($page->social_links && count(array_filter($page->social_links)))
+                @php
+                    $socialIcons = [
+                        'youtube'   => ['label'=>'YouTube',   'color'=>'text-red-600',   'bg'=>'bg-red-50',   'icon'=>'<path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.27 8.27 0 004.84 1.56V6.81a4.85 4.85 0 01-1.07-.12z"/>'],
+                        'tiktok'    => ['label'=>'TikTok',    'color'=>'text-gray-900',  'bg'=>'bg-gray-100', 'icon'=>'<path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.27 8.27 0 004.84 1.56V6.81a4.85 4.85 0 01-1.07-.12z"/>'],
+                        'instagram' => ['label'=>'Instagram', 'color'=>'text-pink-600',  'bg'=>'bg-pink-50',  'icon'=>'<rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>'],
+                        'twitter'   => ['label'=>'Twitter/X', 'color'=>'text-sky-500',  'bg'=>'bg-sky-50',   'icon'=>'<path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/>'],
+                        'facebook'  => ['label'=>'Facebook',  'color'=>'text-blue-600', 'bg'=>'bg-blue-50',  'icon'=>'<path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>'],
+                    ];
+                @endphp
+                <div class="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
+                    <h3 class="font-bold text-gray-900 mb-3">Find us on</h3>
+                    <div class="flex flex-wrap gap-2">
+                        @foreach($socialIcons as $key => $info)
+                            @if(!empty($page->social_links[$key]))
+                            <a href="{{ $page->social_links[$key] }}" target="_blank" rel="noopener noreferrer"
+                               class="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition hover:opacity-80 {{ $info['color'] }} {{ $info['bg'] }}">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">{!! $info['icon'] !!}</svg>
+                                {{ $info['label'] }}
+                            </a>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+                @endif
 
                 {{-- Business Hours --}}
                 @if($page->business_hours)

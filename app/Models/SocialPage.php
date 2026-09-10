@@ -21,8 +21,8 @@ class SocialPage extends Model
     ];
 
     protected $fillable = [
-        'uuid', 'user_id', 'name', 'slug', 'page_type', 'categories',
-        'bio', 'avatar_url', 'cover_url', 'website', 'email', 'phone',
+        'uuid', 'user_id', 'name', 'slug', 'username', 'page_type', 'categories',
+        'bio', 'avatar_url', 'cover_url', 'website', 'email', 'phone', 'social_links',
         'location', 'lat', 'lng', 'business_hours',
         'followers_count', 'rating_avg', 'reviews_count', 'views_count',
         'is_verified', 'is_active', 'status', 'disabled_reason', 'pinned_post_id',
@@ -31,6 +31,7 @@ class SocialPage extends Model
     protected $casts = [
         'categories'     => 'array',
         'business_hours' => 'array',
+        'social_links'   => 'array',
         'is_verified'    => 'boolean',
         'is_active'      => 'boolean',
         'lat'            => 'float',
