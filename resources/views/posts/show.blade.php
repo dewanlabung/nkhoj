@@ -74,6 +74,12 @@
         </nav>
 
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            @if($post->is_sensitive ?? false)
+            <div class="bg-amber-50 border-b border-amber-200 px-6 py-3 flex items-start gap-3">
+                <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <p class="text-sm text-amber-800 font-semibold">Sensitive content — this article may include content some readers find distressing.</p>
+            </div>
+            @endif
             @if($post->thumbnail_url)
             <img src="{{ $post->thumbnail_url }}" alt="{{ $post->title }}" class="w-full h-72 object-cover">
             @endif

@@ -238,6 +238,28 @@
             </div>
         </div>
 
+        {{-- Donation button --}}
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-4 py-3 border-b border-gray-100">
+                <p class="font-bold text-gray-900">Donation button</p>
+                <p class="text-xs text-gray-400 mt-0.5">Add a fundraising or support link so followers can contribute.</p>
+            </div>
+            <div class="p-4 space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Donation URL</label>
+                    <input type="url" name="donation_url" value="{{ old('donation_url', $page->donation_url) }}"
+                           placeholder="https://donate.example.com or PayPal link"
+                           class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Button label <span class="normal-case text-gray-400 font-normal">(optional)</span></label>
+                    <input type="text" name="donation_label" value="{{ old('donation_label', $page->donation_label) }}"
+                           maxlength="60" placeholder="e.g. Support us, Donate, Buy us a coffee"
+                           class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+        </div>
+
         {{-- Privacy & visibility --}}
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
             <div class="px-4 py-3 border-b border-gray-100">

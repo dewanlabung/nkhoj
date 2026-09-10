@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\Post;
 use App\Models\Question;
+use App\Models\SearchLog;
 use App\Models\SocialPage;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SearchController extends Controller
 {
@@ -25,6 +27,14 @@ class SearchController extends Controller
             'users'    => 0,
             'questions'=> 0,
         ];
+
+        $trending = DB::table('search_logs')
+            ->select('query', DB::raw('COUNT(*) as total'))
+            ->where('created_at', '>=', now()->subDays(7))
+            ->groupBy('query')
+            ->orderByDesc('total')
+            ->limit(8)
+            ->pluck('query');
 
         if ($query !== '') {
             $like = "%{$query}%";
@@ -58,6 +68,15 @@ class SearchController extends Controller
                 ->count();
 
             $counts['all'] = array_sum(array_values($counts));
+
+            // Log the search query
+            DB::table('search_logs')->insert([
+                'user_id'       => auth()->id(),
+                'query'         => $query,
+                'results_count' => $counts['all'],
+                'ip'            => $request->ip(),
+                'created_at'    => now(),
+            ]);
 
             $results = match ($type) {
                 'posts' => Post::with(['author', 'category', 'tags'])
@@ -104,7 +123,7 @@ class SearchController extends Controller
             };
         }
 
-        return view('search', compact('query', 'type', 'results', 'counts'));
+        return view('search', compact('query', 'type', 'results', 'counts', 'trending'));
     }
 
     private function allResults(string $query, string $like): array

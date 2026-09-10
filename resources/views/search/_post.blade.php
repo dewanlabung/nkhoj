@@ -1,7 +1,10 @@
-<article class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex gap-4 hover:shadow-md transition-shadow">
+<article class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex gap-4 hover:shadow-md transition-shadow {{ ($post->is_sensitive ?? false) ? 'border-amber-200' : '' }}">
     @if($post->thumbnail_url)
-    <a href="/posts/{{ $post->slug }}" class="flex-shrink-0">
-        <img src="{{ $post->thumbnail_url }}" alt="" class="w-20 h-14 object-cover rounded-lg">
+    <a href="/posts/{{ $post->slug }}" class="flex-shrink-0 relative">
+        <img src="{{ $post->thumbnail_url }}" alt="" class="w-20 h-14 object-cover rounded-lg {{ ($post->is_sensitive ?? false) ? 'blur-sm' : '' }}">
+        @if($post->is_sensitive ?? false)
+        <span class="absolute inset-0 flex items-center justify-center text-lg">⚠️</span>
+        @endif
     </a>
     @endif
     <div class="flex-1 min-w-0">

@@ -24,6 +24,7 @@ class SocialPage extends Model
         'uuid', 'user_id', 'name', 'slug', 'username', 'page_type', 'categories',
         'bio', 'announcement', 'highlights',
         'action_button_type', 'action_button_text', 'action_button_url',
+        'donation_url', 'donation_label',
         'allow_tagging', 'is_archived',
         'avatar_url', 'cover_url', 'website', 'email', 'phone', 'social_links',
         'location', 'lat', 'lng', 'business_hours',
