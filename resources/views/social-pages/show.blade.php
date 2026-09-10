@@ -10,13 +10,50 @@
 @section('content')
 <div class="bg-white min-h-screen" x-data="{ activeTab: 'posts' }">
 
-    {{-- Open Graph meta --}}
+    {{-- SEO & Open Graph --}}
     @section('og')
-    <meta property="og:title" content="{{ $page->name }}">
-    <meta property="og:description" content="{{ $page->bio ?: $page->first_category }}">
-    <meta property="og:image" content="{{ $page->avatar_url ?: '' }}">
+    {{-- Primary meta --}}
+    <meta name="description" content="{{ $page->bio ?: ($page->first_category ? $page->name.' – '.$page->first_category.' page' : $page->name.' – Official Page') }}">
+    <meta name="keywords" content="{{ collect($page->categories ?? [])->implode(', ') }}{{ $page->location ? ', '.$page->location : '' }}">
+    <link rel="canonical" href="{{ url('/pages/'.$page->slug) }}">
+
+    {{-- Open Graph --}}
+    <meta property="og:title" content="{{ $page->name }}{{ $page->is_verified ? ' ✓' : '' }}">
+    <meta property="og:description" content="{{ $page->bio ?: ($page->first_category ? $page->name.' – '.$page->first_category : $page->name.' page') }}">
+    <meta property="og:image" content="{{ $page->avatar_url ? url($page->avatar_url) : '' }}">
     <meta property="og:url" content="{{ url('/pages/'.$page->slug) }}">
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="{{ $page->page_type === 'business' ? 'business.business' : 'website' }}">
+    <meta property="og:site_name" content="{{ config('app.name') }}">
+    @if($page->phone)<meta property="business:contact_data:phone_number" content="{{ $page->phone }}">@endif
+    @if($page->location)<meta property="business:contact_data:locality" content="{{ $page->location }}">@endif
+
+    {{-- Twitter Card --}}
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{{ $page->name }}">
+    <meta name="twitter:description" content="{{ $page->bio ?: $page->first_category }}">
+    @if($page->avatar_url)<meta name="twitter:image" content="{{ url($page->avatar_url) }}">@endif
+
+    {{-- JSON-LD structured data --}}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "{{ $page->page_type === 'business' ? 'LocalBusiness' : 'Organization' }}",
+      "name": "{{ addslashes($page->name) }}",
+      "url": "{{ url('/pages/'.$page->slug) }}",
+      @if($page->avatar_url)"logo": "{{ url($page->avatar_url) }}",@endif
+      @if($page->bio)"description": "{{ addslashes($page->bio) }}",@endif
+      @if($page->email)"email": "{{ $page->email }}",@endif
+      @if($page->phone)"telephone": "{{ $page->phone }}",@endif
+      @if($page->location)"address": { "@type": "PostalAddress", "addressLocality": "{{ addslashes($page->location) }}" },@endif
+      @if($page->lat && $page->lng)"geo": { "@type": "GeoCoordinates", "latitude": {{ $page->lat }}, "longitude": {{ $page->lng }} },@endif
+      @if($page->website)"sameAs": ["{{ $page->website }}"],@endif
+      "interactionStatistic": {
+        "@type": "InteractionCounter",
+        "interactionType": "https://schema.org/FollowAction",
+        "userInteractionCount": {{ $page->followers_count }}
+      }
+    }
+    </script>
     @endsection
 
     {{-- Cover photo --}}
@@ -216,75 +253,113 @@
         <div x-show="activeTab === 'posts'">
             {{-- Create post form (managers only) --}}
             @if($isManager)
-            <div class="bg-gray-50 rounded-2xl p-4 mb-4 border border-gray-200"
-                 x-data="{ postType: 'text', postFormat: 'standard', showForm: false, pollOptions: ['', ''] }">
-                <button @click="showForm = !showForm" class="w-full text-left text-sm text-gray-500 bg-white rounded-xl px-4 py-3 border border-gray-200 hover:bg-gray-50 transition">
-                    What's on your mind? Post, Article, Poll, Q&amp;A, Photo, Event...
+            {{-- ── FB-Lite style composer trigger bar ──────────────────── --}}
+            <div class="flex items-center gap-3 bg-white border border-gray-200 rounded-2xl px-3 py-2.5 mb-4 shadow-sm"
+                 x-data="{ open: false }" @keydown.escape.window="open = false">
+                <img src="{{ $page->avatar }}" class="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200">
+                <button @click="open = true"
+                    class="flex-1 text-left text-gray-400 bg-gray-100 hover:bg-gray-200 rounded-full px-4 py-2 text-sm transition">
+                    What's on your mind?
                 </button>
-                <div x-show="showForm" x-cloak class="mt-3">
-                    <form method="POST" action="/pages/{{ $page->slug }}/posts" enctype="multipart/form-data" class="space-y-3">
+                <button @click="open = true"
+                    class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </button>
+
+                {{-- ── Full-screen composer modal ─────────────────────── --}}
+                <div x-show="open" x-cloak
+                     x-data="{ postType: 'text', postFormat: 'standard', pollOptions: ['', ''] }"
+                     class="fixed inset-0 z-50 bg-white flex flex-col"
+                     style="max-width:480px; margin:0 auto;">
+
+                    {{-- Header --}}
+                    <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white sticky top-0">
+                        <button @click="open = false" class="p-1 -ml-1 rounded-full hover:bg-gray-100 transition">
+                            <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        </button>
+                        <span class="font-bold text-gray-900 text-base">Create post</span>
+                        <button form="composer-form" type="submit"
+                            class="text-blue-600 font-bold text-base px-2 hover:text-blue-700 transition">POST</button>
+                    </div>
+
+                    {{-- Author row --}}
+                    <div class="flex items-center gap-3 px-4 py-3">
+                        <img src="{{ $page->avatar }}" class="w-11 h-11 rounded-full object-cover border border-gray-200 flex-shrink-0">
+                        <div>
+                            <p class="font-bold text-gray-900 text-sm leading-tight">{{ $page->name }}</p>
+                            {{-- Format selector pill --}}
+                            <div class="relative" x-data="{ fmtOpen: false }" @click.outside="fmtOpen = false">
+                                <button type="button" @click="fmtOpen = !fmtOpen"
+                                    class="flex items-center gap-1 mt-0.5 px-2.5 py-0.5 border border-gray-300 rounded-full text-xs font-semibold text-gray-700 hover:bg-gray-50 transition">
+                                    <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    <span x-text="{ standard:'📝 Post', article:'📰 Article', poll:'📊 Poll', qna:'❓ Q&A' }[postFormat]"></span>
+                                </button>
+                                <div x-show="fmtOpen" class="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-10 py-1 min-w-[140px]">
+                                    @foreach(['standard'=>'📝 Post','article'=>'📰 Article','poll'=>'📊 Poll','qna'=>'❓ Q&A'] as $fmt => $lbl)
+                                    <button type="button" @click="postFormat = '{{ $fmt }}'; fmtOpen = false"
+                                        class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
+                                        :class="postFormat === '{{ $fmt }}' ? 'text-blue-600 font-bold' : 'text-gray-700'">{{ $lbl }}</button>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Composer body (scrollable) --}}
+                    <form id="composer-form" method="POST" action="/pages/{{ $page->slug }}/posts"
+                          enctype="multipart/form-data" class="flex-1 overflow-y-auto flex flex-col">
                         @csrf
-                        {{-- Format tabs --}}
-                        <div class="flex gap-2 flex-wrap border-b border-gray-200 pb-2">
-                            @foreach(['standard'=>'📝 Post','article'=>'📰 Article','poll'=>'📊 Poll','qna'=>'❓ Q&A'] as $fmt => $lbl)
-                            <button type="button" @click="postFormat = '{{ $fmt }}'; postType = (postFormat === 'standard') ? 'text' : 'text'"
-                                class="px-3 py-1.5 rounded-full text-xs font-semibold transition"
-                                :class="postFormat === '{{ $fmt }}' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'">{{ $lbl }}</button>
-                            @endforeach
-                        </div>
-                        {{-- Media type tabs (only for standard post) --}}
-                        <div x-show="postFormat === 'standard'" class="flex gap-2 flex-wrap">
-                            @foreach(['text' => '✏️ Text', 'photo' => '📷 Photo', 'video' => '🎬 Video', 'event' => '📅 Event'] as $t => $l)
-                            <button type="button" @click="postType = '{{ $t }}'"
-                                class="px-3 py-1.5 rounded-full text-xs font-semibold transition"
-                                :class="postType === '{{ $t }}' ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-700'">{{ $l }}</button>
-                            @endforeach
-                        </div>
                         <input type="hidden" name="post_format" :value="postFormat">
                         <input type="hidden" name="type" :value="postFormat !== 'standard' ? 'text' : postType">
 
-                        {{-- Article title --}}
-                        <div x-show="postFormat === 'article'">
-                            <input type="text" name="article_title" placeholder="Article headline..."
-                                class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 font-semibold">
+                        {{-- Article headline --}}
+                        <div x-show="postFormat === 'article'" class="px-4 pb-2">
+                            <input type="text" name="article_title" placeholder="Headline..."
+                                class="w-full text-lg font-bold text-gray-900 border-0 border-b border-gray-200 pb-2 focus:outline-none focus:border-blue-400 bg-transparent">
                         </div>
 
-                        {{-- Body (standard / article / qna question) --}}
-                        <div x-show="postFormat !== 'poll'">
-                            <textarea name="body" rows="3"
-                                :placeholder="postFormat === 'article' ? 'Write your article...' : postFormat === 'qna' ? 'Post a question for your community...' : 'Write something...'"
-                                class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 resize-none"></textarea>
+                        {{-- Main textarea --}}
+                        <div x-show="postFormat !== 'poll'" class="flex-1 px-4">
+                            <textarea name="body" rows="6"
+                                :placeholder="postFormat === 'article' ? 'Write your article...' : postFormat === 'qna' ? 'Ask your community a question...' : 'What\'s on your mind?'"
+                                class="w-full text-base text-gray-800 border-0 focus:outline-none resize-none bg-transparent placeholder-gray-400 leading-relaxed"></textarea>
                         </div>
 
-                        {{-- Poll --}}
-                        <div x-show="postFormat === 'poll'" class="space-y-2">
-                            <textarea name="body" rows="2" placeholder="Poll question..."
-                                class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 resize-none"></textarea>
-                            <template x-for="(opt, i) in pollOptions" :key="i">
-                                <div class="flex gap-2 items-center">
-                                    <input type="text" :name="'poll_options[' + i + ']'"
-                                        x-model="pollOptions[i]"
-                                        :placeholder="'Option ' + (i+1)"
-                                        class="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
-                                    <button type="button" x-show="pollOptions.length > 2"
-                                        @click="pollOptions.splice(i, 1)"
-                                        class="text-gray-400 hover:text-red-500 p-1">×</button>
-                                </div>
-                            </template>
-                            <button type="button" x-show="pollOptions.length < 6"
-                                @click="pollOptions.push('')"
-                                class="text-sm text-blue-600 font-semibold hover:underline">+ Add option</button>
+                        {{-- Poll body + options --}}
+                        <div x-show="postFormat === 'poll'" class="px-4 space-y-3">
+                            <textarea name="body" rows="3" placeholder="Ask a question..."
+                                class="w-full text-base text-gray-800 border-0 focus:outline-none resize-none bg-transparent placeholder-gray-400 leading-relaxed"></textarea>
+                            <div class="space-y-2">
+                                <template x-for="(opt, i) in pollOptions" :key="i">
+                                    <div class="flex items-center gap-2 border border-gray-300 rounded-xl px-3 py-2">
+                                        <span class="text-gray-400 text-xs font-bold w-5 text-center" x-text="i+1"></span>
+                                        <input type="text" :name="'poll_options[' + i + ']'" x-model="pollOptions[i]"
+                                            :placeholder="'Option ' + (i+1)"
+                                            class="flex-1 text-sm text-gray-800 border-0 focus:outline-none bg-transparent">
+                                        <button type="button" x-show="pollOptions.length > 2"
+                                            @click="pollOptions.splice(i,1)"
+                                            class="text-gray-400 hover:text-red-500 text-lg leading-none">×</button>
+                                    </div>
+                                </template>
+                                <button type="button" x-show="pollOptions.length < 6"
+                                    @click="pollOptions.push('')"
+                                    class="text-blue-600 text-sm font-semibold hover:underline">+ Add option</button>
+                            </div>
                         </div>
 
-                        {{-- Photo / Video / Event (standard only) --}}
-                        <div x-show="postFormat === 'standard' && postType === 'photo'">
-                            <input type="file" name="image" accept="image/*" class="text-sm text-gray-600">
+                        {{-- Photo attachment preview --}}
+                        <div x-show="postFormat === 'standard' && postType === 'photo'" class="px-4 py-2">
+                            <label class="flex items-center gap-3 border-2 border-dashed border-gray-300 rounded-xl p-4 cursor-pointer hover:bg-gray-50 transition">
+                                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                <span class="text-sm text-gray-500">Tap to choose photo</span>
+                                <input type="file" name="image" accept="image/*" class="hidden">
+                            </label>
                         </div>
-                        <div x-show="postFormat === 'standard' && postType === 'video'" class="space-y-2">
-                            <input type="url" name="video_url" placeholder="Video URL (YouTube, etc.)"
-                                class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
+                        <div x-show="postFormat === 'standard' && postType === 'video'" class="px-4 py-2">
+                            <input type="url" name="video_url" placeholder="Video URL (YouTube, TikTok...)"
+                                class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500">
                         </div>
-                        <div x-show="postFormat === 'standard' && postType === 'event'" class="space-y-2">
+                        <div x-show="postFormat === 'standard' && postType === 'event'" class="px-4 py-2 space-y-2">
                             <input type="text" name="event_title" placeholder="Event title"
                                 class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
                             <div class="grid grid-cols-2 gap-2">
@@ -298,9 +373,33 @@
                             <input type="url" name="event_ticket_url" placeholder="Ticket URL (optional)"
                                 class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
                         </div>
-                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl transition text-sm">
-                            Publish
-                        </button>
+
+                        {{-- Action row (media type shortcuts) --}}
+                        <div class="border-t border-gray-100 mt-auto">
+                            <div x-show="postFormat === 'standard'" class="divide-y divide-gray-100">
+                                @foreach([
+                                    ['photo',  'Photos/Videos',    'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z', 'text-green-600'],
+                                    ['video',  'Video URL',        'M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z', 'text-red-500'],
+                                    ['event',  'Create event',     'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', 'text-red-500'],
+                                ] as [$t, $lbl, $path, $color])
+                                <button type="button" @click="postType = '{{ $t }}'"
+                                    class="w-full flex items-center gap-4 px-4 py-3 hover:bg-gray-50 transition text-left"
+                                    :class="postType === '{{ $t }}' ? 'bg-blue-50' : ''">
+                                    <svg class="w-6 h-6 {{ $color }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $path }}"/></svg>
+                                    <span class="text-sm font-medium text-gray-700">{{ $lbl }}</span>
+                                    <svg x-show="postType === '{{ $t }}'" class="w-4 h-4 text-blue-600 ml-auto" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                </button>
+                                @endforeach
+                            </div>
+
+                            {{-- Big POST button --}}
+                            <div class="px-4 py-3">
+                                <button type="submit"
+                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl text-base transition">
+                                    POST
+                                </button>
+                            </div>
+                        </div>
                     </form>
                 </div>
             </div>
