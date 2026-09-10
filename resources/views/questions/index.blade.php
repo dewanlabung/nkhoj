@@ -45,13 +45,26 @@
 
         {{-- Tabs --}}
         <div class="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl overflow-x-auto">
-            @foreach(['new' => 'Newest', 'top' => 'Top', 'trending' => 'Trending', 'hot' => 'Hot 🔥', 'must-read' => 'Must Read'] as $key => $label)
-            <a href="?tab={{ $key }}{{ $search ? '&q='.urlencode($search) : '' }}{{ request('category') ? '&category='.request('category') : '' }}"
+            @foreach(['new' => 'Newest', 'top' => 'Top', 'trending' => 'Trending', 'hot' => 'Hot 🔥', 'must-read' => 'Must Read', 'unanswered' => 'Unanswered'] as $key => $label)
+            <a href="?tab={{ $key }}{{ $search ? '&q='.urlencode($search) : '' }}{{ request('category') ? '&category='.request('category') : '' }}{{ request('tag') ? '&tag='.request('tag') : '' }}"
                 class="flex-1 text-center py-1.5 text-sm font-medium rounded-lg whitespace-nowrap transition-colors {{ $tab === $key ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700' }}">
                 {{ $label }}
             </a>
             @endforeach
         </div>
+
+        {{-- Active tag filter banner --}}
+        @if(request('tag'))
+        <div class="flex items-center gap-2 text-sm">
+            <span class="text-gray-500 dark:text-gray-400">Filtered by tag:</span>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 rounded-full font-medium text-xs">
+                {{ request('tag') }}
+                <a href="/questions?tab={{ $tab }}{{ $search ? '&q='.urlencode($search) : '' }}" class="hover:text-red-500">
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                </a>
+            </span>
+        </div>
+        @endif
 
         @forelse($questions as $q)
         <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5 hover:shadow-md transition-shadow">
