@@ -244,15 +244,15 @@
         </div>
 
         {{-- TAB: Tools --}}
-        <div x-show="activeTab === 'tools'" class="space-y-4">
+        <div x-show="activeTab === 'tools'" class="space-y-3">
 
-            {{-- Section: Publishing tools --}}
-            <div class="pt-1 pb-0 px-1">
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Publishing tools</p>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-                <div class="divide-y divide-gray-100">
+            {{-- Accordion: Publishing tools --}}
+            <div x-data="{ open: true }" class="bg-white rounded-2xl shadow-sm overflow-hidden">
+                <button @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 text-left border-b border-gray-100 hover:bg-gray-50 transition">
+                    <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Publishing tools</span>
+                    <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div x-show="open" x-cloak class="divide-y divide-gray-100">
                     <a href="/pages/{{ $page->slug }}" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
@@ -283,13 +283,13 @@
                 </div>
             </div>
 
-            {{-- Section: Community management --}}
-            <div class="pt-2 pb-0 px-1">
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Community management</p>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-                <div class="divide-y divide-gray-100">
+            {{-- Accordion: Community management --}}
+            <div x-data="{ open: true }" class="bg-white rounded-2xl shadow-sm overflow-hidden">
+                <button @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 text-left border-b border-gray-100 hover:bg-gray-50 transition">
+                    <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Community management</span>
+                    <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div x-show="open" x-cloak class="divide-y divide-gray-100">
                     <a href="/pages/{{ $page->slug }}/moderation" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center relative">
@@ -314,16 +314,54 @@
                         </div>
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </a>
+                    {{-- FAQ Management --}}
+                    @php $pageFaqs = $page->faqs ?? collect(); @endphp
+                    <div x-data="{ faqOpen: false, addFaq: false, faqQ: '', faqA: '' }" class="px-4 py-4">
+                        <div class="flex items-center gap-3 mb-0">
+                            <div class="w-10 h-10 bg-teal-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-semibold text-gray-900 text-sm">FAQ / Q&A</p>
+                                <p class="text-gray-500 text-xs">{{ $pageFaqs->count() }} pinned question{{ $pageFaqs->count() !== 1 ? 's' : '' }}</p>
+                            </div>
+                            <button @click="faqOpen = !faqOpen" class="text-xs text-blue-600 font-semibold hover:underline" x-text="faqOpen ? 'Hide' : 'Manage'"></button>
+                        </div>
+                        <div x-show="faqOpen" x-cloak class="mt-3 space-y-2">
+                            @foreach($pageFaqs as $faq)
+                            <div class="bg-gray-50 rounded-xl p-3">
+                                <p class="text-sm font-semibold text-gray-800">{{ $faq->question }}</p>
+                                <p class="text-xs text-gray-600 mt-1">{{ $faq->answer }}</p>
+                                <form method="POST" action="/pages/{{ $page->slug }}/faq/{{ $faq->id }}" onsubmit="return confirm('Delete this FAQ?')" class="mt-2">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="text-xs text-red-500 hover:underline">Delete</button>
+                                </form>
+                            </div>
+                            @endforeach
+                            <button @click="addFaq = !addFaq" class="text-xs text-blue-600 font-semibold hover:underline">+ Add question</button>
+                            <div x-show="addFaq" x-cloak class="mt-2">
+                                <form method="POST" action="/pages/{{ $page->slug }}/faq" class="space-y-2">
+                                    @csrf
+                                    <input type="text" name="question" x-model="faqQ" placeholder="Question" required maxlength="300"
+                                        class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                                    <textarea name="answer" x-model="faqA" rows="2" placeholder="Answer" required
+                                        class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500 resize-none"></textarea>
+                                    <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold py-2 rounded-xl transition">Save FAQ</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {{-- Section: Team --}}
+            {{-- Accordion: Team --}}
             @if($isOwner)
-            <div class="pt-2 pb-0 px-1">
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Team</p>
-            </div>
-            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-                <div class="divide-y divide-gray-100">
+            <div x-data="{ open: true }" class="bg-white rounded-2xl shadow-sm overflow-hidden">
+                <button @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 text-left border-b border-gray-100 hover:bg-gray-50 transition">
+                    <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Team</span>
+                    <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div x-show="open" x-cloak class="divide-y divide-gray-100">
                     <a href="/pages/{{ $page->slug }}/admins" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center">
@@ -340,13 +378,13 @@
             </div>
             @endif
 
-            {{-- Section: Settings & privacy --}}
-            <div class="pt-2 pb-0 px-1">
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Settings & privacy</p>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-                <div class="divide-y divide-gray-100">
+            {{-- Accordion: Settings & privacy --}}
+            <div x-data="{ open: true }" class="bg-white rounded-2xl shadow-sm overflow-hidden">
+                <button @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 text-left border-b border-gray-100 hover:bg-gray-50 transition">
+                    <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Settings &amp; privacy</span>
+                    <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div x-show="open" x-cloak class="divide-y divide-gray-100">
                     <a href="/pages/{{ $page->slug }}/settings" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
@@ -375,6 +413,15 @@
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </a>
                     @if($isOwner)
+                    <a href="/pages/{{ $page->slug }}/export" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            </div>
+                            <div><p class="font-semibold text-gray-900 text-sm">Download your data</p><p class="text-gray-500 text-xs">Export posts, followers & activity as ZIP</p></div>
+                        </div>
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </a>
                     <div class="px-4 py-4">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -411,11 +458,14 @@
                 </div>
             </div>
 
-            {{-- Danger zone (owner only) --}}
+            {{-- Accordion: Danger zone (owner only) --}}
             @if($isOwner)
-            <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-red-100">
-                <div class="px-4 py-3 border-b border-red-100"><p class="font-bold text-red-600 text-sm">Danger zone</p></div>
-                <div class="divide-y divide-gray-100 p-4 space-y-3">
+            <div x-data="{ open: false }" class="bg-white rounded-2xl shadow-sm overflow-hidden border border-red-100">
+                <button @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 text-left border-b border-red-100 hover:bg-red-50 transition">
+                    <span class="text-xs font-bold text-red-500 uppercase tracking-widest">Danger zone</span>
+                    <svg class="w-4 h-4 text-red-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div x-show="open" x-cloak class="p-4 space-y-3 divide-y divide-gray-100">
 
                     {{-- Disable / Enable --}}
                     @if($page->status === 'active')
