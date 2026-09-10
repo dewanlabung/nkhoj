@@ -22,7 +22,7 @@
         <a href="/series/{{ $s->slug }}"
            class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden hover:shadow-md transition-shadow group">
             @if($s->cover_image)
-            <img src="{{ $s->cover_image }}" class="w-full h-36 object-cover group-hover:opacity-90 transition">
+            <img src="{{ $s->cover_image }}" loading="lazy" class="w-full h-36 object-cover group-hover:opacity-90 transition">
             @else
             <div class="w-full h-36 bg-gradient-to-br from-brand-400 to-indigo-500 flex items-center justify-center">
                 <span class="text-4xl">📖</span>

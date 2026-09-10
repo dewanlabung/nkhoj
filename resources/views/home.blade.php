@@ -99,7 +99,7 @@
                 <a href="/posts/{{ $pick->slug }}" class="group bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden block">
                     <div class="relative" style="aspect-ratio:16/9; overflow:hidden;">
                         @if($pick->thumbnail_url)
-                        <img src="{{ $pick->thumbnail_url }}" alt="{{ $pick->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <img src="{{ $pick->thumbnail_url }}" loading="lazy" alt="{{ $pick->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                         @else
                         <div class="w-full h-full bg-gradient-to-br from-brand-100 to-indigo-100 flex items-center justify-center">
                             <span class="text-3xl font-black text-brand-200">{{ strtoupper(substr($pick->title,0,1)) }}</span>

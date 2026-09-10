@@ -281,19 +281,48 @@
             {{-- Right: search + notification --}}
             <div class="flex items-center gap-2">
                 {{-- Search toggle --}}
-                <div x-data="{ searchOpen: false }" class="relative">
-                    <button @click="searchOpen = !searchOpen"
+                <div x-data="{
+                    searchOpen: false,
+                    q: '',
+                    suggestions: [],
+                    loading: false,
+                    timer: null,
+                    fetchSuggestions() {
+                        clearTimeout(this.timer);
+                        if (this.q.length < 2) { this.suggestions = []; return; }
+                        this.timer = setTimeout(() => {
+                            this.loading = true;
+                            fetch('/search/suggest?q=' + encodeURIComponent(this.q))
+                                .then(r => r.json())
+                                .then(d => { this.suggestions = d; this.loading = false; })
+                                .catch(() => { this.loading = false; });
+                        }, 200);
+                    }
+                }" class="relative">
+                    <button @click="searchOpen = !searchOpen; if(searchOpen) $nextTick(() => $refs.searchInput.focus())"
                         class="w-9 h-9 flex items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </button>
                     <div x-show="searchOpen" x-cloak x-transition:enter="transition ease-out duration-150"
                         x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
                         @click.outside="searchOpen = false"
-                        class="absolute right-0 top-11 w-72 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg p-3 z-50">
-                        <form action="/search" method="GET">
-                            <input type="text" name="q" autofocus placeholder="समाचार खोज्नुहोस्..."
+                        class="absolute right-0 top-11 w-72 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-50 overflow-hidden">
+                        <form action="/search" method="GET" class="p-3">
+                            <input type="text" name="q" x-ref="searchInput" x-model="q" @input="fetchSuggestions()"
+                                @keydown.enter="searchOpen = false"
+                                placeholder="समाचार खोज्नुहोस्..."
                                 class="w-full text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500">
                         </form>
+                        <div x-show="suggestions.length > 0" class="border-t border-gray-100 dark:border-gray-700 pb-1">
+                            <template x-for="s in suggestions" :key="s.url">
+                                <a :href="s.url" @click="searchOpen = false"
+                                    class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                                    <span x-text="s.icon" class="text-base flex-shrink-0"></span>
+                                    <span x-text="s.label" class="truncate flex-1"></span>
+                                </a>
+                            </template>
+                        </div>
+                        <div x-show="loading" class="px-4 py-2 text-xs text-gray-400">खोजिँदैछ...</div>
                     </div>
                 </div>
                 @auth

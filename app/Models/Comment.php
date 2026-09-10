@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\CommentReaction;
 
 class Comment extends Model
 {
+    use SoftDeletes;
     protected $fillable = ['post_id', 'user_id', 'parent_id', 'body', 'guest_name', 'guest_email', 'is_approved'];
 
     public function post(): BelongsTo
