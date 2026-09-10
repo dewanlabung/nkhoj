@@ -141,11 +141,11 @@ class SocialPageController extends Controller
     {
         $page = SocialPage::where('slug', $slug)->where('is_active', true)->firstOrFail();
 
-        // record daily view
-        PageViewLog::upsert(
-            [['social_page_id' => $page->id, 'date' => today()->toDateString(), 'views' => 1]],
-            ['social_page_id', 'date'],
-            [DB::raw('views = views + 1')]
+        // record daily view (MariaDB-compatible upsert)
+        DB::statement(
+            'INSERT INTO page_view_logs (social_page_id, date, views) VALUES (?, ?, 1)
+             ON DUPLICATE KEY UPDATE views = views + 1',
+            [$page->id, today()->toDateString()]
         );
         $page->increment('views_count');
 
