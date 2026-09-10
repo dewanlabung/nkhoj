@@ -46,14 +46,6 @@ class SocialPageController extends Controller
 
         $query = SocialPage::where('is_active', true)->where('status', 'active');
 
-        // Only show pages that opted into recommendations on the discover tab
-        if (!$search && !in_array($tab, ['liked', 'mine', 'nearby'])
-            && \Illuminate\Support\Facades\Schema::hasColumn('social_pages', 'allow_recommendations')) {
-            $query->where(function($q) {
-                $q->whereNull('allow_recommendations')->orWhere('allow_recommendations', true);
-            });
-        }
-
         if ($search) {
             $query->where('name', 'like', "%{$search}%");
         }
