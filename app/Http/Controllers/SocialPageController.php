@@ -46,13 +46,6 @@ class SocialPageController extends Controller
 
         $query = SocialPage::where('is_active', true)->where('status', 'active');
 
-        // Only show pages that opted into recommendations on the discover tab
-        if (!$search && !in_array($tab, ['liked', 'mine', 'nearby'])) {
-            $query->where(function($q) {
-                $q->whereNull('allow_recommendations')->orWhere('allow_recommendations', true);
-            });
-        }
-
         if ($search) {
             $query->where('name', 'like', "%{$search}%");
         }
@@ -132,7 +125,7 @@ class SocialPageController extends Controller
                 'name'         => 'required|string|max:150',
                 'username'     => ['nullable','string','max:60','regex:/^[a-z0-9._-]+$/i',
                                    'unique:social_pages,username'],
-                'page_type'    => 'required|in:creator,business',
+                'page_type'    => 'nullable|in:creator,business,community,nonprofit,other',
                 'categories'   => 'nullable|array|max:3',
                 'categories.*' => 'nullable|string|max:100',
                 'bio'          => 'nullable|string|max:500',
@@ -146,7 +139,7 @@ class SocialPageController extends Controller
                 'name'         => 'required|string|max:150',
                 'username'     => ['nullable','string','max:60','regex:/^[a-z0-9._-]+$/i',
                                    'unique:social_pages,username'],
-                'page_type'    => 'required|in:creator,business',
+                'page_type'    => 'nullable|in:creator,business,community,nonprofit,other',
                 'categories'   => 'nullable|array|max:3',
                 'categories.*' => 'nullable|string|max:100',
                 'bio'          => 'nullable|string|max:500',
@@ -168,13 +161,12 @@ class SocialPageController extends Controller
             $username = strtolower(trim($data['username']));
         }
 
-        $page = SocialPage::create([
+        $createData = [
             'uuid'         => Str::uuid(),
             'user_id'      => auth()->id(),
             'name'         => $data['name'],
             'slug'         => $slug,
             'username'     => $username,
-            'page_type'    => $data['page_type'],
             'categories'   => array_values(array_filter($data['categories'] ?? [])),
             'bio'          => $data['bio'] ?? null,
             'website'      => $data['website'] ?? null,
@@ -182,7 +174,11 @@ class SocialPageController extends Controller
             'phone'        => $data['phone'] ?? null,
             'social_links' => $data['social_links'] ?? null,
             'status'       => 'active',
-        ]);
+        ];
+        if (\Illuminate\Support\Facades\Schema::hasColumn('social_pages', 'page_type')) {
+            $createData['page_type'] = $data['page_type'] ?? 'other';
+        }
+        $page = SocialPage::create($createData);
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -375,7 +371,9 @@ class SocialPageController extends Controller
             }
         }
 
-        $page->update(['last_post_at' => now()]);
+        if (\Illuminate\Support\Facades\Schema::hasColumn('social_pages', 'last_post_at')) {
+            $page->update(['last_post_at' => now()]);
+        }
 
         return back()->with('success', 'Post published!');
     }
@@ -887,7 +885,7 @@ class SocialPageController extends Controller
             ];
         }
 
-        $page->update([
+        $updateData = [
             'name'                => $data['name'],
             'bio'                 => $data['bio'] ?? null,
             'categories'          => array_values(array_filter($data['categories'] ?? [])),
@@ -903,14 +901,19 @@ class SocialPageController extends Controller
             'action_button_type'  => $data['action_button_type'] ?? null,
             'action_button_text'  => $data['action_button_text'] ?? null,
             'action_button_url'   => $data['action_button_url'] ?? null,
-            'donation_url'          => $data['donation_url'] ?? null,
-            'donation_label'        => $data['donation_label'] ?? null,
-            'allow_tagging'         => $request->boolean('allow_tagging', true),
-            'allow_recommendations' => $request->boolean('allow_recommendations', true),
-            'posts_privacy_default' => $data['posts_privacy_default'] ?? 'public',
-            'social_links'          => array_filter($data['social_links'] ?? []),
-            'username'              => $data['username'] ? strtolower(trim($data['username'])) : $page->username,
-        ]);
+            'donation_url'        => $data['donation_url'] ?? null,
+            'donation_label'      => $data['donation_label'] ?? null,
+            'allow_tagging'       => $request->boolean('allow_tagging', true),
+            'social_links'        => array_filter($data['social_links'] ?? []),
+            'username'            => $data['username'] ? strtolower(trim($data['username'])) : $page->username,
+        ];
+        if (\Illuminate\Support\Facades\Schema::hasColumn('social_pages', 'allow_recommendations')) {
+            $updateData['allow_recommendations'] = $request->boolean('allow_recommendations', true);
+        }
+        if (\Illuminate\Support\Facades\Schema::hasColumn('social_pages', 'posts_privacy_default')) {
+            $updateData['posts_privacy_default'] = $data['posts_privacy_default'] ?? 'public';
+        }
+        $page->update($updateData);
         PageActivityLog::record($page->id, 'update_settings', 'Page settings updated.');
 
         return back()->with('success', 'Page settings updated!');

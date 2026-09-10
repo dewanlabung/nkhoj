@@ -30,15 +30,11 @@
         </div>
         @endif
 
-        {{-- ══════════════════════════════════════════════════════════
-             GROUP 1: Page setup
-        ══════════════════════════════════════════════════════════ --}}
-        <div x-data="{ open: true }">
-        <button type="button" @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 bg-white rounded-2xl shadow-sm mb-1 hover:bg-gray-50 transition">
-            <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Page setup</span>
-            <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-        </button>
-        <div x-show="open" x-cloak class="space-y-1">
+        {{-- GROUP 1: Page setup --}}
+        <div class="pt-1 pb-0 px-1">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Page setup</p>
+        </div>
+        <div class="space-y-1">
 
         {{-- Page name --}}
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
@@ -139,17 +135,12 @@
         </div>
 
         </div>
-        </div>
 
-        {{-- ══════════════════════════════════════════════════════════
-             GROUP 2: Contact & location
-        ══════════════════════════════════════════════════════════ --}}
-        <div x-data="{ open: true }">
-        <button type="button" @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 bg-white rounded-2xl shadow-sm mb-1 hover:bg-gray-50 transition">
-            <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Contact &amp; location</span>
-            <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-        </button>
-        <div x-show="open" x-cloak class="space-y-1">
+        {{-- GROUP 2: Contact & location --}}
+        <div class="pt-3 pb-0 px-1">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Contact &amp; location</p>
+        </div>
+        <div class="space-y-1">
 
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
             <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
@@ -268,17 +259,12 @@
         </div>
 
         </div>
-        </div>
 
-        {{-- ══════════════════════════════════════════════════════════
-             GROUP 3: Audience & visibility
-        ══════════════════════════════════════════════════════════ --}}
-        <div x-data="{ open: true }">
-        <button type="button" @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 bg-white rounded-2xl shadow-sm mb-1 hover:bg-gray-50 transition">
-            <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Audience &amp; visibility</span>
-            <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-        </button>
-        <div x-show="open" x-cloak class="space-y-1">
+        {{-- GROUP 3: Audience & visibility --}}
+        <div class="pt-3 pb-0 px-1">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Audience &amp; visibility</p>
+        </div>
+        <div class="space-y-1">
 
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
             <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
@@ -337,17 +323,12 @@
         </div>
 
         </div>
-        </div>
 
-        {{-- ══════════════════════════════════════════════════════════
-             GROUP 4: Monetization & CTAs
-        ══════════════════════════════════════════════════════════ --}}
-        <div x-data="{ open: true }">
-        <button type="button" @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 bg-white rounded-2xl shadow-sm mb-1 hover:bg-gray-50 transition">
-            <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Monetization &amp; CTAs</span>
-            <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-        </button>
-        <div x-show="open" x-cloak class="space-y-1">
+        {{-- GROUP 4: Monetization & CTAs --}}
+        <div class="pt-3 pb-0 px-1">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Monetization &amp; CTAs</p>
+        </div>
+        <div class="space-y-1">
 
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
             <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
@@ -414,22 +395,18 @@
         </div>
 
         </div>
-        </div>
 
         <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition mt-4">
             Save changes
         </button>
     </form>
 
-    {{-- ══════════════════════════════════════════════════════════
-         GROUP 5: Page status (separate from main form)
-    ══════════════════════════════════════════════════════════ --}}
-    <div class="max-w-xl mx-auto px-4 pt-3 pb-10" x-data="{ open: true }">
-        <button type="button" @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 bg-white rounded-2xl shadow-sm mb-1 hover:bg-gray-50 transition">
-            <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Page status</span>
-            <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-        </button>
-        <div x-show="open" x-cloak class="space-y-1">
+    {{-- GROUP 5: Page status (separate from main form) --}}
+    <div class="max-w-xl mx-auto px-4 pt-3 pb-10">
+        <div class="pt-1 pb-0 px-1 mb-1">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Page status</p>
+        </div>
+        <div class="space-y-1">
 
         {{-- Archive page --}}
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
