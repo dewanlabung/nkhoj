@@ -246,10 +246,83 @@
         {{-- TAB: Tools --}}
         <div x-show="activeTab === 'tools'" class="space-y-4">
 
-            {{-- Team management --}}
-            @if($isOwner)
+            {{-- Section: Publishing tools --}}
+            <div class="pt-1 pb-0 px-1">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Publishing tools</p>
+            </div>
+
             <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-                <div class="px-4 py-3 border-b border-gray-100"><p class="font-bold text-gray-700 text-sm">Team & Admins</p></div>
+                <div class="divide-y divide-gray-100">
+                    <a href="/pages/{{ $page->slug }}" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            </div>
+                            <div><p class="font-semibold text-gray-900 text-sm">Create post</p><p class="text-gray-500 text-xs">Share updates, photos and events</p></div>
+                        </div>
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                    <a href="/pages/{{ $page->slug }}/stories" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-pink-50 rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            </div>
+                            <div><p class="font-semibold text-gray-900 text-sm">Stories</p><p class="text-gray-500 text-xs">Post and manage 24-hour stories</p></div>
+                        </div>
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                    <a href="/pages/{{ $page->slug }}/comments-manager" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                            </div>
+                            <div><p class="font-semibold text-gray-900 text-sm">Comments Manager</p><p class="text-gray-500 text-xs">View and moderate all comments</p></div>
+                        </div>
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                </div>
+            </div>
+
+            {{-- Section: Community management --}}
+            <div class="pt-2 pb-0 px-1">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Community management</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+                <div class="divide-y divide-gray-100">
+                    <a href="/pages/{{ $page->slug }}/moderation" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center relative">
+                                <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                @if($pendingReports > 0)
+                                <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ $pendingReports }}</span>
+                                @endif
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-900 text-sm">Report Queue</p>
+                                <p class="text-gray-500 text-xs">{{ $pendingReports }} pending report{{ $pendingReports !== 1 ? 's' : '' }}</p>
+                            </div>
+                        </div>
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                    <a href="/pages/{{ $page->slug }}/blocked-users" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                            </div>
+                            <div><p class="font-semibold text-gray-900 text-sm">Blocked Users</p><p class="text-gray-500 text-xs">Manage who is blocked from this page</p></div>
+                        </div>
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                </div>
+            </div>
+
+            {{-- Section: Team --}}
+            @if($isOwner)
+            <div class="pt-2 pb-0 px-1">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Team</p>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
                 <div class="divide-y divide-gray-100">
                     <a href="/pages/{{ $page->slug }}/admins" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
                         <div class="flex items-center gap-3">
@@ -267,88 +340,28 @@
             </div>
             @endif
 
-            {{-- Moderation --}}
-            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-                <div class="px-4 py-3 border-b border-gray-100"><p class="font-bold text-gray-700 text-sm">Moderation</p></div>
-                <div class="divide-y divide-gray-100">
-                    <a href="/pages/{{ $page->slug }}/moderation" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center relative">
-                                <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                                @if($pendingReports > 0)
-                                <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ $pendingReports }}</span>
-                                @endif
-                            </div>
-                            <div>
-                                <p class="font-semibold text-gray-900 text-sm">Report Queue</p>
-                                <p class="text-gray-500 text-xs">{{ $pendingReports }} pending report{{ $pendingReports !== 1 ? 's' : '' }}</p>
-                            </div>
-                        </div>
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                    </a>
-                </div>
+            {{-- Section: Settings & privacy --}}
+            <div class="pt-2 pb-0 px-1">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Settings & privacy</p>
             </div>
 
-            {{-- Engagement & Content Tools --}}
             <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-                <div class="px-4 py-3 border-b border-gray-100"><p class="font-bold text-gray-700 text-sm">Content & Engagement</p></div>
-                <div class="divide-y divide-gray-100">
-                    <a href="/pages/{{ $page->slug }}/comments-manager" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-                                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                            </div>
-                            <div><p class="font-semibold text-gray-900 text-sm">Comments Manager</p><p class="text-gray-500 text-xs">View and moderate all comments</p></div>
-                        </div>
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                    </a>
-                    <a href="/pages/{{ $page->slug }}/stories" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-pink-50 rounded-xl flex items-center justify-center">
-                                <svg class="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            </div>
-                            <div><p class="font-semibold text-gray-900 text-sm">Stories</p><p class="text-gray-500 text-xs">Post and manage 24-hour stories</p></div>
-                        </div>
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                    </a>
-                </div>
-            </div>
-
-            {{-- Management --}}
-            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-                <div class="px-4 py-3 border-b border-gray-100"><p class="font-bold text-gray-700 text-sm">Management</p></div>
-                <div class="divide-y divide-gray-100">
-                    <a href="/pages/{{ $page->slug }}/activity-log" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
-                                <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                            </div>
-                            <div><p class="font-semibold text-gray-900 text-sm">Activity Log</p><p class="text-gray-500 text-xs">All management actions on this page</p></div>
-                        </div>
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                    </a>
-                    <a href="/pages/{{ $page->slug }}/blocked-users" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center">
-                                <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
-                            </div>
-                            <div><p class="font-semibold text-gray-900 text-sm">Blocked Users</p><p class="text-gray-500 text-xs">Manage who is blocked from this page</p></div>
-                        </div>
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                    </a>
-                </div>
-            </div>
-
-            {{-- Profile, Verification, Map --}}
-            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-                <div class="px-4 py-3 border-b border-gray-100"><p class="font-bold text-gray-700 text-sm">Profile & Discovery</p></div>
                 <div class="divide-y divide-gray-100">
                     <a href="/pages/{{ $page->slug }}/settings" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
                                 <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>
                             </div>
-                            <div><p class="font-semibold text-gray-900 text-sm">Page Settings</p><p class="text-gray-500 text-xs">Update details, hours, location</p></div>
+                            <div><p class="font-semibold text-gray-900 text-sm">Page Settings</p><p class="text-gray-500 text-xs">Identity, contact, hours, location</p></div>
+                        </div>
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                    <a href="/pages/{{ $page->slug }}/activity-log" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                            </div>
+                            <div><p class="font-semibold text-gray-900 text-sm">Activity Log</p><p class="text-gray-500 text-xs">All management actions on this page</p></div>
                         </div>
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </a>
@@ -361,8 +374,6 @@
                         </div>
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </a>
-
-                    {{-- Verification --}}
                     @if($isOwner)
                     <div class="px-4 py-4">
                         <div class="flex items-center gap-3">
