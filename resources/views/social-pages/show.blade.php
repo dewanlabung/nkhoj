@@ -57,7 +57,7 @@
     @endsection
 
     {{-- Cover photo --}}
-    <div class="relative h-48 md:h-64 bg-gray-300 overflow-hidden">
+    <div class="relative h-32 md:h-48 bg-gray-300 overflow-hidden">
         @if($page->cover_url)
             <img src="{{ $page->cover_url }}" alt="Cover" class="w-full h-full object-cover">
         @else
@@ -77,7 +77,7 @@
     <div class="max-w-2xl mx-auto">
 
         {{-- Avatar + name row --}}
-        <div class="flex items-end gap-4 px-4 -mt-14 mb-3">
+        <div class="flex items-end gap-4 px-4 -mt-10 mb-3">
             <div class="relative flex-shrink-0">
                 <div class="w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-gray-200 shadow-md">
                     <img src="{{ $page->avatar }}" alt="{{ $page->name }}" class="w-full h-full object-cover">
@@ -124,7 +124,7 @@
             </div>
             @endif
             @if($page->username)
-            <p class="text-sm text-gray-400 mt-1">@{{ $page->username }}</p>
+            <p class="text-sm text-gray-400 mt-1">&#64;{{ $page->username }}</p>
             @endif
         </div>
 
@@ -989,7 +989,7 @@
                         @if($page->username)
                         <div class="flex items-center gap-3 text-gray-600">
                             <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                            <span class="text-gray-500">@{{ $page->username }}</span>
+                            <span class="text-gray-500">&#64;{{ $page->username }}</span>
                         </div>
                         @endif
                     </div>

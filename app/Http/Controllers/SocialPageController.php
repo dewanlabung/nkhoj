@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Bookmark;
+use Illuminate\Validation\Rule;
 use App\Models\PageActivityLog;
 use App\Models\PageAdmin;
 use App\Models\PageBlock;
@@ -289,10 +290,14 @@ class SocialPageController extends Controller
             $following = true;
         }
 
-        return response()->json([
-            'following'       => $following,
-            'followers_count' => $page->fresh()->followers_count,
-        ]);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'following'       => $following,
+                'followers_count' => $page->fresh()->followers_count,
+            ]);
+        }
+
+        return back();
     }
 
     // ─── Posts ─────────────────────────────────────────────────────────────────
@@ -829,6 +834,8 @@ class SocialPageController extends Controller
             'action_button_text'  => 'nullable|string|max:60',
             'action_button_url'   => 'nullable|url|max:300',
             'allow_tagging'       => 'nullable|boolean',
+            'username'            => ['nullable','string','max:60','regex:/^[a-z0-9._-]+$/i',
+                                      Rule::unique('social_pages','username')->ignore($page->id)],
         ]);
 
         if ($request->hasFile('avatar')) {
@@ -872,6 +879,7 @@ class SocialPageController extends Controller
             'action_button_text'  => $data['action_button_text'] ?? null,
             'action_button_url'   => $data['action_button_url'] ?? null,
             'allow_tagging'       => $request->boolean('allow_tagging', true),
+            'username'            => $data['username'] ? strtolower(trim($data['username'])) : $page->username,
         ]);
         PageActivityLog::record($page->id, 'update_settings', 'Page settings updated.');
 

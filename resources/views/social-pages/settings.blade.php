@@ -72,6 +72,16 @@
                            class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500">
                 </div>
                 <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Username <span class="text-gray-400 font-normal text-xs">(@handle)</span></label>
+                    <div class="flex items-center border border-gray-300 rounded-xl overflow-hidden focus-within:border-blue-500">
+                        <span class="px-3 py-3 text-sm text-gray-400 bg-gray-50 border-r border-gray-200 select-none">@</span>
+                        <input type="text" name="username" value="{{ old('username', $page->username) }}" maxlength="60"
+                               placeholder="yourpagename" pattern="[a-zA-Z0-9._-]+"
+                               class="flex-1 px-3 py-3 text-sm focus:outline-none bg-transparent">
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1">Letters, numbers, dots, dashes only. Used in @mentions.</p>
+                </div>
+                <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Bio</label>
                     <textarea name="bio" rows="3" maxlength="500"
                               class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 resize-none">{{ old('bio', $page->bio) }}</textarea>
