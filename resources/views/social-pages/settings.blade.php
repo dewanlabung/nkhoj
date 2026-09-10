@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Page Settings — ' . $page->name)
+@php $pageCategories = $page->categories ?? []; @endphp
 
 @push('head')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
@@ -74,6 +75,24 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Bio</label>
                     <textarea name="bio" rows="3" maxlength="500"
                               class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 resize-none">{{ old('bio', $page->bio) }}</textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Categories <span class="text-gray-400 font-normal text-xs">(up to 3)</span></label>
+                    <div class="flex flex-wrap gap-2" x-data="{ selected: {{ json_encode($pageCategories) }} }"
+                         @change="if(document.querySelectorAll('input[name=\'categories[]\']:checked').length > 3) $event.target.checked = false">
+                        @foreach($categories as $cat)
+                        <label class="cursor-pointer">
+                            <input type="checkbox" name="categories[]" value="{{ $cat }}"
+                                   class="sr-only peer"
+                                   {{ in_array($cat, $pageCategories) ? 'checked' : '' }}
+                                   onchange="limitCats(this)">
+                            <span class="px-3 py-1.5 rounded-full text-xs font-semibold border transition
+                                         peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600
+                                         bg-white text-gray-600 border-gray-300 hover:bg-gray-50">{{ $cat }}</span>
+                        </label>
+                        @endforeach
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1">Select up to 3 categories that describe your page.</p>
                 </div>
             </div>
         </div>
@@ -178,6 +197,11 @@
 </div>
 
 <script>
+function limitCats(el) {
+    const all = document.querySelectorAll('input[name="categories[]"]:checked');
+    if (all.length > 3) el.checked = false;
+}
+
 function previewImage(input, previewId) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();

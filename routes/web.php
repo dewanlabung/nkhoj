@@ -414,18 +414,42 @@ Route::get('/pages/map',                            [SocialPageController::class
 Route::get('/api/pages/map-pins',                   [SocialPageController::class, 'mapPins']);
 Route::get('/pages/start',                          [SocialPageController::class, 'intro']);
 Route::middleware('auth')->group(function () {
-    Route::get('/pages/create',                     [SocialPageController::class, 'create']);
-    Route::post('/pages',                           [SocialPageController::class, 'store']);
-    Route::post('/pages/{slug}/follow',             [SocialPageController::class, 'follow'])->name('pages.follow');
-    Route::post('/pages/{slug}/posts',              [SocialPageController::class, 'storePost']);
-    Route::delete('/pages/{slug}/posts/{postId}',   [SocialPageController::class, 'deletePost']);
-    Route::post('/pages/{slug}/posts/{postId}/like',[SocialPageController::class, 'likePost']);
-    Route::post('/pages/{slug}/reviews',            [SocialPageController::class, 'storeReview']);
-    Route::delete('/pages/{slug}/reviews',          [SocialPageController::class, 'deleteReview']);
-    Route::post('/pages/{slug}/request-verification', [SocialPageController::class, 'requestVerification']);
-    Route::get('/pages/{slug}/dashboard',           [SocialPageController::class, 'dashboard']);
-    Route::get('/pages/{slug}/settings',            [SocialPageController::class, 'settings']);
-    Route::put('/pages/{slug}/settings',            [SocialPageController::class, 'updateSettings']);
+    // Create
+    Route::get('/pages/create',                              [SocialPageController::class, 'create']);
+    Route::post('/pages',                                    [SocialPageController::class, 'store']);
+    // Follow
+    Route::post('/pages/{slug}/follow',                      [SocialPageController::class, 'follow'])->name('pages.follow');
+    // Posts
+    Route::post('/pages/{slug}/posts',                       [SocialPageController::class, 'storePost']);
+    Route::delete('/pages/{slug}/posts/{postId}',            [SocialPageController::class, 'deletePost']);
+    Route::post('/pages/{slug}/posts/{postId}/like',         [SocialPageController::class, 'likePost']);
+    Route::post('/pages/{slug}/posts/{postId}/pin',          [SocialPageController::class, 'pinPost']);
+    Route::delete('/pages/{slug}/posts/{postId}/pin',        [SocialPageController::class, 'unpinPost']);
+    Route::post('/pages/{slug}/posts/{postId}/report',       [SocialPageController::class, 'report'])->defaults('type', 'post');
+    // Reviews
+    Route::post('/pages/{slug}/reviews',                     [SocialPageController::class, 'storeReview']);
+    Route::delete('/pages/{slug}/reviews',                   [SocialPageController::class, 'deleteReview']);
+    Route::post('/pages/{slug}/reviews/{reviewId}/report',   [SocialPageController::class, 'report'])->defaults('type', 'review');
+    // Reports
+    Route::post('/pages/{slug}/report',                      [SocialPageController::class, 'report']);
+    // Moderation queue
+    Route::get('/pages/{slug}/moderation',                   [SocialPageController::class, 'moderationQueue']);
+    Route::post('/pages/{slug}/moderation/{reportId}',       [SocialPageController::class, 'moderationAction']);
+    // Admin management
+    Route::get('/pages/{slug}/admins',                       [SocialPageController::class, 'manageAdmins']);
+    Route::post('/pages/{slug}/admins/invite',               [SocialPageController::class, 'inviteAdmin']);
+    Route::post('/pages/{slug}/admins/accept',               [SocialPageController::class, 'acceptAdminInvite']);
+    Route::delete('/pages/{slug}/admins/{userId}',           [SocialPageController::class, 'removeAdmin']);
+    // Verification
+    Route::post('/pages/{slug}/request-verification',        [SocialPageController::class, 'requestVerification']);
+    // Status
+    Route::post('/pages/{slug}/disable',                     [SocialPageController::class, 'disable']);
+    Route::post('/pages/{slug}/enable',                      [SocialPageController::class, 'enable']);
+    Route::delete('/pages/{slug}',                           [SocialPageController::class, 'destroy']);
+    // Dashboard & Settings
+    Route::get('/pages/{slug}/dashboard',                    [SocialPageController::class, 'dashboard']);
+    Route::get('/pages/{slug}/settings',                     [SocialPageController::class, 'settings']);
+    Route::put('/pages/{slug}/settings',                     [SocialPageController::class, 'updateSettings']);
 });
 Route::get('/pages/{slug}',                         [SocialPageController::class, 'show']);
 

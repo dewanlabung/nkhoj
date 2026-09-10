@@ -3,30 +3,34 @@
 namespace App\Http\Controllers;
 
 use App\Models\Bookmark;
+use App\Models\PageAdmin;
 use App\Models\PagePost;
 use App\Models\PagePostLike;
+use App\Models\PageReport;
 use App\Models\PageReview;
 use App\Models\PageVerificationRequest;
 use App\Models\PageViewLog;
 use App\Models\SocialPage;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class SocialPageController extends Controller
 {
-    // GET /pages — discover
+    // ─── Discover / Index ──────────────────────────────────────────────────────
+
     public function index(Request $request)
     {
         $tab      = $request->query('tab', 'discover');
         $search   = $request->query('q');
-        $category = $request->query('category', 'All');
+        $category = $request->query('category');
 
         $myPages = auth()->check()
             ? SocialPage::where('user_id', auth()->id())->latest()->get()
             : collect();
 
-        $query = SocialPage::where('is_active', true);
+        $query = SocialPage::where('is_active', true)->where('status', 'active');
 
         if ($search) {
             $query->where('name', 'like', "%{$search}%");
@@ -40,7 +44,7 @@ class SocialPageController extends Controller
         } elseif ($tab === 'mine' && auth()->check()) {
             $query->where('user_id', auth()->id());
         } elseif ($tab === 'top_rated') {
-            $query->orderByDesc('rating_avg');
+            $query->where('reviews_count', '>', 0)->orderByDesc('rating_avg');
         } elseif ($tab === 'nearby' && $request->filled('near')) {
             [$lat, $lng] = explode(',', $request->query('near'));
             $lat = (float) $lat; $lng = (float) $lng;
@@ -52,27 +56,27 @@ class SocialPageController extends Controller
             $query->orderByDesc('followers_count');
         }
 
-        $pages = $query->paginate(24)->withQueryString();
+        $pages      = $query->paginate(24)->withQueryString();
+        $categories = SocialPage::CATEGORIES;
 
-        return view('social-pages.discover', compact('pages', 'myPages'));
+        return view('social-pages.discover', compact('pages', 'myPages', 'categories'));
     }
 
-    // GET /pages/start — intro splash
+    // ─── Intro / Map ───────────────────────────────────────────────────────────
+
     public function intro()
     {
         return view('social-pages.intro');
     }
 
-    // GET /pages/map — full map view
     public function mapView()
     {
         return view('social-pages.map');
     }
 
-    // GET /api/pages/map-pins — JSON for Leaflet markers
     public function mapPins()
     {
-        $pins = SocialPage::where('is_active', true)
+        $pins = SocialPage::where('is_active', true)->where('status', 'active')
             ->whereNotNull('lat')->whereNotNull('lng')
             ->select('id', 'name', 'slug', 'categories', 'lat', 'lng', 'avatar_url', 'followers_count', 'rating_avg', 'is_verified')
             ->get()
@@ -92,13 +96,14 @@ class SocialPageController extends Controller
         return response()->json($pins);
     }
 
-    // GET /pages/create — multi-step wizard
+    // ─── Create ────────────────────────────────────────────────────────────────
+
     public function create()
     {
-        return view('social-pages.create');
+        $categories = SocialPage::CATEGORIES;
+        return view('social-pages.create', compact('categories'));
     }
 
-    // POST /pages — store
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -125,23 +130,28 @@ class SocialPageController extends Controller
             'name'       => $data['name'],
             'slug'       => $slug,
             'page_type'  => $data['page_type'],
-            'categories' => array_filter($data['categories'] ?? []),
+            'categories' => array_values(array_filter($data['categories'] ?? [])),
             'bio'        => $data['bio'] ?? null,
             'website'    => $data['website'] ?? null,
             'location'   => $data['location'] ?? null,
             'phone'      => $data['phone'] ?? null,
+            'status'     => 'active',
         ]);
 
         return redirect("/pages/{$page->slug}/dashboard")
             ->with('success', 'Your page has been created!');
     }
 
-    // GET /pages/{slug} — public profile
+    // ─── Public Profile ────────────────────────────────────────────────────────
+
     public function show(string $slug)
     {
-        $page = SocialPage::where('slug', $slug)->where('is_active', true)->firstOrFail();
+        $page = SocialPage::where('slug', $slug)
+            ->where('is_active', true)
+            ->where('status', 'active')
+            ->firstOrFail();
 
-        // record daily view (MariaDB-compatible upsert)
+        // record daily view
         DB::statement(
             'INSERT INTO page_view_logs (social_page_id, date, views) VALUES (?, ?, 1)
              ON DUPLICATE KEY UPDATE views = views + 1',
@@ -149,33 +159,37 @@ class SocialPageController extends Controller
         );
         $page->increment('views_count');
 
-        $isOwner     = $page->isOwnedBy(auth()->user());
-        $isFollowing = $page->isFollowedBy(auth()->user());
-        $isSaved     = auth()->check()
-            ? Bookmark::where('user_id', auth()->id())
+        $user        = auth()->user();
+        $userRole    = $page->roleFor($user);
+        $isOwner     = $userRole === 'owner';
+        $isManager   = in_array($userRole, ['owner', 'admin', 'moderator', 'editor']);
+        $isFollowing = $page->isFollowedBy($user);
+
+        $isSaved = $user
+            ? Bookmark::where('user_id', $user->id)
                 ->where('bookmarkable_type', SocialPage::class)
                 ->where('bookmarkable_id', $page->id)
                 ->exists()
             : false;
 
-        $userReview = auth()->check()
-            ? $page->reviews()->where('user_id', auth()->id())->first()
-            : null;
-
-        $posts   = PagePost::where('social_page_id', $page->id)->latest()->paginate(12);
-        $reviews = $page->reviews()->with('user')->latest()->paginate(10);
-        $events  = PagePost::where('social_page_id', $page->id)->where('type', 'event')
-                        ->where('event_start', '>=', now())->orderBy('event_start')->limit(5)->get();
-
-        $isOpen = $page->isOpenNow();
+        $userReview  = $user ? $page->reviews()->where('user_id', $user->id)->first() : null;
+        $pinnedPost  = $page->pinned_post_id ? $page->pinnedPost()->with('author')->first() : null;
+        $posts       = PagePost::where('social_page_id', $page->id)
+                            ->where('id', '!=', $page->pinned_post_id ?? 0)
+                            ->latest()->paginate(12);
+        $reviews     = $page->reviews()->with('user')->latest()->paginate(10);
+        $events      = PagePost::where('social_page_id', $page->id)->where('type', 'event')
+                            ->where('event_start', '>=', now())->orderBy('event_start')->limit(5)->get();
+        $isOpen      = $page->isOpenNow();
 
         return view('social-pages.show', compact(
-            'page', 'isOwner', 'isFollowing', 'isSaved',
-            'posts', 'reviews', 'userReview', 'events', 'isOpen'
+            'page', 'isOwner', 'isManager', 'userRole', 'isFollowing', 'isSaved',
+            'posts', 'reviews', 'userReview', 'events', 'isOpen', 'pinnedPost'
         ));
     }
 
-    // POST /pages/{slug}/follow — toggle follow (AJAX)
+    // ─── Follow ────────────────────────────────────────────────────────────────
+
     public function follow(string $slug)
     {
         $page = SocialPage::where('slug', $slug)->firstOrFail();
@@ -197,10 +211,12 @@ class SocialPageController extends Controller
         ]);
     }
 
-    // POST /pages/{slug}/posts — store page post
+    // ─── Posts ─────────────────────────────────────────────────────────────────
+
     public function storePost(Request $request, string $slug)
     {
-        $page = SocialPage::where('slug', $slug)->where('user_id', auth()->id())->firstOrFail();
+        $page = SocialPage::where('slug', $slug)->where('is_active', true)->firstOrFail();
+        abort_unless($page->isManagedBy(auth()->user()), 403);
 
         $data = $request->validate([
             'type'             => 'required|in:text,photo,video,event',
@@ -239,17 +255,21 @@ class SocialPageController extends Controller
         return back()->with('success', 'Post published!');
     }
 
-    // DELETE /pages/{slug}/posts/{postId}
     public function deletePost(string $slug, int $postId)
     {
-        $page = SocialPage::where('slug', $slug)->where('user_id', auth()->id())->firstOrFail();
+        $page = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isManagedBy(auth()->user()), 403);
         $post = PagePost::where('id', $postId)->where('social_page_id', $page->id)->firstOrFail();
+
+        // unpin if pinned
+        if ($page->pinned_post_id === $postId) {
+            $page->update(['pinned_post_id' => null]);
+        }
         $post->delete();
 
         return back()->with('success', 'Post deleted.');
     }
 
-    // POST /pages/{slug}/posts/{postId}/like — toggle like (AJAX)
     public function likePost(string $slug, int $postId)
     {
         $page = SocialPage::where('slug', $slug)->where('is_active', true)->firstOrFail();
@@ -269,7 +289,29 @@ class SocialPageController extends Controller
         return response()->json(['liked' => $liked, 'likes_count' => $post->fresh()->likes_count]);
     }
 
-    // POST /pages/{slug}/reviews — store review
+    // POST /pages/{slug}/posts/{postId}/pin
+    public function pinPost(string $slug, int $postId)
+    {
+        $page = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isOwnedBy(auth()->user()), 403);
+        PagePost::where('id', $postId)->where('social_page_id', $page->id)->firstOrFail();
+
+        $page->update(['pinned_post_id' => $postId]);
+        return back()->with('success', 'Post pinned.');
+    }
+
+    // DELETE /pages/{slug}/posts/{postId}/pin
+    public function unpinPost(string $slug, int $postId)
+    {
+        $page = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isOwnedBy(auth()->user()), 403);
+
+        $page->update(['pinned_post_id' => null]);
+        return back()->with('success', 'Post unpinned.');
+    }
+
+    // ─── Reviews ───────────────────────────────────────────────────────────────
+
     public function storeReview(Request $request, string $slug)
     {
         $page = SocialPage::where('slug', $slug)->where('is_active', true)->firstOrFail();
@@ -291,10 +333,9 @@ class SocialPageController extends Controller
         return back()->with('success', 'Review submitted!');
     }
 
-    // DELETE /pages/{slug}/reviews — delete own review
     public function deleteReview(string $slug)
     {
-        $page   = SocialPage::where('slug', $slug)->where('is_active', true)->firstOrFail();
+        $page = SocialPage::where('slug', $slug)->where('is_active', true)->firstOrFail();
         PageReview::where('social_page_id', $page->id)->where('user_id', auth()->id())->delete();
 
         $avg   = $page->reviews()->avg('rating') ?? 0;
@@ -304,7 +345,149 @@ class SocialPageController extends Controller
         return back()->with('success', 'Review removed.');
     }
 
-    // POST /pages/{slug}/request-verification
+    // ─── Reports / Moderation ──────────────────────────────────────────────────
+
+    // POST /pages/{slug}/report
+    // POST /pages/{slug}/posts/{postId}/report
+    // POST /pages/{slug}/reviews/{reviewId}/report
+    public function report(Request $request, string $slug, ?string $type = null, ?int $entityId = null)
+    {
+        $page = SocialPage::where('slug', $slug)->where('is_active', true)->firstOrFail();
+
+        $data = $request->validate([
+            'reason'  => 'required|in:spam,inappropriate,harassment,fake,other',
+            'details' => 'nullable|string|max:500',
+        ]);
+
+        if ($type === 'post' && $entityId) {
+            $reportable = PagePost::where('id', $entityId)->where('social_page_id', $page->id)->firstOrFail();
+        } elseif ($type === 'review' && $entityId) {
+            $reportable = PageReview::where('id', $entityId)->where('social_page_id', $page->id)->firstOrFail();
+        } else {
+            $reportable = $page;
+        }
+
+        PageReport::updateOrCreate(
+            [
+                'reportable_type' => get_class($reportable),
+                'reportable_id'   => $reportable->id,
+                'user_id'         => auth()->id(),
+            ],
+            [
+                'social_page_id' => $page->id,
+                'reason'         => $data['reason'],
+                'details'        => $data['details'] ?? null,
+                'status'         => 'pending',
+            ]
+        );
+
+        return back()->with('success', 'Report submitted. Thank you.');
+    }
+
+    // GET /pages/{slug}/moderation
+    public function moderationQueue(string $slug)
+    {
+        $page = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isManagedBy(auth()->user()), 403);
+
+        $reports = PageReport::where('social_page_id', $page->id)
+            ->with(['reporter', 'reportable'])
+            ->latest()
+            ->paginate(20);
+
+        return view('social-pages.moderation', compact('page', 'reports'));
+    }
+
+    // POST /pages/{slug}/moderation/{reportId}
+    public function moderationAction(Request $request, string $slug, int $reportId)
+    {
+        $page = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isManagedBy(auth()->user()), 403);
+
+        $data   = $request->validate(['action' => 'required|in:dismiss,delete_content']);
+        $report = PageReport::where('id', $reportId)->where('social_page_id', $page->id)->firstOrFail();
+
+        if ($data['action'] === 'delete_content' && $report->reportable) {
+            $report->reportable->delete();
+        }
+
+        $report->update([
+            'status'      => 'reviewed',
+            'reviewed_by' => auth()->id(),
+            'reviewed_at' => now(),
+        ]);
+
+        return back()->with('success', 'Report resolved.');
+    }
+
+    // ─── Admin Management ──────────────────────────────────────────────────────
+
+    // GET /pages/{slug}/admins
+    public function manageAdmins(string $slug)
+    {
+        $page = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isOwnedBy(auth()->user()), 403);
+
+        $admins = PageAdmin::where('social_page_id', $page->id)
+            ->with(['user', 'inviter'])
+            ->latest()
+            ->get();
+
+        return view('social-pages.admins', compact('page', 'admins'));
+    }
+
+    // POST /pages/{slug}/admins/invite
+    public function inviteAdmin(Request $request, string $slug)
+    {
+        $page = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isOwnedBy(auth()->user()), 403);
+
+        $data = $request->validate([
+            'username' => 'required|string|exists:users,username',
+            'role'     => 'required|in:admin,moderator,editor',
+        ]);
+
+        $invitee = User::where('username', $data['username'])->firstOrFail();
+
+        if ($page->isOwnedBy($invitee)) {
+            return back()->withErrors(['username' => 'Cannot invite the page owner.']);
+        }
+
+        PageAdmin::updateOrCreate(
+            ['social_page_id' => $page->id, 'user_id' => $invitee->id],
+            ['invited_by' => auth()->id(), 'role' => $data['role'], 'accepted_at' => null]
+        );
+
+        return back()->with('success', "@{$invitee->username} has been invited as {$data['role']}.");
+    }
+
+    // POST /pages/{slug}/admins/accept
+    public function acceptAdminInvite(string $slug)
+    {
+        $page   = SocialPage::where('slug', $slug)->firstOrFail();
+        $invite = PageAdmin::where('social_page_id', $page->id)
+                           ->where('user_id', auth()->id())
+                           ->whereNull('accepted_at')
+                           ->firstOrFail();
+
+        $invite->update(['accepted_at' => now()]);
+
+        return redirect("/pages/{$page->slug}")->with('success', "You are now an {$invite->role} of {$page->name}.");
+    }
+
+    // DELETE /pages/{slug}/admins/{userId}
+    public function removeAdmin(string $slug, int $userId)
+    {
+        $page = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isOwnedBy(auth()->user()), 403);
+
+        PageAdmin::where('social_page_id', $page->id)->where('user_id', $userId)->delete();
+
+        return back()->with('success', 'Admin removed.');
+    }
+
+    // ─── Verification ──────────────────────────────────────────────────────────
+
     public function requestVerification(Request $request, string $slug)
     {
         $page = SocialPage::where('slug', $slug)->where('user_id', auth()->id())->firstOrFail();
@@ -328,12 +511,51 @@ class SocialPageController extends Controller
         return back()->with('success', 'Verification request submitted! We will review it shortly.');
     }
 
-    // GET /pages/{slug}/dashboard — professional dashboard (owner only)
-    public function dashboard(string $slug)
+    // ─── Page Status (Disable / Enable / Delete) ───────────────────────────────
+
+    // POST /pages/{slug}/disable
+    public function disable(Request $request, string $slug)
+    {
+        $page = SocialPage::where('slug', $slug)->where('user_id', auth()->id())->firstOrFail();
+        $data = $request->validate(['reason' => 'nullable|string|max:500']);
+
+        $page->update([
+            'status'          => 'disabled',
+            'disabled_reason' => $data['reason'] ?? null,
+        ]);
+
+        return redirect("/pages/{$page->slug}/dashboard")->with('success', 'Page has been disabled.');
+    }
+
+    // POST /pages/{slug}/enable
+    public function enable(string $slug)
     {
         $page = SocialPage::where('slug', $slug)->where('user_id', auth()->id())->firstOrFail();
 
-        // 30-day view chart data
+        $page->update(['status' => 'active', 'disabled_reason' => null]);
+
+        return redirect("/pages/{$page->slug}/dashboard")->with('success', 'Page is now active.');
+    }
+
+    // DELETE /pages/{slug}
+    public function destroy(string $slug)
+    {
+        $page = SocialPage::where('slug', $slug)->where('user_id', auth()->id())->firstOrFail();
+        $page->delete();
+
+        return redirect('/pages')->with('success', 'Page deleted permanently.');
+    }
+
+    // ─── Dashboard ─────────────────────────────────────────────────────────────
+
+    public function dashboard(string $slug)
+    {
+        $page = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isManagedBy(auth()->user()), 403);
+
+        $isOwner = $page->isOwnedBy(auth()->user());
+        $userRole = $page->roleFor(auth()->user());
+
         $viewData = PageViewLog::where('social_page_id', $page->id)
             ->where('date', '>=', now()->subDays(29)->toDateString())
             ->orderBy('date')
@@ -350,34 +572,48 @@ class SocialPageController extends Controller
         $hasPendingVerification = PageVerificationRequest::where('social_page_id', $page->id)
                                         ->where('status', 'pending')->exists();
 
-        return view('social-pages.dashboard', compact('page', 'chartLabels', 'chartValues', 'hasPendingVerification'));
+        $pendingReports = PageReport::where('social_page_id', $page->id)
+                              ->where('status', 'pending')->count();
+
+        $pendingInvites = PageAdmin::where('social_page_id', $page->id)
+                              ->whereNotNull('accepted_at')->count();
+
+        $categories = SocialPage::CATEGORIES;
+
+        return view('social-pages.dashboard', compact(
+            'page', 'isOwner', 'userRole',
+            'chartLabels', 'chartValues',
+            'hasPendingVerification', 'pendingReports', 'pendingInvites',
+            'categories'
+        ));
     }
 
-    // GET /pages/{slug}/settings — settings (owner only)
+    // ─── Settings ──────────────────────────────────────────────────────────────
+
     public function settings(string $slug)
     {
         $page = SocialPage::where('slug', $slug)->where('user_id', auth()->id())->firstOrFail();
-        return view('social-pages.settings', compact('page'));
+        $categories = SocialPage::CATEGORIES;
+        return view('social-pages.settings', compact('page', 'categories'));
     }
 
-    // PUT /pages/{slug}/settings — update settings
     public function updateSettings(Request $request, string $slug)
     {
         $page = SocialPage::where('slug', $slug)->where('user_id', auth()->id())->firstOrFail();
 
         $data = $request->validate([
-            'name'         => 'required|string|max:150',
-            'bio'          => 'nullable|string|max:500',
-            'categories'   => 'nullable|array|max:3',
-            'categories.*' => 'nullable|string|max:100',
-            'website'      => 'nullable|url|max:300',
-            'email'        => 'nullable|email|max:150',
-            'phone'        => 'nullable|string|max:50',
-            'location'     => 'nullable|string|max:200',
-            'lat'          => 'nullable|numeric|between:-90,90',
-            'lng'          => 'nullable|numeric|between:-180,180',
-            'avatar'       => 'nullable|image|max:2048',
-            'cover'        => 'nullable|image|max:4096',
+            'name'           => 'required|string|max:150',
+            'bio'            => 'nullable|string|max:500',
+            'categories'     => 'nullable|array|max:3',
+            'categories.*'   => 'nullable|string|max:100',
+            'website'        => 'nullable|url|max:300',
+            'email'          => 'nullable|email|max:150',
+            'phone'          => 'nullable|string|max:50',
+            'location'       => 'nullable|string|max:200',
+            'lat'            => 'nullable|numeric|between:-90,90',
+            'lng'            => 'nullable|numeric|between:-180,180',
+            'avatar'         => 'nullable|image|max:2048',
+            'cover'          => 'nullable|image|max:4096',
             'business_hours' => 'nullable|array',
         ]);
 
@@ -395,7 +631,6 @@ class SocialPageController extends Controller
             $data['cover_url'] = '/uploads/pages/' . $filename;
         }
 
-        // build business_hours from individual day fields
         $days  = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
         $hours = [];
         foreach ($days as $day) {
@@ -406,25 +641,26 @@ class SocialPageController extends Controller
             ];
         }
 
-        $page->update(array_filter([
+        $page->update([
             'name'           => $data['name'],
             'bio'            => $data['bio'] ?? null,
-            'categories'     => array_filter($data['categories'] ?? []),
+            'categories'     => array_values(array_filter($data['categories'] ?? [])),
             'website'        => $data['website'] ?? null,
             'email'          => $data['email'] ?? null,
             'phone'          => $data['phone'] ?? null,
             'location'       => $data['location'] ?? null,
-            'lat'            => $data['lat'] ?? null,
-            'lng'            => $data['lng'] ?? null,
+            'lat'            => $data['lat'] ?? $page->lat,
+            'lng'            => $data['lng'] ?? $page->lng,
             'business_hours' => $hours,
             'avatar_url'     => $data['avatar_url'] ?? $page->avatar_url,
             'cover_url'      => $data['cover_url'] ?? $page->cover_url,
-        ], fn($v) => $v !== null));
+        ]);
 
         return back()->with('success', 'Page settings updated!');
     }
 
-    // GET /dashboard/pages — my pages list
+    // ─── My Pages ──────────────────────────────────────────────────────────────
+
     public function myPages()
     {
         $pages = SocialPage::where('user_id', auth()->id())->latest()->get();
