@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\CreateNotification;
 use App\Models\Comment;
-use App\Models\Notification;
 use App\Models\Post;
 use Illuminate\Http\Request;
 
@@ -29,15 +29,11 @@ class CommentController extends Controller
 
         // notify post author
         if ($post->author_id && $post->author_id !== auth()->id()) {
-            Notification::create([
-                'user_id' => $post->author_id,
-                'type'    => 'comment',
-                'data'    => [
-                    'commenter' => auth()->user()?->name ?? ($data['guest_name'] ?? 'अतिथि'),
-                    'post_title' => $post->title,
-                    'post_slug'  => $post->slug,
-                    'excerpt'    => \Str::limit($data['body'], 80),
-                ],
+            CreateNotification::dispatch($post->author_id, 'comment', [
+                'commenter'  => auth()->user()?->name ?? ($data['guest_name'] ?? 'अतिथि'),
+                'post_title' => $post->title,
+                'post_slug'  => $post->slug,
+                'excerpt'    => \Str::limit($data['body'], 80),
             ]);
         }
 

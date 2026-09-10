@@ -63,25 +63,24 @@ class SearchController extends Controller
 
         if ($query !== '') {
             $like = "%{$query}%";
+            $ft   = $query; // for MATCH…AGAINST
 
             $counts['posts'] = Post::published()
-                ->where(fn($q) => $q->where('title', 'like', $like)
-                    ->orWhere('excerpt', 'like', $like)
-                    ->orWhere('body', 'like', $like))
+                ->where(fn($q) => $q->whereRaw('MATCH(title,body) AGAINST(? IN BOOLEAN MODE)', [$ft])
+                    ->orWhere('title', 'like', $like))
                 ->count();
 
             // social_pages.categories is a JSON array; search name, page_type, bio instead
             $counts['pages'] = SocialPage::where('status', 'active')
-                ->where(fn($q) => $q->where('name', 'like', $like)
-                    ->orWhere('page_type', 'like', $like)
-                    ->orWhere('bio', 'like', $like))
+                ->where(fn($q) => $q->whereRaw('MATCH(name,bio) AGAINST(? IN BOOLEAN MODE)', [$ft])
+                    ->orWhere('name', 'like', $like)
+                    ->orWhere('page_type', 'like', $like))
                 ->count();
 
             $counts['events'] = Event::where('is_published', true)
-                ->where(fn($q) => $q->where('title', 'like', $like)
-                    ->orWhere('description', 'like', $like)
-                    ->orWhere('venue', 'like', $like)
-                    ->orWhere('organizer', 'like', $like))
+                ->where(fn($q) => $q->whereRaw('MATCH(title,description) AGAINST(? IN BOOLEAN MODE)', [$ft])
+                    ->orWhere('title', 'like', $like)
+                    ->orWhere('venue', 'like', $like))
                 ->count();
 
             $counts['users'] = User::where(fn($q) => $q->where('name', 'like', $like)
@@ -89,15 +88,14 @@ class SearchController extends Controller
                 ->orWhere('bio', 'like', $like))
                 ->count();
 
-            $counts['questions'] = Question::where(fn($q) => $q->where('title', 'like', $like)
-                ->orWhere('content', 'like', $like))
+            $counts['questions'] = Question::where(fn($q) => $q->whereRaw('MATCH(title,content) AGAINST(? IN BOOLEAN MODE)', [$ft])
+                ->orWhere('title', 'like', $like))
                 ->count();
 
             $counts['recipes'] = Recipe::where('is_published', true)
-                ->where(fn($q) => $q->where('title', 'like', $like)
-                    ->orWhere('description', 'like', $like)
-                    ->orWhere('cuisine_type', 'like', $like)
-                    ->orWhere('meal_type', 'like', $like))
+                ->where(fn($q) => $q->whereRaw('MATCH(title,description) AGAINST(? IN BOOLEAN MODE)', [$ft])
+                    ->orWhere('title', 'like', $like)
+                    ->orWhere('cuisine_type', 'like', $like))
                 ->count();
 
             $counts['all'] = array_sum(array_values($counts));
@@ -113,28 +111,26 @@ class SearchController extends Controller
             $results = match ($type) {
                 'posts' => Post::with(['author', 'category', 'tags'])
                     ->published()
-                    ->where(fn($q) => $q->where('title', 'like', $like)
-                        ->orWhere('excerpt', 'like', $like)
-                        ->orWhere('body', 'like', $like))
+                    ->where(fn($q) => $q->whereRaw('MATCH(title,body) AGAINST(? IN BOOLEAN MODE)', [$ft])
+                        ->orWhere('title', 'like', $like))
                     ->orderByRaw("CASE WHEN title LIKE ? THEN 0 ELSE 1 END", [$like])
                     ->orderByDesc('published_at')
                     ->paginate(12)
                     ->withQueryString(),
 
                 'pages' => SocialPage::where('status', 'active')
-                    ->where(fn($q) => $q->where('name', 'like', $like)
-                        ->orWhere('page_type', 'like', $like)
-                        ->orWhere('bio', 'like', $like))
+                    ->where(fn($q) => $q->whereRaw('MATCH(name,bio) AGAINST(? IN BOOLEAN MODE)', [$ft])
+                        ->orWhere('name', 'like', $like)
+                        ->orWhere('page_type', 'like', $like))
                     ->orderByRaw("CASE WHEN name LIKE ? THEN 0 ELSE 1 END", [$like])
                     ->orderByDesc('followers_count')
                     ->paginate(12)
                     ->withQueryString(),
 
                 'events' => Event::where('is_published', true)
-                    ->where(fn($q) => $q->where('title', 'like', $like)
-                        ->orWhere('description', 'like', $like)
-                        ->orWhere('venue', 'like', $like)
-                        ->orWhere('organizer', 'like', $like))
+                    ->where(fn($q) => $q->whereRaw('MATCH(title,description) AGAINST(? IN BOOLEAN MODE)', [$ft])
+                        ->orWhere('title', 'like', $like)
+                        ->orWhere('venue', 'like', $like))
                     ->orderByRaw("CASE WHEN title LIKE ? THEN 0 ELSE 1 END", [$like])
                     ->orderBy('starts_at')
                     ->paginate(12)
@@ -149,8 +145,8 @@ class SearchController extends Controller
                     ->withQueryString(),
 
                 'questions' => Question::with(['user', 'category'])
-                    ->where(fn($q) => $q->where('title', 'like', $like)
-                        ->orWhere('content', 'like', $like))
+                    ->where(fn($q) => $q->whereRaw('MATCH(title,content) AGAINST(? IN BOOLEAN MODE)', [$ft])
+                        ->orWhere('title', 'like', $like))
                     ->orderByRaw("CASE WHEN title LIKE ? THEN 0 ELSE 1 END", [$like])
                     ->latest()
                     ->paginate(12)
@@ -158,16 +154,15 @@ class SearchController extends Controller
 
                 'recipes' => Recipe::with('author')
                     ->where('is_published', true)
-                    ->where(fn($q) => $q->where('title', 'like', $like)
-                        ->orWhere('description', 'like', $like)
-                        ->orWhere('cuisine_type', 'like', $like)
-                        ->orWhere('meal_type', 'like', $like))
+                    ->where(fn($q) => $q->whereRaw('MATCH(title,description) AGAINST(? IN BOOLEAN MODE)', [$ft])
+                        ->orWhere('title', 'like', $like)
+                        ->orWhere('cuisine_type', 'like', $like))
                     ->orderByRaw("CASE WHEN title LIKE ? THEN 0 ELSE 1 END", [$like])
                     ->latest()
                     ->paginate(12)
                     ->withQueryString(),
 
-                default => $this->allResults($query, $like),
+                default => $this->allResults($query, $like, $ft),
             };
         }
 
@@ -225,58 +220,52 @@ class SearchController extends Controller
         return response()->json(array_slice($results, 0, 8));
     }
 
-    private function allResults(string $query, string $like): array
+    private function allResults(string $query, string $like, string $ft = ''): array
     {
+        $ft = $ft ?: $query;
         return [
             'posts' => Post::with(['author', 'category'])
                 ->published()
-                ->where(fn($q) => $q->where('title', 'like', $like)
-                    ->orWhere('excerpt', 'like', $like))
+                ->where(fn($q) => $q->whereRaw('MATCH(title,body) AGAINST(? IN BOOLEAN MODE)', [$ft])
+                    ->orWhere('title', 'like', $like))
                 ->orderByRaw("CASE WHEN title LIKE ? THEN 0 ELSE 1 END", [$like])
                 ->orderByDesc('published_at')
-                ->limit(4)
-                ->get(),
+                ->limit(4)->get(),
 
             'pages' => SocialPage::where('status', 'active')
-                ->where(fn($q) => $q->where('name', 'like', $like)
-                    ->orWhere('page_type', 'like', $like)
-                    ->orWhere('bio', 'like', $like))
+                ->where(fn($q) => $q->whereRaw('MATCH(name,bio) AGAINST(? IN BOOLEAN MODE)', [$ft])
+                    ->orWhere('name', 'like', $like)
+                    ->orWhere('page_type', 'like', $like))
                 ->orderByRaw("CASE WHEN name LIKE ? THEN 0 ELSE 1 END", [$like])
                 ->orderByDesc('followers_count')
-                ->limit(4)
-                ->get(),
+                ->limit(4)->get(),
 
             'events' => Event::where('is_published', true)
-                ->where(fn($q) => $q->where('title', 'like', $like)
-                    ->orWhere('description', 'like', $like)
+                ->where(fn($q) => $q->whereRaw('MATCH(title,description) AGAINST(? IN BOOLEAN MODE)', [$ft])
+                    ->orWhere('title', 'like', $like)
                     ->orWhere('venue', 'like', $like))
                 ->orderByRaw("CASE WHEN title LIKE ? THEN 0 ELSE 1 END", [$like])
                 ->orderBy('starts_at')
-                ->limit(4)
-                ->get(),
+                ->limit(4)->get(),
 
             'users' => User::where(fn($q) => $q->where('name', 'like', $like)
                 ->orWhere('username', 'like', $like))
                 ->orderByRaw("CASE WHEN name LIKE ? THEN 0 ELSE 1 END", [$like])
-                ->limit(4)
-                ->get(),
+                ->limit(4)->get(),
 
             'questions' => Question::with('user')
-                ->where(fn($q) => $q->where('title', 'like', $like)
-                    ->orWhere('content', 'like', $like))
+                ->where(fn($q) => $q->whereRaw('MATCH(title,content) AGAINST(? IN BOOLEAN MODE)', [$ft])
+                    ->orWhere('title', 'like', $like))
                 ->orderByRaw("CASE WHEN title LIKE ? THEN 0 ELSE 1 END", [$like])
-                ->latest()
-                ->limit(4)
-                ->get(),
+                ->latest()->limit(4)->get(),
 
             'recipes' => Recipe::with('author')
                 ->where('is_published', true)
-                ->where(fn($q) => $q->where('title', 'like', $like)
-                    ->orWhere('description', 'like', $like)
+                ->where(fn($q) => $q->whereRaw('MATCH(title,description) AGAINST(? IN BOOLEAN MODE)', [$ft])
+                    ->orWhere('title', 'like', $like)
                     ->orWhere('cuisine_type', 'like', $like))
                 ->orderByRaw("CASE WHEN title LIKE ? THEN 0 ELSE 1 END", [$like])
-                ->limit(4)
-                ->get(),
+                ->limit(4)->get(),
         ];
     }
 }

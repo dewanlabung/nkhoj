@@ -123,23 +123,26 @@ class HomeController extends Controller
 
     public function leaderboard()
     {
-        $topByFollowers = User::withCount('followers')
-            ->where('role', '!=', 'reader')
-            ->orderByDesc('followers_count')
-            ->limit(10)
-            ->get();
+        $topByFollowers = Cache::remember('leaderboard_followers', 600, fn() =>
+            User::withCount('followers')
+                ->where('role', '!=', 'reader')
+                ->orderByDesc('followers_count')
+                ->limit(10)->get()
+        );
 
-        $topByViews = User::withSum(['posts as total_views' => fn($q) => $q->published()], 'view_count')
-            ->where('role', '!=', 'reader')
-            ->orderByDesc('total_views')
-            ->limit(10)
-            ->get();
+        $topByViews = Cache::remember('leaderboard_views', 600, fn() =>
+            User::withSum(['posts as total_views' => fn($q) => $q->published()], 'view_count')
+                ->where('role', '!=', 'reader')
+                ->orderByDesc('total_views')
+                ->limit(10)->get()
+        );
 
-        $topByPosts = User::withCount(['posts as published_posts_count' => fn($q) => $q->published()])
-            ->where('role', '!=', 'reader')
-            ->orderByDesc('published_posts_count')
-            ->limit(10)
-            ->get();
+        $topByPosts = Cache::remember('leaderboard_posts', 600, fn() =>
+            User::withCount(['posts as published_posts_count' => fn($q) => $q->published()])
+                ->where('role', '!=', 'reader')
+                ->orderByDesc('published_posts_count')
+                ->limit(10)->get()
+        );
 
         return view('leaderboard', compact('topByFollowers', 'topByViews', 'topByPosts'));
     }

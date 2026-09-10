@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\CreateNotification;
 use App\Models\Category;
-use App\Models\Notification;
 use App\Models\Post;
 use App\Models\Tag;
 use Illuminate\Http\Request;
@@ -281,11 +281,7 @@ class DashboardController extends Controller
             'author_username' => $author->username,
         ];
         foreach ($followers as $followerId) {
-            Notification::create([
-                'user_id' => $followerId,
-                'type'    => 'new_post',
-                'data'    => $payload,
-            ]);
+            CreateNotification::dispatch($followerId, 'new_post', $payload);
         }
     }
 

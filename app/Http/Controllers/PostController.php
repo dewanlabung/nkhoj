@@ -25,6 +25,22 @@ class PostController extends Controller
             ->limit(4)
             ->get();
 
+        // Tag-based recommendations: posts sharing the most tags with this post
+        $tagIds = $post->tags->pluck('id');
+        $tagRecommended = collect();
+        if ($tagIds->isNotEmpty()) {
+            $tagRecommended = Post::with(['author', 'category'])
+                ->published()
+                ->where('id', '!=', $post->id)
+                ->whereNotIn('id', $related->pluck('id'))
+                ->whereHas('tags', fn($q) => $q->whereIn('tags.id', $tagIds))
+                ->withCount(['tags as shared_tags' => fn($q) => $q->whereIn('tags.id', $tagIds)])
+                ->orderByDesc('shared_tags')
+                ->orderByDesc('view_count')
+                ->limit(4)
+                ->get();
+        }
+
         $comments = $post->comments()
             ->with(['author', 'replies.author'])
             ->approved()
@@ -76,7 +92,7 @@ class PostController extends Controller
             $widgetData['settings'] = File::exists($path) ? (json_decode(File::get($path), true) ?? []) : [];
         }
 
-        return view('posts.show', compact('post', 'related', 'comments', 'reactionCounts', 'userReaction', 'isBookmarked', 'sidebarWidgets', 'widgetData'));
+        return view('posts.show', compact('post', 'related', 'tagRecommended', 'comments', 'reactionCounts', 'userReaction', 'isBookmarked', 'sidebarWidgets', 'widgetData'));
     }
 
     public function share(string $slug)

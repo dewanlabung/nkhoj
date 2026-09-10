@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Recipe;
 use App\Models\RecipeLike;
+use App\Models\RecipeRating;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -122,5 +123,24 @@ class RecipeController extends Controller
             $liked = true;
         }
         return response()->json(['liked' => $liked, 'count' => $recipe->fresh()->likes_count]);
+    }
+
+    public function rate(Request $request, Recipe $recipe)
+    {
+        $data = $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'review' => 'nullable|string|max:500',
+        ]);
+
+        RecipeRating::updateOrCreate(
+            ['recipe_id' => $recipe->id, 'user_id' => auth()->id()],
+            $data
+        );
+
+        $avg   = $recipe->ratings()->avg('rating');
+        $count = $recipe->ratings()->count();
+        $recipe->update(['rating_avg' => round($avg, 2), 'ratings_count' => $count]);
+
+        return response()->json(['rating_avg' => round($avg, 1), 'ratings_count' => $count, 'your_rating' => $data['rating']]);
     }
 }

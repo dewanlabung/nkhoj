@@ -2,6 +2,16 @@
 @section('title', $event->title . ' – Nkhoj Events')
 
 @push('head')
+<meta property="og:title" content="{{ $event->title }}">
+<meta property="og:type" content="event">
+<meta property="og:url" content="{{ url('/events/' . ($event->slug ?? $event->uuid)) }}">
+@if($event->thumbnail_url)<meta property="og:image" content="{{ $event->thumbnail_url }}">@endif
+@if($event->description)<meta property="og:description" content="{{ Str::limit(strip_tags($event->description), 160) }}">@endif
+<meta property="og:site_name" content="Nkhoj">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ $event->title }}">
+@if($event->description)<meta name="twitter:description" content="{{ Str::limit(strip_tags($event->description), 160) }}">@endif
+@if($event->thumbnail_url)<meta name="twitter:image" content="{{ $event->thumbnail_url }}">@endif
 <script type="application/ld+json">
 {
     "@context": "https://schema.org",
