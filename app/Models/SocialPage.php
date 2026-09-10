@@ -25,25 +25,28 @@ class SocialPage extends Model
         'bio', 'announcement', 'highlights',
         'action_button_type', 'action_button_text', 'action_button_url',
         'donation_url', 'donation_label',
-        'allow_tagging', 'is_archived',
+        'allow_tagging', 'allow_recommendations', 'posts_privacy_default', 'is_archived',
         'avatar_url', 'cover_url', 'website', 'email', 'phone', 'social_links',
         'location', 'lat', 'lng', 'business_hours',
+        'last_post_at',
         'followers_count', 'rating_avg', 'reviews_count', 'views_count',
         'is_verified', 'is_active', 'status', 'disabled_reason', 'pinned_post_id',
     ];
 
     protected $casts = [
-        'categories'     => 'array',
-        'business_hours' => 'array',
-        'social_links'   => 'array',
-        'highlights'     => 'array',
-        'is_verified'    => 'boolean',
-        'is_active'      => 'boolean',
-        'is_archived'    => 'boolean',
-        'allow_tagging'  => 'boolean',
-        'lat'            => 'float',
-        'lng'            => 'float',
-        'rating_avg'     => 'float',
+        'categories'           => 'array',
+        'business_hours'       => 'array',
+        'social_links'         => 'array',
+        'highlights'           => 'array',
+        'is_verified'          => 'boolean',
+        'is_active'            => 'boolean',
+        'is_archived'          => 'boolean',
+        'allow_tagging'        => 'boolean',
+        'allow_recommendations'=> 'boolean',
+        'last_post_at'         => 'datetime',
+        'lat'                  => 'float',
+        'lng'                  => 'float',
+        'rating_avg'           => 'float',
     ];
 
     public function owner(): BelongsTo
@@ -110,6 +113,16 @@ class SocialPage extends Model
     public function activityLogs(): HasMany
     {
         return $this->hasMany(PageActivityLog::class, 'social_page_id')->latest();
+    }
+
+    public function faqs(): HasMany
+    {
+        return $this->hasMany(PageFaq::class, 'social_page_id')->orderBy('display_order');
+    }
+
+    public function milestones(): HasMany
+    {
+        return $this->hasMany(PageMilestone::class, 'social_page_id')->orderByDesc('milestone_value');
     }
 
     public function stories(): HasMany

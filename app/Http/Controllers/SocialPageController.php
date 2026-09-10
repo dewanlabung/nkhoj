@@ -20,12 +20,15 @@ use App\Models\PageReport;
 use App\Models\PageReview;
 use App\Models\PageStory;
 use App\Models\PageVerificationRequest;
+use App\Models\PageFaq;
+use App\Models\PageMilestone;
 use App\Models\PageViewLog;
 use App\Models\SocialPage;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use ZipArchive;
 
 class SocialPageController extends Controller
 {
@@ -42,6 +45,13 @@ class SocialPageController extends Controller
             : collect();
 
         $query = SocialPage::where('is_active', true)->where('status', 'active');
+
+        // Only show pages that opted into recommendations on the discover tab
+        if (!$search && !in_array($tab, ['liked', 'mine', 'nearby'])) {
+            $query->where(function($q) {
+                $q->whereNull('allow_recommendations')->orWhere('allow_recommendations', true);
+            });
+        }
 
         if ($search) {
             $query->where('name', 'like', "%{$search}%");
@@ -288,6 +298,8 @@ class SocialPageController extends Controller
             $page->followers()->attach($user->id);
             $page->increment('followers_count');
             $following = true;
+            $page->refresh();
+            PageMilestone::checkAndRecord($page);
         }
 
         if ($request->expectsJson()) {
@@ -362,6 +374,8 @@ class SocialPageController extends Controller
                 ]);
             }
         }
+
+        $page->update(['last_post_at' => now()]);
 
         return back()->with('success', 'Post published!');
     }
@@ -835,9 +849,18 @@ class SocialPageController extends Controller
             'action_button_url'   => 'nullable|url|max:300',
             'donation_url'        => 'nullable|url|max:300',
             'donation_label'      => 'nullable|string|max:60',
-            'allow_tagging'       => 'nullable|boolean',
-            'username'            => ['nullable','string','max:60','regex:/^[a-z0-9._-]+$/i',
-                                      Rule::unique('social_pages','username')->ignore($page->id)],
+            'allow_tagging'           => 'nullable|boolean',
+            'allow_recommendations'   => 'nullable|boolean',
+            'posts_privacy_default'   => 'nullable|in:public,followers',
+            'social_links'            => 'nullable|array',
+            'social_links.instagram'  => 'nullable|url|max:300',
+            'social_links.twitter'    => 'nullable|url|max:300',
+            'social_links.youtube'    => 'nullable|url|max:300',
+            'social_links.tiktok'     => 'nullable|url|max:300',
+            'social_links.facebook'   => 'nullable|url|max:300',
+            'social_links.linkedin'   => 'nullable|url|max:300',
+            'username'                => ['nullable','string','max:60','regex:/^[a-z0-9._-]+$/i',
+                                          Rule::unique('social_pages','username')->ignore($page->id)],
         ]);
 
         if ($request->hasFile('avatar')) {
@@ -880,10 +903,13 @@ class SocialPageController extends Controller
             'action_button_type'  => $data['action_button_type'] ?? null,
             'action_button_text'  => $data['action_button_text'] ?? null,
             'action_button_url'   => $data['action_button_url'] ?? null,
-            'donation_url'        => $data['donation_url'] ?? null,
-            'donation_label'      => $data['donation_label'] ?? null,
-            'allow_tagging'       => $request->boolean('allow_tagging', true),
-            'username'            => $data['username'] ? strtolower(trim($data['username'])) : $page->username,
+            'donation_url'          => $data['donation_url'] ?? null,
+            'donation_label'        => $data['donation_label'] ?? null,
+            'allow_tagging'         => $request->boolean('allow_tagging', true),
+            'allow_recommendations' => $request->boolean('allow_recommendations', true),
+            'posts_privacy_default' => $data['posts_privacy_default'] ?? 'public',
+            'social_links'          => array_filter($data['social_links'] ?? []),
+            'username'              => $data['username'] ? strtolower(trim($data['username'])) : $page->username,
         ]);
         PageActivityLog::record($page->id, 'update_settings', 'Page settings updated.');
 
@@ -1221,6 +1247,96 @@ class SocialPageController extends Controller
     }
 
     // ─── Follow Suggestions ────────────────────────────────────────────────────
+
+    // ─── FAQ (Pinned Q&A) ──────────────────────────────────────────────────────
+
+    public function storeFaq(Request $request, string $slug)
+    {
+        $page = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isManagedBy(auth()->user()), 403);
+
+        $data = $request->validate([
+            'question' => 'required|string|max:300',
+            'answer'   => 'required|string|max:2000',
+        ]);
+
+        $order = PageFaq::where('social_page_id', $page->id)->max('display_order') + 1;
+        PageFaq::create([
+            'social_page_id' => $page->id,
+            'question'       => $data['question'],
+            'answer'         => $data['answer'],
+            'display_order'  => $order,
+        ]);
+
+        return back()->with('success', 'FAQ added.');
+    }
+
+    public function updateFaq(Request $request, string $slug, int $faqId)
+    {
+        $page = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isManagedBy(auth()->user()), 403);
+        $faq = PageFaq::where('id', $faqId)->where('social_page_id', $page->id)->firstOrFail();
+
+        $data = $request->validate([
+            'question' => 'required|string|max:300',
+            'answer'   => 'required|string|max:2000',
+        ]);
+
+        $faq->update($data);
+        return back()->with('success', 'FAQ updated.');
+    }
+
+    public function deleteFaq(string $slug, int $faqId)
+    {
+        $page = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isManagedBy(auth()->user()), 403);
+        PageFaq::where('id', $faqId)->where('social_page_id', $page->id)->delete();
+        return back()->with('success', 'FAQ deleted.');
+    }
+
+    // ─── Data Export ───────────────────────────────────────────────────────────
+
+    public function exportData(string $slug)
+    {
+        $page = SocialPage::where('slug', $slug)->where('user_id', auth()->id())->firstOrFail();
+
+        $zipPath = sys_get_temp_dir() . '/page_export_' . $page->id . '_' . time() . '.zip';
+        $zip = new ZipArchive();
+        $zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+
+        // Page info
+        $info = $page->only(['name', 'slug', 'username', 'page_type', 'bio', 'categories',
+                              'website', 'email', 'phone', 'location', 'followers_count',
+                              'views_count', 'rating_avg', 'reviews_count', 'created_at']);
+        $zip->addFromString('page_info.json', json_encode($info, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+        // Posts
+        $posts = PagePost::where('social_page_id', $page->id)->latest()->get()
+            ->map(fn($p) => $p->only(['id', 'type', 'body', 'image_url', 'video_url',
+                                       'event_title', 'event_start', 'event_venue',
+                                       'likes_count', 'created_at']));
+        $zip->addFromString('posts.json', json_encode($posts, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+        // Followers list (user ids + timestamps only, no PII)
+        $followers = DB::table('social_page_followers')
+            ->where('social_page_id', $page->id)
+            ->select('user_id', 'created_at')
+            ->get();
+        $zip->addFromString('followers.json', json_encode($followers, JSON_PRETTY_PRINT));
+
+        // Activity log
+        $activity = PageActivityLog::where('social_page_id', $page->id)->latest()->limit(500)->get()
+            ->map(fn($a) => $a->only(['action', 'description', 'created_at']));
+        $zip->addFromString('activity_log.json', json_encode($activity, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+        $zip->close();
+
+        return response()->download($zipPath, $page->slug . '_export.zip', [
+            'Content-Type' => 'application/zip',
+        ])->deleteFileAfterSend();
+    }
+
+    // ─── Follow suggestions ────────────────────────────────────────────────────
 
     public function followSuggestions(string $slug)
     {

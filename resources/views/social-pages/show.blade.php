@@ -82,6 +82,9 @@
                 <div class="w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-gray-200 shadow-md">
                     <img src="{{ $page->avatar }}" alt="{{ $page->name }}" class="w-full h-full object-cover">
                 </div>
+                @if($page->last_post_at && $page->last_post_at->gt(now()->subDays(7)))
+                <span class="absolute bottom-1 right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full" title="Active recently"></span>
+                @endif
                 @if($isOwner)
                 <label class="absolute bottom-0 right-0 bg-gray-100 hover:bg-gray-200 rounded-full p-1.5 cursor-pointer shadow border border-white transition">
                     <svg class="w-3.5 h-3.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -1075,6 +1078,45 @@
                     L.marker([{{ $page->lat }}, {{ $page->lng }}]).addTo(map).bindPopup('{{ addslashes($page->name) }}').openPopup();
                 });
                 </script>
+                @endif
+
+                {{-- Milestones --}}
+                @php $milestones = $page->milestones ?? collect(); @endphp
+                @if($milestones->count())
+                <div class="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
+                    <h3 class="font-bold text-gray-900 mb-3">🏆 Milestones</h3>
+                    <div class="flex flex-wrap gap-2">
+                        @foreach($milestones as $ms)
+                        @php
+                            $val = $ms->milestone_value;
+                            $label = $val >= 1000000 ? number_format($val/1000000, 1).'M' : ($val >= 1000 ? number_format($val/1000, 0).'K' : $val);
+                        @endphp
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                            🎉 {{ $label }} {{ $ms->milestone_type }}
+                        </span>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
+                {{-- FAQ --}}
+                @php $faqs = $page->faqs ?? collect(); @endphp
+                @if($faqs->count())
+                <div class="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm" x-data="{ openFaq: null }">
+                    <h3 class="font-bold text-gray-900 mb-3">Frequently asked questions</h3>
+                    <div class="space-y-1">
+                        @foreach($faqs as $i => $faq)
+                        <div class="border border-gray-100 rounded-xl overflow-hidden">
+                            <button @click="openFaq = openFaq === {{ $i }} ? null : {{ $i }}"
+                                class="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-50 transition">
+                                <span class="text-sm font-semibold text-gray-800">{{ $faq->question }}</span>
+                                <svg class="w-4 h-4 text-gray-400 flex-shrink-0 transition-transform" :class="openFaq === {{ $i }} ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <div x-show="openFaq === {{ $i }}" x-cloak class="px-4 pb-3 text-sm text-gray-600 leading-relaxed">{{ $faq->answer }}</div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
                 @endif
 
                 {{-- Share --}}

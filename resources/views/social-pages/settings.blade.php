@@ -33,9 +33,12 @@
         {{-- ══════════════════════════════════════════════════════════
              GROUP 1: Page setup
         ══════════════════════════════════════════════════════════ --}}
-        <div class="pt-2 pb-1 px-1">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Page setup</p>
-        </div>
+        <div x-data="{ open: true }">
+        <button type="button" @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 bg-white rounded-2xl shadow-sm mb-1 hover:bg-gray-50 transition">
+            <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Page setup</span>
+            <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div x-show="open" x-cloak class="space-y-1">
 
         {{-- Page name --}}
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
@@ -103,6 +106,14 @@
                     <p class="text-xs text-gray-400 mt-1">Letters, numbers, dots, dashes only. Used in @mentions.</p>
                 </div>
                 <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Page type</label>
+                    <select name="page_type" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
+                        @foreach(['other' => 'General / Other', 'business' => 'Business', 'creator' => 'Creator / Influencer', 'community' => 'Community', 'nonprofit' => 'Non-profit / NGO'] as $val => $label)
+                        <option value="{{ $val }}" {{ ($page->page_type ?? 'other') === $val ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Bio</label>
                     <textarea name="bio" rows="3" maxlength="500"
                               class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 resize-none">{{ old('bio', $page->bio) }}</textarea>
@@ -127,12 +138,18 @@
             </div>
         </div>
 
+        </div>
+        </div>
+
         {{-- ══════════════════════════════════════════════════════════
              GROUP 2: Contact & location
         ══════════════════════════════════════════════════════════ --}}
-        <div class="pt-4 pb-1 px-1">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Contact & location</p>
-        </div>
+        <div x-data="{ open: true }">
+        <button type="button" @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 bg-white rounded-2xl shadow-sm mb-1 hover:bg-gray-50 transition">
+            <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Contact &amp; location</span>
+            <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div x-show="open" x-cloak class="space-y-1">
 
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
             <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
@@ -155,6 +172,25 @@
                     <input type="text" name="phone" value="{{ old('phone', $page->phone) }}"
                            class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
                 </div>
+            </div>
+        </div>
+
+        {{-- Social links --}}
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                <p class="font-bold text-gray-900">Social media links</p>
+            </div>
+            @php $sl = $page->social_links ?? []; @endphp
+            <div class="p-4 space-y-2">
+                @foreach(['instagram' => ['Instagram', 'https://instagram.com/...'], 'twitter' => ['X / Twitter', 'https://x.com/...'], 'youtube' => ['YouTube', 'https://youtube.com/...'], 'tiktok' => ['TikTok', 'https://tiktok.com/...'], 'facebook' => ['Facebook', 'https://facebook.com/...'], 'linkedin' => ['LinkedIn', 'https://linkedin.com/...'],] as $key => [$label, $ph])
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-semibold text-gray-500 w-20 shrink-0">{{ $label }}</span>
+                    <input type="url" name="social_links[{{ $key }}]" value="{{ old('social_links.'.$key, $sl[$key] ?? '') }}"
+                           placeholder="{{ $ph }}"
+                           class="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                </div>
+                @endforeach
             </div>
         </div>
 
@@ -231,12 +267,18 @@
             </div>
         </div>
 
+        </div>
+        </div>
+
         {{-- ══════════════════════════════════════════════════════════
              GROUP 3: Audience & visibility
         ══════════════════════════════════════════════════════════ --}}
-        <div class="pt-4 pb-1 px-1">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Audience & visibility</p>
-        </div>
+        <div x-data="{ open: true }">
+        <button type="button" @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 bg-white rounded-2xl shadow-sm mb-1 hover:bg-gray-50 transition">
+            <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Audience &amp; visibility</span>
+            <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div x-show="open" x-cloak class="space-y-1">
 
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
             <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
@@ -256,15 +298,56 @@
                         <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition peer-checked:translate-x-5"></div>
                     </div>
                 </label>
+                <label class="flex items-center justify-between py-3 border-t border-gray-100 cursor-pointer">
+                    <div>
+                        <p class="font-semibold text-gray-900 text-sm">Appear in recommendations</p>
+                        <p class="text-xs text-gray-400">Show this page in Discover and suggested pages</p>
+                    </div>
+                    <div class="relative flex-shrink-0">
+                        <input type="checkbox" name="allow_recommendations" value="1" class="sr-only peer"
+                            {{ ($page->allow_recommendations ?? true) ? 'checked' : '' }}>
+                        <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 transition"></div>
+                        <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition peer-checked:translate-x-5"></div>
+                    </div>
+                </label>
             </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                <div>
+                    <p class="font-bold text-gray-900">Post privacy default</p>
+                    <p class="text-xs text-gray-400">Who can see new posts by default</p>
+                </div>
+            </div>
+            <div class="p-4 space-y-2">
+                @foreach(['public' => ['Public', 'Anyone can see new posts'], 'followers' => ['Followers only', 'Only people who follow this page']] as $val => [$label, $desc])
+                <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition
+                    {{ ($page->posts_privacy_default ?? 'public') === $val ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50' }}">
+                    <input type="radio" name="posts_privacy_default" value="{{ $val }}" class="text-blue-600"
+                        {{ ($page->posts_privacy_default ?? 'public') === $val ? 'checked' : '' }}>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-900">{{ $label }}</p>
+                        <p class="text-xs text-gray-500">{{ $desc }}</p>
+                    </div>
+                </label>
+                @endforeach
+            </div>
+        </div>
+
+        </div>
         </div>
 
         {{-- ══════════════════════════════════════════════════════════
              GROUP 4: Monetization & CTAs
         ══════════════════════════════════════════════════════════ --}}
-        <div class="pt-4 pb-1 px-1">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Monetization & CTAs</p>
-        </div>
+        <div x-data="{ open: true }">
+        <button type="button" @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 bg-white rounded-2xl shadow-sm mb-1 hover:bg-gray-50 transition">
+            <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Monetization &amp; CTAs</span>
+            <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div x-show="open" x-cloak class="space-y-1">
 
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
             <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
@@ -330,6 +413,9 @@
             </div>
         </div>
 
+        </div>
+        </div>
+
         <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition mt-4">
             Save changes
         </button>
@@ -338,13 +424,12 @@
     {{-- ══════════════════════════════════════════════════════════
          GROUP 5: Page status (separate from main form)
     ══════════════════════════════════════════════════════════ --}}
-    <div class="max-w-xl mx-auto px-4 pb-2 pt-2">
-        <div class="pt-2 pb-1 px-1">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Page status</p>
-        </div>
-    </div>
-
-    <div class="max-w-xl mx-auto px-4 space-y-1 pb-10">
+    <div class="max-w-xl mx-auto px-4 pt-3 pb-10" x-data="{ open: true }">
+        <button type="button" @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 bg-white rounded-2xl shadow-sm mb-1 hover:bg-gray-50 transition">
+            <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Page status</span>
+            <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div x-show="open" x-cloak class="space-y-1">
 
         {{-- Archive page --}}
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
@@ -399,6 +484,7 @@
             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </a>
 
+    </div>
     </div>
 </div>
 

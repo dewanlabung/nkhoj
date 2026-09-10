@@ -496,6 +496,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/pages/{slug}/comments-manager',             [SocialPageController::class, 'commentsManager']);
     // Follow suggestions API
     Route::get('/api/pages/{slug}/suggestions',              [SocialPageController::class, 'followSuggestions']);
+    // FAQ
+    Route::post('/pages/{slug}/faq',                         [SocialPageController::class, 'storeFaq']);
+    Route::put('/pages/{slug}/faq/{faqId}',                  [SocialPageController::class, 'updateFaq']);
+    Route::delete('/pages/{slug}/faq/{faqId}',               [SocialPageController::class, 'deleteFaq']);
+    // Data export (owner only)
+    Route::get('/pages/{slug}/export',                       [SocialPageController::class, 'exportData']);
 });
 Route::get('/pages/{slug}',                         [SocialPageController::class, 'show']);
 
