@@ -101,7 +101,8 @@
             </thead>
             <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
                 @forelse($pages as $page)
-                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors" x-data="{ open: false }">
+                </tbody><tbody x-data="{ open: false }" class="divide-y divide-gray-50 dark:divide-gray-700/50">
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                     <td class="px-5 py-3">
                         <div class="flex items-center gap-2.5">
                             <img src="{{ $page->avatar }}" class="w-8 h-8 rounded-full object-cover border border-gray-200 dark:border-gray-600 flex-shrink-0"
@@ -203,6 +204,7 @@
                     </td>
                 </tr>
                 @empty
+                </tbody><tbody>
                 <tr>
                     <td colspan="8" class="px-5 py-10 text-center text-gray-400 dark:text-gray-500 text-sm">No social pages found.</td>
                 </tr>
