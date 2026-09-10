@@ -51,6 +51,7 @@
                 'posts'     => ['label' => 'लेखहरू',         'icon' => '📰'],
                 'pages'     => ['label' => 'पेजहरू',         'icon' => '🏢'],
                 'events'    => ['label' => 'घटनाहरू',        'icon' => '📅'],
+                'recipes'   => ['label' => 'रेसिपीहरू',      'icon' => '🍽️'],
                 'users'     => ['label' => 'प्रयोगकर्ता',   'icon' => '👤'],
                 'questions' => ['label' => 'प्रश्नहरू',      'icon' => '❓'],
             ];
@@ -77,7 +78,7 @@
     {{-- ALL tab: grouped sections --}}
     @if($type === 'all' && is_array($results))
 
-        @php $anyResult = collect($results)->some(fn($g) => $g->isNotEmpty()); @endphp
+        @php $anyResult = collect($results)->filter()->some(fn($g) => $g->isNotEmpty()); @endphp
 
         @if(!$anyResult)
         <div class="text-center py-16 bg-white rounded-xl border border-gray-100">
@@ -147,6 +148,21 @@
         </div>
         @endif
 
+        {{-- Recipes section --}}
+        @if($results['recipes']->isNotEmpty())
+        <div class="mb-6">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="font-bold text-gray-800 text-sm">🍽️ रेसिपीहरू</h2>
+                <a href="/search?q={{ urlencode($query) }}&type=recipes" class="text-xs text-brand-600 hover:underline">सबै हेर्नुहोस् →</a>
+            </div>
+            <div class="space-y-3">
+                @foreach($results['recipes'] as $recipe)
+                @include('search._recipe', ['recipe' => $recipe, 'query' => $query])
+                @endforeach
+            </div>
+        </div>
+        @endif
+
         {{-- Questions section --}}
         @if($results['questions']->isNotEmpty())
         <div class="mb-6">
@@ -199,6 +215,13 @@
                 @include('search._user', ['user' => $user])
             @empty
                 @include('search._empty', ['icon' => '👤', 'query' => $query])
+            @endforelse
+
+        @elseif($type === 'recipes')
+            @forelse($results as $recipe)
+                @include('search._recipe', ['recipe' => $recipe, 'query' => $query])
+            @empty
+                @include('search._empty', ['icon' => '🍽️', 'query' => $query])
             @endforelse
 
         @elseif($type === 'questions')
