@@ -57,7 +57,7 @@
     @endsection
 
     {{-- Cover photo --}}
-    <div class="relative h-36 md:h-56 bg-gray-300 overflow-hidden">
+    <div class="relative h-48 md:h-64 bg-gray-300 overflow-hidden">
         @if($page->cover_url)
             <img src="{{ $page->cover_url }}" alt="Cover" class="w-full h-full object-cover">
         @else
@@ -73,106 +73,137 @@
         @endif
     </div>
 
-    {{-- Profile row --}}
-    <div class="max-w-2xl mx-auto px-4">
-        <div class="flex items-end gap-4 -mt-10 mb-4">
+    {{-- ── FB Lite–style profile section ────────────────────────── --}}
+    <div class="max-w-2xl mx-auto">
+
+        {{-- Avatar + name row --}}
+        <div class="flex items-end gap-4 px-4 -mt-14 mb-3">
             <div class="relative flex-shrink-0">
-                <div class="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-white overflow-hidden bg-gray-200 shadow">
+                <div class="w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-gray-200 shadow-md">
                     <img src="{{ $page->avatar }}" alt="{{ $page->name }}" class="w-full h-full object-cover">
                 </div>
+                @if($isOwner)
+                <label class="absolute bottom-0 right-0 bg-gray-100 hover:bg-gray-200 rounded-full p-1.5 cursor-pointer shadow border border-white transition">
+                    <svg class="w-3.5 h-3.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                </label>
+                @endif
             </div>
-            <div class="flex-1 pb-1">
-                <div class="flex items-center gap-2 flex-wrap">
-                    <h1 class="text-xl font-bold text-gray-900">{{ $page->name }}</h1>
+            <div class="flex-1 pb-1 min-w-0">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    <h1 class="text-xl font-bold text-gray-900 leading-tight">{{ $page->name }}</h1>
                     @if($page->is_verified)
-                        <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                    @endif
-                    {{-- Business hours badge --}}
-                    @if($isOpen === true)
-                        <span class="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-semibold">Open Now</span>
-                    @elseif($isOpen === false)
-                        <span class="text-xs px-2 py-0.5 bg-red-100 text-red-600 rounded-full font-semibold">Closed</span>
+                        <svg class="w-5 h-5 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                     @endif
                 </div>
-                @if($page->username)
-                <p class="text-gray-400 text-xs">@{{ $page->username }}</p>
-                @endif
-                <p class="text-gray-500 text-sm">
-                    {{ number_format($page->followers_count) }} followers
-                    @if($page->first_category) &middot; {{ $page->first_category }} @endif
-                    @if($page->reviews_count > 0)
-                        &middot; ⭐ {{ number_format($page->rating_avg, 1) }} ({{ $page->reviews_count }})
-                    @endif
+                <p class="text-sm text-gray-600 mt-0.5">
+                    <strong>{{ number_format($page->followers_count) }}</strong> followers
+                    @if($posts->total() ?? 0) &middot; <strong>{{ number_format($posts->total()) }}</strong> posts @endif
+                    @if($page->reviews_count > 0) &middot; ⭐ {{ number_format($page->rating_avg, 1) }} @endif
                 </p>
             </div>
         </div>
 
-        {{-- Action buttons --}}
-        <div class="flex gap-2 mb-5 flex-wrap">
-            @if($isOwner)
-                <a href="/pages/{{ $page->slug }}/dashboard"
-                   class="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl transition text-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                    Dashboard
-                </a>
-                <a href="/pages/{{ $page->slug }}/settings"
-                   class="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2.5 px-4 rounded-xl transition text-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>
-                    Settings
-                </a>
-            @else
-                @auth
-                    <button id="follow-btn" onclick="toggleFollow()"
-                        class="flex-1 flex items-center justify-center gap-2 font-semibold py-2.5 px-4 rounded-xl transition text-sm {{ $isFollowing ? 'bg-gray-100 hover:bg-gray-200 text-gray-800' : 'bg-blue-600 hover:bg-blue-700 text-white' }}"
-                        data-following="{{ $isFollowing ? 'true' : 'false' }}" data-slug="{{ $page->slug }}">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $isFollowing ? 'M5 13l4 4L19 7' : 'M12 4v16m8-8H4' }}"/></svg>
-                        <span id="follow-label">{{ $isFollowing ? 'Following' : 'Follow' }}</span>
-                    </button>
-                    <button id="save-page-btn" onclick="toggleSavePage()"
-                        class="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl transition text-sm font-semibold {{ ($isSaved ?? false) ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
-                        data-saved="{{ ($isSaved ?? false) ? 'true' : 'false' }}" data-id="{{ $page->id }}">
-                        <svg class="w-4 h-4" fill="{{ ($isSaved ?? false) ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 20 20"><path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z"/></svg>
-                        <span id="save-page-label">{{ ($isSaved ?? false) ? 'Saved' : 'Save' }}</span>
-                    </button>
-                @else
-                    <a href="/login" class="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl transition text-sm">Follow</a>
-                @endauth
+        {{-- Bio + meta --}}
+        <div class="px-4 mb-3" x-data="{ expanded: false }">
+            @if($page->bio)
+            <p class="text-gray-900 text-sm leading-relaxed" :class="expanded ? '' : 'line-clamp-2'">{{ $page->bio }}</p>
+            @if(strlen($page->bio) > 120)
+            <button @click="expanded = !expanded" class="text-blue-600 text-sm font-semibold mt-0.5" x-text="expanded ? 'See less' : 'See more'"></button>
             @endif
+            @endif
+            {{-- Category + hours badge --}}
+            @if($page->first_category || $isOpen !== null)
+            <div class="flex items-center gap-2 mt-2 text-sm text-gray-700 font-semibold">
+                <svg class="w-5 h-5 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                <span>{{ $page->first_category ?: ($page->page_type === 'business' ? 'Business' : 'Organization') }}</span>
+                @if($isOpen === true)
+                    <span class="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-semibold">Open Now</span>
+                @elseif($isOpen === false)
+                    <span class="text-xs px-2 py-0.5 bg-red-100 text-red-600 rounded-full font-semibold">Closed</span>
+                @endif
+            </div>
+            @endif
+            @if($page->username)
+            <p class="text-sm text-gray-400 mt-1">@{{ $page->username }}</p>
+            @endif
+        </div>
 
-            {{-- Share button --}}
-            <button onclick="sharePage()" id="share-btn"
-                class="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 transition text-sm font-semibold">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
-                <span id="share-label">Share</span>
-            </button>
-
-            {{-- "..." menu (report, copy link) --}}
-            <div class="relative" x-data="{ open: false }" @click.outside="open = false">
-                <button @click="open = !open"
-                    class="flex items-center justify-center w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 transition">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z"/></svg>
-                </button>
-                <div x-show="open" x-cloak
-                    class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden py-1">
-                    <button onclick="sharePage()" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2.5">
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
-                        Share page
-                    </button>
-                    <button onclick="copyPageUrl()" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2.5">
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                        Copy link
-                    </button>
+        {{-- Action buttons: two full-width columns --}}
+        <div class="px-4 mb-1">
+            <div class="flex gap-2">
+                @if($isOwner)
+                    <a href="/pages/{{ $page->slug }}/dashboard"
+                       class="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                        Dashboard
+                    </a>
+                    <a href="/pages/{{ $page->slug }}/settings"
+                       class="flex-1 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2.5 rounded-xl transition text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>
+                        Settings
+                    </a>
+                @else
                     @auth
-                    @if(!$isOwner)
-                    <hr class="my-1 border-gray-100">
-                    <button onclick="showReportPage()" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2.5">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        Report page
-                    </button>
-                    @endif
+                        <button id="follow-btn" onclick="toggleFollow()"
+                            class="flex-1 flex items-center justify-center gap-2 font-bold py-2.5 rounded-xl transition text-sm {{ $isFollowing ? 'bg-gray-100 hover:bg-gray-200 text-gray-800' : 'bg-blue-600 hover:bg-blue-700 text-white' }}"
+                            data-following="{{ $isFollowing ? 'true' : 'false' }}" data-slug="{{ $page->slug }}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $isFollowing ? 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' : 'M12 4v16m8-8H4' }}"/></svg>
+                            <span id="follow-label">{{ $isFollowing ? 'Following' : 'Follow' }}</span>
+                        </button>
+                        <button onclick="sharePage()"
+                            class="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition text-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+                            Share
+                        </button>
+                    @else
+                        <a href="/login" class="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition text-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            Follow
+                        </a>
+                        <button onclick="sharePage()"
+                            class="flex-1 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2.5 rounded-xl transition text-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+                            Share
+                        </button>
                     @endauth
+                @endif
+                {{-- "..." three-dot menu --}}
+                <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+                    <button @click="open = !open"
+                        class="flex items-center justify-center w-11 h-11 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 transition">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z"/></svg>
+                    </button>
+                    <div x-show="open" x-cloak
+                        class="absolute right-0 top-full mt-1 w-52 bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 py-1"
+                        style="filter:drop-shadow(0 8px 24px rgba(0,0,0,.15))">
+                        @auth
+                        @if(!$isOwner)
+                        <button id="save-page-btn" onclick="toggleSavePage()" @click="open=false"
+                            class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3"
+                            data-saved="{{ ($isSaved ?? false) ? 'true' : 'false' }}" data-id="{{ $page->id }}">
+                            <svg class="w-5 h-5 text-gray-500" fill="{{ ($isSaved ?? false) ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+                            <span id="save-page-label">{{ ($isSaved ?? false) ? 'Saved' : 'Save page' }}</span>
+                        </button>
+                        @endif
+                        @endauth
+                        <button onclick="sharePage()" class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3">
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+                            Share page
+                        </button>
+                        <button onclick="copyPageUrl()" class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3">
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            Copy link
+                        </button>
+                        @auth
+                        @if(!$isOwner)
+                        <div class="my-1 border-t border-gray-100"></div>
+                        <button onclick="showReportPage()" @click="open=false" class="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            Report page
+                        </button>
+                        @endif
+                        @endauth
+                    </div>
                 </div>
             </div>
         </div>
@@ -433,7 +464,7 @@
                                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z"/></svg>
                                 </button>
                                 <div x-show="postMenuOpen" x-cloak
-                                    class="absolute right-0 mt-1 w-44 bg-white border border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden py-1">
+                                    class="absolute right-0 mt-1 w-44 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden py-1">
                                     <button onclick="copyPostUrl('{{ $page->slug }}', {{ $post->id }})"
                                         class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
                                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
@@ -614,12 +645,6 @@
                             </a>
                             @endauth
 
-                            {{-- Share post --}}
-                            <button onclick="copyPostUrl('{{ $page->slug }}', {{ $post->id }})"
-                                class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-100 transition">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
-                                Share
-                            </button>
                         </div>
 
                         {{-- Comment section --}}
@@ -1011,13 +1036,21 @@
             {{-- Submit question --}}
             @auth
             @if(!$isManager)
-            <div class="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-5">
-                <form method="POST" action="/pages/{{ $page->slug }}/qna" class="flex gap-2">
-                    @csrf
-                    <input type="text" name="question" placeholder="Ask something..." required maxlength="500"
+            <div class="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-5"
+                x-data="{ question: '', sending: false, sent: false }">
+                <div class="flex gap-2">
+                    <input type="text" x-model="question" placeholder="Ask something..." maxlength="500"
+                        @keydown.enter="if(question.trim()){ sending=true; fetch('/pages/{{ $page->slug }}/qna',{method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({question:question})}).then(r=>r.json()).then(d=>{ if(d.success||d.id){ sent=true; question=''; setTimeout(()=>{ sent=false; location.reload(); },1200); } }).catch(()=>{ alert('Failed to submit'); }).finally(()=>{ sending=false; }) }"
                         class="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
-                    <button type="submit" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm transition flex-shrink-0">Ask</button>
-                </form>
+                    <button type="button"
+                        :disabled="sending || !question.trim()"
+                        @click="if(question.trim()){ sending=true; fetch('/pages/{{ $page->slug }}/qna',{method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({question:question})}).then(r=>r.json()).then(d=>{ if(d.success||d.id){ sent=true; question=''; setTimeout(()=>{ sent=false; location.reload(); },1200); } }).catch(()=>{ alert('Failed to submit'); }).finally(()=>{ sending=false; }) }"
+                        class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold rounded-xl text-sm transition flex-shrink-0">
+                        <span x-show="!sending && !sent">Ask</span>
+                        <span x-show="sending">...</span>
+                        <span x-show="sent">✓</span>
+                    </button>
+                </div>
             </div>
             @endif
             @endauth
@@ -1051,24 +1084,29 @@
                     </div>
                     @endif
                     @if($isManager)
-                    <form method="POST" action="/pages/{{ $page->slug }}/qna/{{ $item->id }}/answer"
-                        class="mt-3" x-data="{ show: false }">
-                        @csrf
+                    <div class="mt-3"
+                        x-data="{ show: false, answer: '{{ addslashes($item->answer ?? '') }}', featured: {{ $item->is_featured ? 'true' : 'false' }}, saving: false, saved: false }">
                         <button type="button" @click="show = !show" class="text-xs text-blue-600 font-semibold hover:underline">
                             {{ $item->answer ? '✏️ Edit answer' : '💬 Answer' }}
                         </button>
                         <div x-show="show" x-cloak class="mt-2 space-y-2">
-                            <textarea name="answer" rows="2" placeholder="Your answer..."
-                                class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500 resize-none">{{ $item->answer }}</textarea>
+                            <textarea x-model="answer" rows="2" placeholder="Your answer..."
+                                class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500 resize-none"></textarea>
                             <div class="flex gap-2 items-center">
                                 <label class="flex items-center gap-1.5 text-xs text-gray-600 cursor-pointer">
-                                    <input type="checkbox" name="is_featured" {{ $item->is_featured ? 'checked' : '' }} class="rounded">
+                                    <input type="checkbox" x-model="featured" class="rounded">
                                     Feature this Q&amp;A
                                 </label>
-                                <button type="submit" class="ml-auto px-4 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition">Save</button>
+                                <button type="button" :disabled="saving"
+                                    @click="saving=true; fetch('/pages/{{ $page->slug }}/qna/{{ $item->id }}/answer',{method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({answer:answer,is_featured:featured})}).then(r=>r.json()).then(d=>{ if(d.success||d.id){ saved=true; setTimeout(()=>{ saved=false; location.reload(); },1000); } }).catch(()=>{ alert('Failed to save'); }).finally(()=>{ saving=false; })"
+                                    class="ml-auto px-4 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition">
+                                    <span x-show="!saving && !saved">Save</span>
+                                    <span x-show="saving">...</span>
+                                    <span x-show="saved">✓</span>
+                                </button>
                             </div>
                         </div>
-                    </form>
+                    </div>
                     @endif
                 </div>
                 @endforeach

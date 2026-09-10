@@ -896,11 +896,15 @@ class SocialPageController extends Controller
         $page = SocialPage::where('slug', $slug)->where('is_active', true)->firstOrFail();
         $data = $request->validate(['question' => 'required|string|max:500']);
 
-        PageQna::create([
+        $qna = PageQna::create([
             'social_page_id' => $page->id,
             'user_id'        => auth()->id() ?: null,
             'question'       => $data['question'],
         ]);
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'id' => $qna->id]);
+        }
 
         return back()->with('success', 'Your question has been submitted!');
     }
@@ -921,6 +925,10 @@ class SocialPageController extends Controller
             'answered_by' => auth()->id(),
             'is_featured' => $request->boolean('is_featured'),
         ]);
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'id' => $item->id]);
+        }
 
         return back()->with('success', 'Answer saved.');
     }
