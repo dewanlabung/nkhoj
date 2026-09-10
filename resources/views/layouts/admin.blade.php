@@ -271,6 +271,33 @@
             </a>
 
             <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-widest px-3 pt-4 pb-1.5">Community</p>
+
+            {{-- Social Pages collapsible submenu --}}
+            <div x-data="{ pagesOpen: {{ request()->is('admin/social-pages*') || request()->is('admin/page-categories*') ? 'true' : 'false' }} }">
+                <button @click="pagesOpen = !pagesOpen"
+                    class="sl w-full justify-between {{ request()->is('admin/social-pages*') || request()->is('admin/page-categories*') ? 'on' : '' }}">
+                    <span class="flex items-center gap-2.5">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        Social Pages
+                    </span>
+                    <svg class="w-3.5 h-3.5 transition-transform" :class="pagesOpen ? 'rotate-90' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </button>
+                <div x-show="pagesOpen" x-cloak class="ml-4 mt-0.5 space-y-0.5 border-l border-white/10 pl-3">
+                    <a href="/admin/social-pages" class="sl text-[12.5px] {{ request()->is('admin/social-pages') ? 'on' : '' }}">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                        All Pages
+                    </a>
+                    <a href="/admin/social-pages?status=pending_verification" class="sl text-[12.5px] {{ request()->is('admin/social-pages') && request('status') === 'pending_verification' ? 'on' : '' }}">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+                        Verifications
+                    </a>
+                    <a href="/admin/page-categories" class="sl text-[12.5px] {{ request()->is('admin/page-categories*') ? 'on' : '' }}">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                        Page Categories
+                    </a>
+                </div>
+            </div>
+
             <a href="/admin/comments" class="sl {{ request()->is('admin/comments*') ? 'on' : '' }}">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
                 Comments
