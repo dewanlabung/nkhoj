@@ -23,6 +23,8 @@ class SocialPage extends Model
     protected $fillable = [
         'uuid', 'user_id', 'name', 'slug', 'username', 'page_type', 'categories',
         'bio', 'announcement', 'highlights',
+        'action_button_type', 'action_button_text', 'action_button_url',
+        'allow_tagging', 'is_archived',
         'avatar_url', 'cover_url', 'website', 'email', 'phone', 'social_links',
         'location', 'lat', 'lng', 'business_hours',
         'followers_count', 'rating_avg', 'reviews_count', 'views_count',
@@ -36,6 +38,8 @@ class SocialPage extends Model
         'highlights'     => 'array',
         'is_verified'    => 'boolean',
         'is_active'      => 'boolean',
+        'is_archived'    => 'boolean',
+        'allow_tagging'  => 'boolean',
         'lat'            => 'float',
         'lng'            => 'float',
         'rating_avg'     => 'float',
@@ -95,6 +99,32 @@ class SocialPage extends Model
     public function pinnedPost(): BelongsTo
     {
         return $this->belongsTo(PagePost::class, 'pinned_post_id');
+    }
+
+    public function blocks(): HasMany
+    {
+        return $this->hasMany(PageBlock::class, 'social_page_id');
+    }
+
+    public function activityLogs(): HasMany
+    {
+        return $this->hasMany(PageActivityLog::class, 'social_page_id')->latest();
+    }
+
+    public function stories(): HasMany
+    {
+        return $this->hasMany(PageStory::class, 'social_page_id')->active()->latest();
+    }
+
+    public function notificationPrefs(): HasMany
+    {
+        return $this->hasMany(PageNotificationPref::class, 'social_page_id');
+    }
+
+    public function isBlockedUser(?User $user): bool
+    {
+        if (! $user) return false;
+        return $this->blocks()->where('blocked_user_id', $user->id)->exists();
     }
 
     public function isFollowedBy(?User $user): bool

@@ -289,6 +289,56 @@
                 </div>
             </div>
 
+            {{-- Engagement & Content Tools --}}
+            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-100"><p class="font-bold text-gray-700 text-sm">Content & Engagement</p></div>
+                <div class="divide-y divide-gray-100">
+                    <a href="/pages/{{ $page->slug }}/comments-manager" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                            </div>
+                            <div><p class="font-semibold text-gray-900 text-sm">Comments Manager</p><p class="text-gray-500 text-xs">View and moderate all comments</p></div>
+                        </div>
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                    <a href="/pages/{{ $page->slug }}/stories" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-pink-50 rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            </div>
+                            <div><p class="font-semibold text-gray-900 text-sm">Stories</p><p class="text-gray-500 text-xs">Post and manage 24-hour stories</p></div>
+                        </div>
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                </div>
+            </div>
+
+            {{-- Management --}}
+            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-100"><p class="font-bold text-gray-700 text-sm">Management</p></div>
+                <div class="divide-y divide-gray-100">
+                    <a href="/pages/{{ $page->slug }}/activity-log" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                            </div>
+                            <div><p class="font-semibold text-gray-900 text-sm">Activity Log</p><p class="text-gray-500 text-xs">All management actions on this page</p></div>
+                        </div>
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                    <a href="/pages/{{ $page->slug }}/blocked-users" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                            </div>
+                            <div><p class="font-semibold text-gray-900 text-sm">Blocked Users</p><p class="text-gray-500 text-xs">Manage who is blocked from this page</p></div>
+                        </div>
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                </div>
+            </div>
+
             {{-- Profile, Verification, Map --}}
             <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
                 <div class="px-4 py-3 border-b border-gray-100"><p class="font-bold text-gray-700 text-sm">Profile & Discovery</p></div>

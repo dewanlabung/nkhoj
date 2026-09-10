@@ -190,10 +190,98 @@
             </div>
         </div>
 
+        {{-- Action Button --}}
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-4 py-3 border-b border-gray-100">
+                <p class="font-bold text-gray-900">Action button</p>
+                <p class="text-xs text-gray-400 mt-0.5">A button shown on your page for visitors to take action (Book Now, Contact, etc.)</p>
+            </div>
+            <div class="p-4 space-y-3" x-data="{ type: '{{ $page->action_button_type }}' }">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Button type</label>
+                    <select name="action_button_type" x-model="type"
+                        class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
+                        <option value="">None (disable)</option>
+                        <option value="book">Book Now</option>
+                        <option value="contact">Contact Us</option>
+                        <option value="shop">Shop Now</option>
+                        <option value="call">Call Now</option>
+                        <option value="email">Send Email</option>
+                        <option value="website">Visit Website</option>
+                        <option value="donate">Donate</option>
+                        <option value="signup">Sign Up</option>
+                        <option value="learn_more">Learn More</option>
+                    </select>
+                </div>
+                <div x-show="type">
+                    <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Button label (optional)</label>
+                    <input type="text" name="action_button_text" value="{{ $page->action_button_text }}" maxlength="60"
+                        placeholder="e.g. Book a table"
+                        class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
+                </div>
+                <div x-show="type">
+                    <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Destination URL or email</label>
+                    <input type="text" name="action_button_url" value="{{ $page->action_button_url }}"
+                        placeholder="https://... or mailto:..."
+                        class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+        </div>
+
+        {{-- Privacy & visibility --}}
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-4 py-3 border-b border-gray-100">
+                <p class="font-bold text-gray-900">Privacy & visibility</p>
+            </div>
+            <div class="p-4 space-y-4">
+                <label class="flex items-center justify-between gap-3 cursor-pointer">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-900">Allow tagging</p>
+                        <p class="text-xs text-gray-400">Let other users tag this page in their posts</p>
+                    </div>
+                    <div class="relative">
+                        <input type="checkbox" name="allow_tagging" value="1" class="sr-only peer"
+                            {{ $page->allow_tagging ? 'checked' : '' }}>
+                        <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 transition"></div>
+                        <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition peer-checked:translate-x-5"></div>
+                    </div>
+                </label>
+            </div>
+        </div>
+
         <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition">
             Save changes
         </button>
     </form>
+
+    {{-- Archive page (separate from main form) --}}
+    <div class="max-w-xl mx-auto px-4 pb-8">
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-red-100">
+            <div class="px-4 py-3 border-b border-gray-100">
+                <p class="font-bold text-gray-900">Archive page</p>
+                <p class="text-xs text-gray-400 mt-0.5">Temporarily hide this page from the public. You can restore it at any time.</p>
+            </div>
+            <div class="p-4">
+                @if($page->is_archived ?? false)
+                <p class="text-sm text-amber-700 font-medium mb-3">This page is currently archived and not visible to the public.</p>
+                <form method="POST" action="/pages/{{ $page->slug }}/unarchive">
+                    @csrf
+                    <button type="submit" class="px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-xl transition">
+                        Restore page
+                    </button>
+                </form>
+                @else
+                <p class="text-sm text-gray-600 mb-3">Your page will be hidden from search and discovery while archived.</p>
+                <form method="POST" action="/pages/{{ $page->slug }}/archive" onsubmit="return confirm('Archive this page? It will be hidden from the public until you restore it.')">
+                    @csrf
+                    <button type="submit" class="px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-semibold rounded-xl transition border border-red-200">
+                        Archive page
+                    </button>
+                </form>
+                @endif
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
