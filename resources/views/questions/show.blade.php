@@ -420,19 +420,19 @@
                         @endauth
 
                         {{-- Footer actions --}}
-                        <div class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
-                            <div class="flex items-center gap-2 text-xs text-gray-500">
-                                <div class="w-6 h-6 rounded-full bg-gray-400 flex items-center justify-center text-white text-[10px] font-bold">
+                        <div class="flex flex-wrap items-center gap-y-2 justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
+                            <div class="flex items-center gap-2 text-xs text-gray-500 min-w-0 flex-shrink">
+                                <div class="w-6 h-6 rounded-full bg-gray-400 flex-shrink-0 flex items-center justify-center text-white text-[10px] font-bold">
                                     {{ $answer->is_anonymous ? '?' : strtoupper(substr($answer->user->name ?? 'A', 0, 1)) }}
                                 </div>
-                                <span class="font-medium">{{ $answer->is_anonymous ? 'Anonymous' : ($answer->user->name ?? 'Unknown') }}</span>
+                                <span class="font-medium truncate max-w-[100px]">{{ $answer->is_anonymous ? 'Anonymous' : ($answer->user->name ?? 'Unknown') }}</span>
                                 @if(!$answer->is_anonymous && $answer->user && $answer->user->reputation > 0)
-                                <span class="px-1 py-0.5 bg-brand-50 dark:bg-brand-900/20 text-brand-600 rounded text-[10px] font-semibold">{{ number_format($answer->user->reputation) }}</span>
+                                <span class="px-1 py-0.5 bg-brand-50 dark:bg-brand-900/20 text-brand-600 rounded text-[10px] font-semibold flex-shrink-0">{{ number_format($answer->user->reputation) }}</span>
                                 @endif
-                                <span>·</span>
-                                <span>{{ $answer->created_at->diffForHumans() }}</span>
+                                <span class="flex-shrink-0">·</span>
+                                <span class="flex-shrink-0 whitespace-nowrap">{{ $answer->created_at->diffForHumans() }}</span>
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-1 flex-wrap flex-shrink-0">
                                 {{-- Comments toggle --}}
                                 <button @click="showComments = !showComments; showCommentForm = false"
                                     class="flex items-center gap-1 text-xs px-2 py-1 rounded-lg text-gray-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors">
