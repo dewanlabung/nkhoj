@@ -12,12 +12,20 @@ class SocialPage extends Model
 {
     protected $table = 'social_pages';
 
+    const CATEGORIES = [
+        'Arts & Entertainment', 'Automotive', 'Business', 'Clothing & Fashion',
+        'Community', 'Education', 'Finance', 'Food & Restaurant', 'Government',
+        'Health & Medical', 'Home & Garden', 'Legal', 'Media & News',
+        'Music', 'Non-profit', 'Real Estate', 'Religion', 'Science',
+        'Shopping', 'Sports', 'Technology', 'Tourism & Travel',
+    ];
+
     protected $fillable = [
         'uuid', 'user_id', 'name', 'slug', 'page_type', 'categories',
         'bio', 'avatar_url', 'cover_url', 'website', 'email', 'phone',
         'location', 'lat', 'lng', 'business_hours',
         'followers_count', 'rating_avg', 'reviews_count', 'views_count',
-        'is_verified', 'is_active',
+        'is_verified', 'is_active', 'status', 'disabled_reason', 'pinned_post_id',
     ];
 
     protected $casts = [
@@ -61,6 +69,21 @@ class SocialPage extends Model
         return $this->hasMany(PageVerificationRequest::class);
     }
 
+    public function admins(): HasMany
+    {
+        return $this->hasMany(PageAdmin::class, 'social_page_id');
+    }
+
+    public function reports(): HasMany
+    {
+        return $this->hasMany(PageReport::class, 'social_page_id');
+    }
+
+    public function pinnedPost(): BelongsTo
+    {
+        return $this->belongsTo(PagePost::class, 'pinned_post_id');
+    }
+
     public function isFollowedBy(?User $user): bool
     {
         if (!$user) return false;
@@ -71,6 +94,26 @@ class SocialPage extends Model
     {
         if (!$user) return false;
         return $this->user_id === $user->id;
+    }
+
+    // true if user is owner OR accepted admin/moderator/editor
+    public function isManagedBy(?User $user): bool
+    {
+        if (!$user) return false;
+        if ($this->user_id === $user->id) return true;
+        return $this->admins()
+                    ->where('user_id', $user->id)
+                    ->whereNotNull('accepted_at')
+                    ->exists();
+    }
+
+    // role for the user: 'owner', 'admin', 'moderator', 'editor', or null
+    public function roleFor(?User $user): ?string
+    {
+        if (!$user) return null;
+        if ($this->user_id === $user->id) return 'owner';
+        $admin = $this->admins()->where('user_id', $user->id)->whereNotNull('accepted_at')->first();
+        return $admin?->role;
     }
 
     public function getAvatarAttribute(): string
@@ -90,7 +133,7 @@ class SocialPage extends Model
         if (!$hours) return null;
 
         $now  = Carbon::now('Asia/Kathmandu');
-        $day  = strtolower($now->format('D')); // mon, tue, wed...
+        $day  = strtolower($now->format('D'));
         $slot = $hours[$day] ?? null;
         if (!$slot || ($slot['closed'] ?? false)) return false;
 
