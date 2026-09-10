@@ -1081,7 +1081,7 @@
                 @endif
 
                 {{-- Milestones --}}
-                @php $milestones = $page->milestones ?? collect(); @endphp
+                @php try { $milestones = $page->milestones; } catch (\Exception $e) { $milestones = collect(); } @endphp
                 @if($milestones->count())
                 <div class="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
                     <h3 class="font-bold text-gray-900 mb-3">🏆 Milestones</h3>
@@ -1100,7 +1100,7 @@
                 @endif
 
                 {{-- FAQ --}}
-                @php $faqs = $page->faqs ?? collect(); @endphp
+                @php try { $faqs = $page->faqs; } catch (\Exception $e) { $faqs = collect(); } @endphp
                 @if($faqs->count())
                 <div class="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm" x-data="{ openFaq: null }">
                     <h3 class="font-bold text-gray-900 mb-3">Frequently asked questions</h3>

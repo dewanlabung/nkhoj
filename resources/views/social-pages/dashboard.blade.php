@@ -246,13 +246,11 @@
         {{-- TAB: Tools --}}
         <div x-show="activeTab === 'tools'" class="space-y-3">
 
-            {{-- Accordion: Publishing tools --}}
-            <div x-data="{ open: true }" class="bg-white rounded-2xl shadow-sm overflow-hidden">
-                <button @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 text-left border-b border-gray-100 hover:bg-gray-50 transition">
-                    <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Publishing tools</span>
-                    <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                </button>
-                <div x-show="open" x-cloak class="divide-y divide-gray-100">
+            <div class="pt-1 pb-0 px-1">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Publishing tools</p>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+                <div class="divide-y divide-gray-100">
                     <a href="/pages/{{ $page->slug }}" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
@@ -283,13 +281,11 @@
                 </div>
             </div>
 
-            {{-- Accordion: Community management --}}
-            <div x-data="{ open: true }" class="bg-white rounded-2xl shadow-sm overflow-hidden">
-                <button @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 text-left border-b border-gray-100 hover:bg-gray-50 transition">
-                    <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Community management</span>
-                    <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                </button>
-                <div x-show="open" x-cloak class="divide-y divide-gray-100">
+            <div class="pt-1 pb-0 px-1">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Community management</p>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+                <div class="divide-y divide-gray-100">
                     <a href="/pages/{{ $page->slug }}/moderation" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center relative">
@@ -315,7 +311,7 @@
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </a>
                     {{-- FAQ Management --}}
-                    @php $pageFaqs = $page->faqs ?? collect(); @endphp
+                    @php try { $pageFaqs = $page->faqs; } catch (\Exception $e) { $pageFaqs = collect(); } @endphp
                     <div x-data="{ faqOpen: false, addFaq: false, faqQ: '', faqA: '' }" class="px-4 py-4">
                         <div class="flex items-center gap-3 mb-0">
                             <div class="w-10 h-10 bg-teal-50 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -354,14 +350,12 @@
                 </div>
             </div>
 
-            {{-- Accordion: Team --}}
             @if($isOwner)
-            <div x-data="{ open: true }" class="bg-white rounded-2xl shadow-sm overflow-hidden">
-                <button @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 text-left border-b border-gray-100 hover:bg-gray-50 transition">
-                    <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Team</span>
-                    <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                </button>
-                <div x-show="open" x-cloak class="divide-y divide-gray-100">
+            <div class="pt-1 pb-0 px-1">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Team</p>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+                <div class="divide-y divide-gray-100">
                     <a href="/pages/{{ $page->slug }}/admins" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center">
@@ -378,13 +372,11 @@
             </div>
             @endif
 
-            {{-- Accordion: Settings & privacy --}}
-            <div x-data="{ open: true }" class="bg-white rounded-2xl shadow-sm overflow-hidden">
-                <button @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 text-left border-b border-gray-100 hover:bg-gray-50 transition">
-                    <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Settings &amp; privacy</span>
-                    <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                </button>
-                <div x-show="open" x-cloak class="divide-y divide-gray-100">
+            <div class="pt-1 pb-0 px-1">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Settings &amp; privacy</p>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+                <div class="divide-y divide-gray-100">
                     <a href="/pages/{{ $page->slug }}/settings" class="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
@@ -458,14 +450,13 @@
                 </div>
             </div>
 
-            {{-- Accordion: Danger zone (owner only) --}}
+            {{-- Danger zone (owner only) --}}
             @if($isOwner)
-            <div x-data="{ open: false }" class="bg-white rounded-2xl shadow-sm overflow-hidden border border-red-100">
-                <button @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 text-left border-b border-red-100 hover:bg-red-50 transition">
-                    <span class="text-xs font-bold text-red-500 uppercase tracking-widest">Danger zone</span>
-                    <svg class="w-4 h-4 text-red-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                </button>
-                <div x-show="open" x-cloak class="p-4 space-y-3 divide-y divide-gray-100">
+            <div class="pt-1 pb-0 px-1">
+                <p class="text-xs font-bold text-red-400 uppercase tracking-widest">Danger zone</p>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-red-100">
+                <div class="p-4 space-y-3 divide-y divide-gray-100">
 
                     {{-- Disable / Enable --}}
                     @if($page->status === 'active')
