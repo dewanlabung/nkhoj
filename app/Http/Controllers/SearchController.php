@@ -174,6 +174,57 @@ class SearchController extends Controller
         return view('search', compact('query', 'type', 'results', 'counts', 'trending', 'recent', 'suggested'));
     }
 
+    public function suggest(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $query = trim($request->get('q', ''));
+
+        if (strlen($query) < 2) {
+            return response()->json([]);
+        }
+
+        $like = "%{$query}%";
+        $results = [];
+
+        $posts = Post::published()
+            ->where('title', 'like', $like)
+            ->orderByDesc('view_count')
+            ->limit(4)
+            ->get(['id', 'title', 'slug', 'thumbnail_url']);
+
+        foreach ($posts as $p) {
+            $results[] = ['type' => 'post', 'label' => $p->title, 'url' => '/posts/' . $p->slug, 'icon' => '📰'];
+        }
+
+        $pages = SocialPage::where('status', 'active')
+            ->where('name', 'like', $like)
+            ->limit(2)
+            ->get(['id', 'name', 'slug']);
+
+        foreach ($pages as $p) {
+            $results[] = ['type' => 'page', 'label' => $p->name, 'url' => '/pages/' . $p->slug, 'icon' => '📄'];
+        }
+
+        $users = User::where('name', 'like', $like)
+            ->orWhere('username', 'like', $like)
+            ->limit(2)
+            ->get(['id', 'name', 'username']);
+
+        foreach ($users as $u) {
+            $results[] = ['type' => 'user', 'label' => $u->name . ' @' . $u->username, 'url' => '/profile/' . $u->username, 'icon' => '👤'];
+        }
+
+        $events = Event::where('is_published', true)
+            ->where('title', 'like', $like)
+            ->limit(2)
+            ->get(['id', 'title', 'slug', 'uuid']);
+
+        foreach ($events as $e) {
+            $results[] = ['type' => 'event', 'label' => $e->title, 'url' => '/events/' . ($e->slug ?? $e->uuid), 'icon' => '📅'];
+        }
+
+        return response()->json(array_slice($results, 0, 8));
+    }
+
     private function allResults(string $query, string $like): array
     {
         return [

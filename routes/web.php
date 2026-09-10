@@ -24,7 +24,8 @@ use App\Http\Controllers\SocialPageController;
 Route::get('/', [HomeController::class, 'index']);
 Route::get('/leaderboard', [HomeController::class, 'leaderboard']);
 Route::get('/health', fn() => response()->json(['status' => 'ok', 'app' => 'nkhoj', 'time' => now()->toIso8601String()]));
-Route::get('/search', [SearchController::class, 'index']);
+Route::get('/search', [SearchController::class, 'index'])->middleware('throttle:30,1');
+Route::get('/search/suggest', [SearchController::class, 'suggest'])->middleware('throttle:60,1');
 Route::get('/category/{slug}', [CategoryController::class, 'show']);
 Route::get('/tag/{slug}', [TagController::class, 'show']);
 Route::get('/posts/{slug}', [PostController::class, 'show']);
@@ -43,11 +44,11 @@ Route::post('/newsletter/subscribe',            [ContactController::class, 'subs
 Route::get('/newsletter/unsubscribe/{token}',   [ContactController::class, 'unsubscribe']);
 
 // Polls (public JSON endpoints)
-Route::post('/polls/{pollId}/vote',    [PollController::class, 'vote']);
+Route::post('/polls/{pollId}/vote',    [PollController::class, 'vote'])->middleware('throttle:10,1');
 Route::get('/polls/{pollId}/results',  [PollController::class, 'results']);
 
 // Comments (auth or guest)
-Route::post('/posts/{slug}/comments', [CommentController::class, 'store']);
+Route::post('/posts/{slug}/comments', [CommentController::class, 'store'])->middleware('throttle:15,1');
 Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->middleware('auth');
 Route::post('/comments/{comment}/react', [\App\Http\Controllers\CommentReactionController::class, 'toggle']);
 
@@ -69,7 +70,7 @@ Route::get('/profile/{username}', [\App\Http\Controllers\ProfileController::clas
 Route::post('/follow/{id}', [\App\Http\Controllers\ProfileController::class, 'follow'])->middleware('auth');
 
 // Reactions (works guest + auth)
-Route::post('/react/{postId}', [\App\Http\Controllers\ReactionController::class, 'store']);
+Route::post('/react/{postId}', [\App\Http\Controllers\ReactionController::class, 'store'])->middleware('throttle:30,1');
 
 // Bookmarks + following feed (auth only)
 Route::middleware('auth')->group(function () {

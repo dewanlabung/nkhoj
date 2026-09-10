@@ -1,6 +1,27 @@
 @extends('layouts.app')
 @section('title', $recipe->title . ' – Nkhoj Recipes')
 
+@push('head')
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Recipe",
+    "name": "{{ addslashes($recipe->title) }}",
+    @if($recipe->thumbnail_url)"image": "{{ $recipe->thumbnail_url }}",@endif
+    @if($recipe->description)"description": "{{ addslashes(strip_tags(Str::limit($recipe->description, 200))) }}",@endif
+    @if($recipe->author)"author": { "@type": "Person", "name": "{{ addslashes($recipe->author->name) }}" },@endif
+    @if($recipe->cuisine_type)"recipeCuisine": "{{ addslashes($recipe->cuisine_type) }}",@endif
+    @if($recipe->meal_type)"recipeCategory": "{{ addslashes($recipe->meal_type) }}",@endif
+    @if($recipe->prep_time)"prepTime": "PT{{ $recipe->prep_time }}M",@endif
+    @if($recipe->cook_time)"cookTime": "PT{{ $recipe->cook_time }}M",@endif
+    @if($recipe->total_time)"totalTime": "PT{{ $recipe->total_time }}M",@endif
+    @if($recipe->servings)"recipeYield": "{{ $recipe->servings }}",@endif
+    @if($recipe->difficulty)"difficulty": "{{ $recipe->difficulty }}",@endif
+    "url": "{{ url('/recipes/' . ($recipe->slug ?? $recipe->uuid)) }}"
+}
+</script>
+@endpush
+
 @section('content')
 <div class="max-w-4xl mx-auto">
     {{-- Breadcrumb --}}
