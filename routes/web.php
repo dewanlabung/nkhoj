@@ -440,11 +440,11 @@ Route::middleware('auth')->group(function () {
     Route::delete('/pages/{slug}/posts/{postId}/comments/{commentId}', [SocialPageController::class, 'deleteComment']);
     Route::post('/pages/{slug}/posts/{postId}/pin',          [SocialPageController::class, 'pinPost']);
     Route::delete('/pages/{slug}/posts/{postId}/pin',        [SocialPageController::class, 'unpinPost']);
-    Route::post('/pages/{slug}/posts/{postId}/report',       [SocialPageController::class, 'report'])->defaults('type', 'post');
+    Route::post('/pages/{slug}/posts/{entityId}/report',     [SocialPageController::class, 'report'])->defaults('type', 'post');
     // Reviews
     Route::post('/pages/{slug}/reviews',                     [SocialPageController::class, 'storeReview']);
     Route::delete('/pages/{slug}/reviews',                   [SocialPageController::class, 'deleteReview']);
-    Route::post('/pages/{slug}/reviews/{reviewId}/report',   [SocialPageController::class, 'report'])->defaults('type', 'review');
+    Route::post('/pages/{slug}/reviews/{entityId}/report',   [SocialPageController::class, 'report'])->defaults('type', 'review');
     // Reports
     Route::post('/pages/{slug}/report',                      [SocialPageController::class, 'report']);
     // Moderation queue
