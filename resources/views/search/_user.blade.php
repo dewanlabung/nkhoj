@@ -1,22 +1,24 @@
-<a href="/profile/{{ $user->username }}"
-    class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-4 hover:shadow-md transition-shadow block group">
-    <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
-        @if($user->avatar)
-        <img src="{{ $user->avatar }}" alt="" class="w-full h-full object-cover">
-        @else
-        <div class="w-full h-full bg-brand-500 flex items-center justify-center text-white font-bold text-lg">
-            {{ strtoupper(substr($user->name, 0, 1)) }}
+<div class="flex items-center gap-3 px-4 py-3">
+    <a href="/profile/{{ $user->username }}" class="flex-shrink-0">
+        <div class="w-12 h-12 rounded-full overflow-hidden bg-brand-500 flex items-center justify-center">
+            @if($user->avatar_url ?? $user->avatar ?? null)
+            <img src="{{ $user->avatar_url ?? $user->avatar }}" alt="" class="w-full h-full object-cover">
+            @else
+            <span class="text-white font-bold text-lg">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+            @endif
         </div>
-        @endif
-    </div>
+    </a>
     <div class="flex-1 min-w-0">
-        <p class="font-semibold text-gray-900 group-hover:text-brand-600 transition-colors text-sm">{{ $user->name }}</p>
+        <a href="/profile/{{ $user->username }}">
+            <p class="font-semibold text-sm text-gray-900">{{ $user->name }}</p>
+        </a>
         <p class="text-xs text-brand-500">@{{ $user->username }}</p>
         @if($user->bio)
         <p class="text-xs text-gray-400 mt-0.5 line-clamp-1">{{ $user->bio }}</p>
         @endif
     </div>
-    <svg class="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-    </svg>
-</a>
+    <a href="/profile/{{ $user->username }}"
+       class="flex-shrink-0 px-4 py-1.5 bg-gray-100 text-gray-700 text-xs font-semibold rounded-full hover:bg-gray-200 transition">
+        View profile
+    </a>
+</div>

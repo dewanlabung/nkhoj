@@ -38,6 +38,29 @@ class SearchController extends Controller
             ->limit(8)
             ->pluck('query');
 
+        // Recent searches and suggested people for empty state
+        $recent = collect();
+        $suggested = collect();
+
+        if ($query === '') {
+            if (auth()->check()) {
+                $recent = DB::table('search_logs')
+                    ->where('user_id', auth()->id())
+                    ->orderByDesc('created_at')
+                    ->limit(40)
+                    ->pluck('query')
+                    ->unique()
+                    ->take(8)
+                    ->values();
+            }
+
+            $suggested = User::query()
+                ->when(auth()->check(), fn($q) => $q->where('id', '!=', auth()->id()))
+                ->latest()
+                ->limit(6)
+                ->get(['id', 'name', 'username', 'avatar_url', 'bio']);
+        }
+
         if ($query !== '') {
             $like = "%{$query}%";
 
@@ -148,7 +171,7 @@ class SearchController extends Controller
             };
         }
 
-        return view('search', compact('query', 'type', 'results', 'counts', 'trending'));
+        return view('search', compact('query', 'type', 'results', 'counts', 'trending', 'recent', 'suggested'));
     }
 
     private function allResults(string $query, string $like): array
