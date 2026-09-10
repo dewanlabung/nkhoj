@@ -29,14 +29,14 @@ class TechQnaSeeder extends Seeder
             'name'     => 'Rajesh Adhikari',
             'username' => 'rajesh_it',
             'password' => bcrypt('password'),
-            'role'     => 'member',
+            'role'     => 'reader',
         ]);
         $user3 = User::firstOrCreate(['email' => 'techuser2@nkhoj.com'], [
             'uuid'     => Str::uuid(),
             'name'     => 'Sita Thapa',
             'username' => 'sita_dev',
             'password' => bcrypt('password'),
-            'role'     => 'member',
+            'role'     => 'reader',
         ]);
 
         // Ensure Tech & IT categories exist
