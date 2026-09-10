@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Subscription;
+use App\Services\HibpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -70,6 +71,10 @@ class AccountController extends Controller
             return back()->withErrors(['current_password' => 'Current password is incorrect.']);
         }
 
+        if (app(HibpService::class)->isBreached($request->password)) {
+            return back()->withErrors(['password' => 'This password has appeared in a known data breach. Please choose a different password.']);
+        }
+
         $user->update(['password' => $request->password]);
 
         return back()->with('success', 'Password changed successfully.');
@@ -92,11 +97,7 @@ class AccountController extends Controller
 
     public function deleteAccount(Request $request)
     {
-        $request->validate(['confirm' => 'required|in:DELETE']);
-        $user = auth()->user();
-        auth()->logout();
-        $user->delete();
-
-        return redirect('/')->with('success', 'Your account has been deleted.');
+        // Redirected — use DataPrivacyController::requestDeletion for grace-period flow
+        return redirect('/account/data-privacy');
     }
 }

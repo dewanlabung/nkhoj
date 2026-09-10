@@ -376,6 +376,28 @@ Route::middleware(['auth'])->prefix('account')->group(function () {
     Route::get('/subscriptions',       [AccountController::class, 'subscriptions']);
     Route::get('/privacy',             [AccountController::class, 'privacy']);
     Route::delete('/delete',           [AccountController::class, 'deleteAccount']);
+
+    // API Tokens
+    Route::get('/tokens',              [\App\Http\Controllers\Account\TokenController::class, 'index']);
+    Route::post('/tokens',             [\App\Http\Controllers\Account\TokenController::class, 'store']);
+    Route::delete('/tokens/{id}',      [\App\Http\Controllers\Account\TokenController::class, 'destroy']);
+    Route::get('/tokens/{id}/activity',[\App\Http\Controllers\Account\TokenController::class, 'activity']);
+
+    // Active Sessions
+    Route::get('/sessions',            [\App\Http\Controllers\Account\SessionsController::class, 'index']);
+    Route::delete('/sessions/{id}',    [\App\Http\Controllers\Account\SessionsController::class, 'destroy']);
+    Route::delete('/sessions',         [\App\Http\Controllers\Account\SessionsController::class, 'destroyAll']);
+
+    // Notification Preferences
+    Route::get('/notifications',       [\App\Http\Controllers\Account\NotificationPreferenceController::class, 'index']);
+    Route::post('/notifications',      [\App\Http\Controllers\Account\NotificationPreferenceController::class, 'update']);
+
+    // Data & Privacy (extended)
+    Route::get('/data-privacy',        [\App\Http\Controllers\Account\DataPrivacyController::class, 'index']);
+    Route::post('/data-privacy/export',[\App\Http\Controllers\Account\DataPrivacyController::class, 'requestExport']);
+    Route::get('/export/download',     [\App\Http\Controllers\Account\DataPrivacyController::class, 'download']);
+    Route::post('/data-privacy/delete',[\App\Http\Controllers\Account\DataPrivacyController::class, 'requestDeletion']);
+    Route::post('/data-privacy/cancel-deletion', [\App\Http\Controllers\Account\DataPrivacyController::class, 'cancelDeletion']);
 });
 
 // Membership (frontend)

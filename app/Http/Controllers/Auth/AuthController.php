@@ -33,7 +33,11 @@ class AuthController extends Controller
                 Auth::logout();
                 return redirect('/two-factor-challenge');
             }
-            try { LoginHistory::record($user->id, 'email'); } catch (\Throwable) {}
+            try {
+                LoginHistory::record($user->id, 'email');
+                \App\Models\UserSession::upsertForRequest($request, $user->id);
+                \App\Jobs\LoginAnomalyCheck::dispatch($user->id, $request->ip(), $request->userAgent() ?? '');
+            } catch (\Throwable) {}
             return redirect()->intended('/dashboard');
         }
 

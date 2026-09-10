@@ -60,6 +60,20 @@ This file tracks all implemented features and improvements so recommendations ar
 
 ---
 
+### Account System & API
+- [x] Personal Access Token (PAT) manager — `/account/tokens`, Sanctum-based, scopes: read/write/notifications
+- [x] API v1 skeleton — `routes/api.php` v1 prefix, `{data,meta,errors}` envelope, `LogApiRequest` middleware audit log
+- [x] Push notification device token registration — `device_tokens` table, `POST /api/v1/device-tokens`
+- [x] Active sessions manager — `user_sessions` table, `/account/sessions`, revoke per-session or all-others
+- [x] API request audit log — `api_audit_logs` table, per-token activity at `/account/tokens/{id}/activity`
+- [x] Login anomaly alert — `LoginAnomalyCheck` job compares new IP against recent history, queues email alert
+- [x] HIBP password breach check — `HibpService` queries k-anonymity API on password change; blocks breached passwords
+- [x] Account data export — `ExportAccountData` queued job, `/account/data-privacy/export`, 24h download link via email
+- [x] Account deletion 30-day grace period — `deletion_requested_at` column, cancel flow, `PurgeDeletedAccounts` daily job
+- [x] Profile completion score + nudge banner — `completionScore()` on User model, progress bar on `/account` home
+- [x] Notification preference center — `notification_preferences` table, `/account/notifications` with in-app/email/push toggles
+- [x] `CreateNotification` job respects preferences (architecture ready; full channel fan-out wires to FCM/APNs on deployment)
+
 ## 🔲 Not Yet Implemented (candidate backlog)
 
 > Suggestions from this list will be offered in future recommendations. Cross off when done.
@@ -74,5 +88,8 @@ This file tracks all implemented features and improvements so recommendations ar
 - [ ] Event RSVP attendance export (CSV/PDF for organizers)
 - [ ] Post reaction analytics (which reactions, by whom)
 - [ ] Author earnings / monetization dashboard
-- [ ] Mobile push notifications (Web Push API)
+- [ ] Mobile push notifications (FCM/APNs fan-out from device_tokens table)
 - [ ] AI-powered auto-tagging on post publish
+- [ ] OAuth2 authorization server (first-party SPA / third-party clients)
+- [ ] API v1 content endpoints (posts, events, recipes, search) for native app
+- [ ] WebSocket / SSE for real-time in-app notification badge updates

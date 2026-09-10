@@ -13,3 +13,6 @@ Schedule::command('ai:generate-posts')->dailyAt('06:00');
 
 // Auto-publish posts whose scheduled_at has passed
 Schedule::command('posts:publish-scheduled')->everyFiveMinutes();
+
+// Purge accounts that requested deletion 30+ days ago
+Schedule::job(new \App\Jobs\PurgeDeletedAccounts)->daily();
