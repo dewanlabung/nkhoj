@@ -7,12 +7,20 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        // Add batch-3 columns to social_pages
+        // Add batch-3 columns to social_pages (guarded so re-running on prod is safe)
         Schema::table('social_pages', function (Blueprint $table) {
-            $table->string('page_type', 30)->default('other')->after('username');
-            $table->string('posts_privacy_default', 20)->default('public')->after('allow_tagging');
-            $table->boolean('allow_recommendations')->default(true)->after('posts_privacy_default');
-            $table->timestamp('last_post_at')->nullable()->after('allow_recommendations');
+            if (!Schema::hasColumn('social_pages', 'page_type')) {
+                $table->string('page_type', 30)->default('other')->after('username');
+            }
+            if (!Schema::hasColumn('social_pages', 'posts_privacy_default')) {
+                $table->string('posts_privacy_default', 20)->default('public')->after('allow_tagging');
+            }
+            if (!Schema::hasColumn('social_pages', 'allow_recommendations')) {
+                $table->boolean('allow_recommendations')->default(true)->after('posts_privacy_default');
+            }
+            if (!Schema::hasColumn('social_pages', 'last_post_at')) {
+                $table->timestamp('last_post_at')->nullable()->after('allow_recommendations');
+            }
         });
 
         // FAQ / pinned questions on a page (admin-curated)
