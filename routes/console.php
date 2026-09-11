@@ -16,3 +16,9 @@ Schedule::command('posts:publish-scheduled')->everyFiveMinutes();
 
 // Purge accounts that requested deletion 30+ days ago
 Schedule::job(new \App\Jobs\PurgeDeletedAccounts)->daily();
+
+// Purge expired disappearing DMs
+Schedule::command('messages:purge-expired')->hourly();
+
+// Purge expired 24-hour stories
+Schedule::command('stories:purge-expired')->hourly();

@@ -585,3 +585,77 @@ Route::post('/events',                   [\App\Http\Controllers\EventController:
 Route::get('/events/{slug}',             [\App\Http\Controllers\EventController::class, 'show']);
 Route::post('/events/{event}/attend',    [\App\Http\Controllers\EventController::class, 'attend'])->middleware('auth');
 Route::get('/events/{event}/attendees/export', [\App\Http\Controllers\EventController::class, 'exportAttendees'])->middleware('auth');
+
+// ─── Live Streaming ───────────────────────────────────────────────────────────
+Route::get('/live',                        [\App\Http\Controllers\LiveStreamController::class, 'index']);
+Route::get('/live/create',                 [\App\Http\Controllers\LiveStreamController::class, 'create'])->middleware('auth');
+Route::post('/live',                       [\App\Http\Controllers\LiveStreamController::class, 'store'])->middleware('auth');
+Route::get('/live/{liveStream}',           [\App\Http\Controllers\LiveStreamController::class, 'show']);
+Route::post('/live/{liveStream}/end',      [\App\Http\Controllers\LiveStreamController::class, 'end'])->middleware('auth');
+Route::post('/live/{liveStream}/chat',     [\App\Http\Controllers\LiveStreamController::class, 'chat'])->middleware('throttle:30,1');
+Route::get('/live/{liveStream}/poll',      [\App\Http\Controllers\LiveStreamController::class, 'poll']);
+
+// ─── Reels ────────────────────────────────────────────────────────────────────
+Route::get('/reels',                    [\App\Http\Controllers\ReelController::class, 'index']);
+Route::get('/reels/create',             [\App\Http\Controllers\ReelController::class, 'create'])->middleware('auth');
+Route::post('/reels',                   [\App\Http\Controllers\ReelController::class, 'store'])->middleware('auth');
+Route::post('/reels/{reel}/like',       [\App\Http\Controllers\ReelController::class, 'like'])->middleware('auth');
+Route::post('/reels/{reel}/comment',    [\App\Http\Controllers\ReelController::class, 'comment'])->middleware('auth');
+Route::get('/reels/{reel}/comments',    [\App\Http\Controllers\ReelController::class, 'comments']);
+
+// ─── Watch Party ──────────────────────────────────────────────────────────────
+Route::get('/watch-party',                          [\App\Http\Controllers\WatchPartyController::class, 'index']);
+Route::get('/watch-party/create',                   [\App\Http\Controllers\WatchPartyController::class, 'create'])->middleware('auth');
+Route::post('/watch-party',                         [\App\Http\Controllers\WatchPartyController::class, 'store'])->middleware('auth');
+Route::get('/watch-party/{code}',                   [\App\Http\Controllers\WatchPartyController::class, 'show']);
+Route::post('/watch-party/{code}/join',             [\App\Http\Controllers\WatchPartyController::class, 'join'])->middleware('auth');
+Route::middleware('auth')->group(function () {
+    Route::post('/watch-party/{watchParty}/sync',    [\App\Http\Controllers\WatchPartyController::class, 'sync']);
+    Route::get('/watch-party/{watchParty}/sync',     [\App\Http\Controllers\WatchPartyController::class, 'getSync']);
+    Route::post('/watch-party/{watchParty}/message', [\App\Http\Controllers\WatchPartyController::class, 'sendMessage'])->middleware('throttle:30,1');
+    Route::get('/watch-party/{watchParty}/messages', [\App\Http\Controllers\WatchPartyController::class, 'pollMessages']);
+});
+
+// ─── Virtual Gifts / Wallet ───────────────────────────────────────────────────
+Route::middleware('auth')->group(function () {
+    Route::get('/wallet',               [\App\Http\Controllers\GiftController::class, 'wallet']);
+    Route::post('/gifts/{user}',        [\App\Http\Controllers\GiftController::class, 'send'])->middleware('throttle:20,1');
+    Route::post('/wallet/buy',          [\App\Http\Controllers\GiftController::class, 'buyCoins']);
+});
+
+// ─── Inbox / Disappearing DMs ─────────────────────────────────────────────────
+Route::middleware('auth')->group(function () {
+    Route::get('/inbox',                                [\App\Http\Controllers\InboxController::class, 'index']);
+    Route::get('/inbox/{conversation}',                 [\App\Http\Controllers\InboxController::class, 'show']);
+    Route::post('/inbox/start',                         [\App\Http\Controllers\InboxController::class, 'start']);
+    Route::post('/inbox/{conversation}/send',           [\App\Http\Controllers\InboxController::class, 'send'])->middleware('throttle:60,1');
+    Route::get('/inbox/{conversation}/poll',            [\App\Http\Controllers\InboxController::class, 'poll']);
+});
+
+// ─── Stories & Highlights ─────────────────────────────────────────────────────
+Route::get('/stories',                                      [\App\Http\Controllers\StoryController::class, 'index']);
+Route::get('/stories/{story}',                              [\App\Http\Controllers\StoryController::class, 'show']);
+Route::middleware('auth')->group(function () {
+    Route::post('/stories',                                 [\App\Http\Controllers\StoryController::class, 'store'])->middleware('throttle:20,1');
+    Route::delete('/stories/{story}',                       [\App\Http\Controllers\StoryController::class, 'destroy']);
+    Route::post('/highlights',                              [\App\Http\Controllers\StoryController::class, 'storeHighlight']);
+    Route::post('/highlights/{highlight}/add',              [\App\Http\Controllers\StoryController::class, 'addToHighlight']);
+    Route::delete('/highlights/{highlight}',                [\App\Http\Controllers\StoryController::class, 'destroyHighlight']);
+});
+
+// ─── Trending Topics ──────────────────────────────────────────────────────────
+Route::get('/trending',                                     [\App\Http\Controllers\TrendingController::class, 'index']);
+
+// ─── Broadcast Channels ───────────────────────────────────────────────────────
+Route::get('/channels',                                     [\App\Http\Controllers\BroadcastChannelController::class, 'index']);
+Route::get('/channels/create',                              [\App\Http\Controllers\BroadcastChannelController::class, 'create'])->middleware('auth');
+Route::post('/channels',                                    [\App\Http\Controllers\BroadcastChannelController::class, 'store'])->middleware('auth');
+Route::get('/channels/{broadcastChannel:slug}',             [\App\Http\Controllers\BroadcastChannelController::class, 'show']);
+Route::middleware('auth')->group(function () {
+    Route::post('/channels/{broadcastChannel:slug}/subscribe', [\App\Http\Controllers\BroadcastChannelController::class, 'subscribe']);
+    Route::post('/channels/{broadcastChannel:slug}/broadcast', [\App\Http\Controllers\BroadcastChannelController::class, 'broadcast'])->middleware('throttle:20,1');
+    Route::post('/channel-messages/{channelMessage}/react',    [\App\Http\Controllers\BroadcastChannelController::class, 'react']);
+});
+
+// ─── QR Profile Card ──────────────────────────────────────────────────────────
+Route::get('/profile/{username}/qr-card',                   [\App\Http\Controllers\QrCardController::class, 'show']);
