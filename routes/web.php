@@ -631,3 +631,31 @@ Route::middleware('auth')->group(function () {
     Route::post('/inbox/{conversation}/send',           [\App\Http\Controllers\InboxController::class, 'send'])->middleware('throttle:60,1');
     Route::get('/inbox/{conversation}/poll',            [\App\Http\Controllers\InboxController::class, 'poll']);
 });
+
+// ─── Stories & Highlights ─────────────────────────────────────────────────────
+Route::get('/stories',                                      [\App\Http\Controllers\StoryController::class, 'index']);
+Route::get('/stories/{story}',                              [\App\Http\Controllers\StoryController::class, 'show']);
+Route::middleware('auth')->group(function () {
+    Route::post('/stories',                                 [\App\Http\Controllers\StoryController::class, 'store'])->middleware('throttle:20,1');
+    Route::delete('/stories/{story}',                       [\App\Http\Controllers\StoryController::class, 'destroy']);
+    Route::post('/highlights',                              [\App\Http\Controllers\StoryController::class, 'storeHighlight']);
+    Route::post('/highlights/{highlight}/add',              [\App\Http\Controllers\StoryController::class, 'addToHighlight']);
+    Route::delete('/highlights/{highlight}',                [\App\Http\Controllers\StoryController::class, 'destroyHighlight']);
+});
+
+// ─── Trending Topics ──────────────────────────────────────────────────────────
+Route::get('/trending',                                     [\App\Http\Controllers\TrendingController::class, 'index']);
+
+// ─── Broadcast Channels ───────────────────────────────────────────────────────
+Route::get('/channels',                                     [\App\Http\Controllers\BroadcastChannelController::class, 'index']);
+Route::get('/channels/create',                              [\App\Http\Controllers\BroadcastChannelController::class, 'create'])->middleware('auth');
+Route::post('/channels',                                    [\App\Http\Controllers\BroadcastChannelController::class, 'store'])->middleware('auth');
+Route::get('/channels/{broadcastChannel:slug}',             [\App\Http\Controllers\BroadcastChannelController::class, 'show']);
+Route::middleware('auth')->group(function () {
+    Route::post('/channels/{broadcastChannel:slug}/subscribe', [\App\Http\Controllers\BroadcastChannelController::class, 'subscribe']);
+    Route::post('/channels/{broadcastChannel:slug}/broadcast', [\App\Http\Controllers\BroadcastChannelController::class, 'broadcast'])->middleware('throttle:20,1');
+    Route::post('/channel-messages/{channelMessage}/react',    [\App\Http\Controllers\BroadcastChannelController::class, 'react']);
+});
+
+// ─── QR Profile Card ──────────────────────────────────────────────────────────
+Route::get('/profile/{username}/qr-card',                   [\App\Http\Controllers\QrCardController::class, 'show']);
