@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\EventAttendee;
+use App\Traits\SavesOptimizedThumbnail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class EventController extends Controller
 {
+    use SavesOptimizedThumbnail;
     public function index(Request $request)
     {
         $tab      = $request->query('tab', 'upcoming');
@@ -86,8 +88,7 @@ class EventController extends Controller
 
         $thumbnailUrl = null;
         if ($request->hasFile('thumbnail')) {
-            $path = $request->file('thumbnail')->store('events', 'public');
-            $thumbnailUrl = '/storage/' . $path;
+            $thumbnailUrl = $this->saveOptimizedThumbnail($request->file('thumbnail'), 'events');
         }
 
         $event = Event::create([
@@ -109,6 +110,39 @@ class EventController extends Controller
         ]);
 
         return redirect("/events/{$event->slug}")->with('success', 'Event created!');
+    }
+
+    public function exportAttendees(Event $event)
+    {
+        abort_unless(auth()->id() === $event->user_id, 403);
+
+        $attendees = EventAttendee::where('event_id', $event->id)
+            ->with('user:id,name,email')
+            ->orderBy('created_at')
+            ->get();
+
+        $filename = 'attendees-' . $event->slug . '-' . now()->format('Ymd') . '.csv';
+
+        $headers = [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () use ($attendees) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['Name', 'Email', 'Status', 'Registered At']);
+            foreach ($attendees as $a) {
+                fputcsv($out, [
+                    $a->user->name ?? 'Unknown',
+                    $a->user->email ?? '',
+                    $a->status,
+                    $a->created_at->toDateTimeString(),
+                ]);
+            }
+            fclose($out);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     public function attend(Event $event, Request $request)

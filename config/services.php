@@ -26,4 +26,8 @@ return [
         'endpoint' => env('MAILGUN_ENDPOINT', 'api.mailgun.net'),
         'scheme'   => 'https',
     ],
+
+    'fcm' => [
+        'server_key' => env('FIREBASE_SERVER_KEY'),
+    ],
 ];

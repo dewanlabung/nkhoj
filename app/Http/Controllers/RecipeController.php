@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Recipe;
 use App\Models\RecipeLike;
 use App\Models\RecipeRating;
+use App\Traits\SavesOptimizedThumbnail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class RecipeController extends Controller
 {
+    use SavesOptimizedThumbnail;
     public function index(Request $request)
     {
         $tab      = $request->query('tab', 'trending');
@@ -85,8 +87,7 @@ class RecipeController extends Controller
 
         $thumbnailUrl = null;
         if ($request->hasFile('thumbnail')) {
-            $path = $request->file('thumbnail')->store('recipes', 'public');
-            $thumbnailUrl = '/storage/' . $path;
+            $thumbnailUrl = $this->saveOptimizedThumbnail($request->file('thumbnail'), 'recipes');
         }
 
         $recipe = Recipe::create([

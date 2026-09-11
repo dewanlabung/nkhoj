@@ -20,6 +20,17 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
     Route::delete('/auth/token',[V1\AuthController::class, 'revoke'])->middleware('auth:sanctum');
     Route::get('/auth/me',      [V1\AuthController::class, 'me'])->middleware('auth:sanctum');
 
+    // Public content endpoints (read-only, throttled)
+    Route::middleware('throttle:120,1')->group(function () {
+        Route::get('/posts',              [V1\PostController::class, 'index']);
+        Route::get('/posts/{slug}',       [V1\PostController::class, 'show']);
+        Route::get('/events',             [V1\EventController::class, 'index']);
+        Route::get('/events/{slug}',      [V1\EventController::class, 'show']);
+        Route::get('/recipes',            [V1\RecipeController::class, 'index']);
+        Route::get('/recipes/{slug}',     [V1\RecipeController::class, 'show']);
+        Route::get('/search',             [V1\SearchController::class, 'index']);
+    });
+
     // Authenticated routes
     Route::middleware(['auth:sanctum', \App\Http\Middleware\LogApiRequest::class])->group(function () {
         // Device tokens (push notifications)

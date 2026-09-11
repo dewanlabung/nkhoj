@@ -452,23 +452,47 @@
                             </div>
                         </div>
 
-                        {{-- Nested replies --}}
+                        {{-- Nested replies with load-more --}}
                         @if($comment->replies->count())
-                        <div class="mt-3 ml-4 space-y-3">
-                            @foreach($comment->replies as $reply)
+                        @php $allReplies = $comment->replies; $firstReplies = $allReplies->take(3); $moreReplies = $allReplies->skip(3); @endphp
+                        <div class="mt-3 ml-4 space-y-3" x-data="{ showAll: false }">
+                            @foreach($firstReplies as $reply)
                             <div class="flex gap-3">
                                 <div class="w-7 h-7 rounded-full bg-indigo-300 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
                                     {{ strtoupper(substr($reply->displayName(), 0, 1)) }}
                                 </div>
-                                <div class="flex-1 bg-indigo-50 rounded-xl px-4 py-2">
+                                <div class="flex-1 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl px-4 py-2">
                                     <div class="flex items-center justify-between mb-0.5">
-                                        <span class="text-xs font-semibold text-gray-800">{{ $reply->displayName() }}</span>
+                                        <span class="text-xs font-semibold text-gray-800 dark:text-gray-200">{{ $reply->displayName() }}</span>
                                         <span class="text-xs text-gray-400">{{ $reply->created_at->diffForHumans() }}</span>
                                     </div>
-                                    <p class="text-sm text-gray-700 font-nepali">{{ $reply->body }}</p>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300 font-nepali">{{ $reply->body }}</p>
                                 </div>
                             </div>
                             @endforeach
+                            @if($moreReplies->count())
+                            <template x-if="showAll">
+                                <div class="space-y-3">
+                                    @foreach($moreReplies as $reply)
+                                    <div class="flex gap-3">
+                                        <div class="w-7 h-7 rounded-full bg-indigo-300 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                                            {{ strtoupper(substr($reply->displayName(), 0, 1)) }}
+                                        </div>
+                                        <div class="flex-1 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl px-4 py-2">
+                                            <div class="flex items-center justify-between mb-0.5">
+                                                <span class="text-xs font-semibold text-gray-800 dark:text-gray-200">{{ $reply->displayName() }}</span>
+                                                <span class="text-xs text-gray-400">{{ $reply->created_at->diffForHumans() }}</span>
+                                            </div>
+                                            <p class="text-sm text-gray-700 dark:text-gray-300 font-nepali">{{ $reply->body }}</p>
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                </div>
+                            </template>
+                            <button @click="showAll = !showAll" class="text-xs text-brand-600 hover:text-brand-700 font-medium mt-1">
+                                <span x-text="showAll ? 'Hide replies' : '+ {{ $moreReplies->count() }} more {{ Str::plural("reply", $moreReplies->count()) }}'"></span>
+                            </button>
+                            @endif
                         </div>
                         @endif
                     </div>
