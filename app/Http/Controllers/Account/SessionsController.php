@@ -12,7 +12,11 @@ class SessionsController extends Controller
     public function index()
     {
         $currentSid = session()->getId();
-        $sessions   = auth()->user()->userSessions()->get();
+        try {
+            $sessions = auth()->user()->userSessions()->get();
+        } catch (\Throwable) {
+            $sessions = collect();
+        }
         return view('account.sessions', compact('sessions', 'currentSid'));
     }
 

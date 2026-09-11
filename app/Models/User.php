@@ -43,6 +43,10 @@ class User extends Authenticatable
         'data_export_token',
         'data_export_requested_at',
         'data_export_ready_at',
+        'recovery_email',
+        'recovery_email_verified_at',
+        'recovery_token',
+        'recovery_token_expires_at',
     ];
 
     protected $hidden = ['password', 'remember_token', 'two_factor_secret'];
@@ -61,9 +65,11 @@ class User extends Authenticatable
             'balance'                  => 'decimal:2',
             'two_factor_enabled'        => 'boolean',
             'two_factor_confirmed_at'   => 'datetime',
-            'deletion_requested_at'     => 'datetime',
-            'data_export_requested_at'  => 'datetime',
-            'data_export_ready_at'      => 'datetime',
+            'deletion_requested_at'        => 'datetime',
+            'data_export_requested_at'     => 'datetime',
+            'data_export_ready_at'         => 'datetime',
+            'recovery_email_verified_at'   => 'datetime',
+            'recovery_token_expires_at'    => 'datetime',
         ];
     }
 
