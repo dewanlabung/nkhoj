@@ -57,10 +57,17 @@
                 </button>
             </form>
 
-            <p class="mt-6 text-center text-sm text-gray-500">
-                Don't have an account?
-                <a href="/register" class="font-semibold text-brand-600 hover:text-brand-700">Sign up free</a>
-            </p>
+            <div class="mt-6 text-center space-y-2">
+                <p class="text-sm text-gray-500">
+                    <a href="/forgot-password" class="text-brand-600 hover:text-brand-700 font-medium">Forgot password?</a>
+                    <span class="mx-2 text-gray-300">·</span>
+                    <a href="/forgot-username" class="text-brand-600 hover:text-brand-700 font-medium">Forgot username?</a>
+                </p>
+                <p class="text-sm text-gray-500">
+                    Don't have an account?
+                    <a href="/register" class="font-semibold text-brand-600 hover:text-brand-700">Sign up free</a>
+                </p>
+            </div>
         </div>
     </div>
 </div>

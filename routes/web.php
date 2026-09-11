@@ -58,6 +58,14 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::get('/register', [AuthController::class, 'showRegister']);
     Route::post('/register', [AuthController::class, 'register']);
+
+    // Account recovery (public — no auth)
+    Route::get('/forgot-username',  [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'showForgotUsername']);
+    Route::post('/forgot-username', [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'sendUsername'])->middleware('throttle:5,10');
+    Route::get('/forgot-password',  [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'showForgotPassword']);
+    Route::post('/forgot-password', [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'sendPasswordReset'])->middleware('throttle:5,10');
+    Route::get('/reset-password',   [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'showResetPassword']);
+    Route::post('/reset-password',  [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'resetPassword'])->middleware('throttle:10,10');
 });
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth');
 
@@ -400,6 +408,12 @@ Route::middleware(['auth'])->prefix('account')->group(function () {
     Route::get('/export/download',     [\App\Http\Controllers\Account\DataPrivacyController::class, 'download']);
     Route::post('/data-privacy/delete',[\App\Http\Controllers\Account\DataPrivacyController::class, 'requestDeletion']);
     Route::post('/data-privacy/cancel-deletion', [\App\Http\Controllers\Account\DataPrivacyController::class, 'cancelDeletion']);
+
+    // Account recovery settings
+    Route::get('/recovery',              [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'showRecoverySettings']);
+    Route::post('/recovery/email',       [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'saveRecoveryEmail']);
+    Route::get('/recovery/verify-email', [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'verifyRecoveryEmail']);
+    Route::delete('/recovery/email',     [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'removeRecoveryEmail']);
 });
 
 // Membership (frontend)

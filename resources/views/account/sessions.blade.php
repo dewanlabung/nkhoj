@@ -21,7 +21,7 @@
         @if(session('success'))<div class="mb-4 px-4 py-3 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-xl text-sm">{{ session('success') }}</div>@endif
 
         @if($sessions->isEmpty())
-        <p class="text-sm text-gray-400 text-center py-6">No session records found. Sessions are tracked on next login.</p>
+        <p class="text-sm text-gray-400 text-center py-6">No session records found. Sessions are tracked on next login after running <code class="text-xs bg-gray-100 dark:bg-gray-700 px-1 rounded">php artisan migrate</code>.</p>
         @else
         <div class="space-y-3">
             @foreach($sessions as $session)
