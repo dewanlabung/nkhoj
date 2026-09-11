@@ -154,6 +154,10 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('/comments/{id}/approve',    [AdminController::class, 'approveComment']);
     Route::delete('/comments/{id}',          [AdminController::class, 'deleteComment']);
 
+    // Content Reports
+    Route::get('/reports',         [\App\Http\Controllers\ContentReportController::class, 'adminIndex']);
+    Route::patch('/reports/{id}',  [\App\Http\Controllers\ContentReportController::class, 'adminAction']);
+
     // Tags
     Route::get('/tags',                      [AdminController::class, 'tags']);
     Route::post('/tags',                     [AdminController::class, 'storeTag']);
@@ -555,12 +559,16 @@ Route::get('/pages/{slug}',                         [SocialPageController::class
 // Dashboard (auth required)
 Route::middleware('auth')->prefix('dashboard')->group(function () {
     Route::get('/', [DashboardController::class, 'index']);
+    Route::get('/analytics', [DashboardController::class, 'analytics']);
     Route::get('/posts/create', [DashboardController::class, 'create']);
     Route::post('/posts', [DashboardController::class, 'store']);
     Route::get('/posts/{id}/edit', [DashboardController::class, 'edit']);
     Route::put('/posts/{id}', [DashboardController::class, 'update']);
     Route::get('/pages', [SocialPageController::class, 'myPages']);
 });
+
+// Content reporting
+Route::middleware('auth')->post('/report', [\App\Http\Controllers\ContentReportController::class, 'store'])->middleware('throttle:10,1');
 
 // Recipes community
 Route::get('/recipe',                    [\App\Http\Controllers\RecipeController::class, 'index']);

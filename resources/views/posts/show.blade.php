@@ -289,7 +289,7 @@
 
                     @auth
                     {{-- Bookmark button --}}
-                    <div class="ml-auto"
+                    <div class="ml-auto flex items-center gap-2 relative"
                         x-data="{ saved: {{ $isBookmarked ? 'true' : 'false' }}, loading: false }"
                         x-cloak>
                         <button
@@ -305,6 +305,42 @@
                             class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-50">
                             <span x-text="saved ? '🔖 सेभ गरियो' : '🔖 सेभ गर्नुहोस्'"></span>
                         </button>
+                        {{-- Report button --}}
+                        <div x-data="{ open: false, done: false, reason: '', sending: false }">
+                            <button @click="open = !open" title="Report this article"
+                                class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6H10.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/></svg>
+                                Report
+                            </button>
+                            <div x-show="open" x-cloak @click.outside="open = false"
+                                class="absolute z-20 right-0 mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl p-4">
+                                <template x-if="done">
+                                    <p class="text-sm text-green-600 text-center py-2">✓ Report submitted. Thank you.</p>
+                                </template>
+                                <template x-if="!done">
+                                    <div>
+                                        <p class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">Why are you reporting this?</p>
+                                        <select x-model="reason" class="w-full text-xs border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 mb-3 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                            <option value="">Select a reason…</option>
+                                            <option value="spam">Spam or misleading</option>
+                                            <option value="misinformation">Misinformation</option>
+                                            <option value="hate_speech">Hate speech / harassment</option>
+                                            <option value="violence">Violence / dangerous content</option>
+                                            <option value="copyright">Copyright violation</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                        <button :disabled="!reason || sending" @click="
+                                            sending = true;
+                                            fetch('/report', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content }, body: JSON.stringify({ type: 'post', id: {{ $post->id }}, reason }) })
+                                            .then(r => r.json()).then(() => { done = true; sending = false; }).catch(() => { sending = false; });
+                                        "
+                                        class="w-full text-xs bg-red-600 text-white rounded-lg py-1.5 font-semibold disabled:opacity-50 hover:bg-red-700 transition-colors">
+                                            Submit Report
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
                     </div>
                     @endauth
                 </div>
