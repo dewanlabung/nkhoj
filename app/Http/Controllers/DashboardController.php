@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Jobs\CreateNotification;
 use App\Models\Category;
+use App\Models\Comment;
 use App\Models\Post;
 use App\Models\Tag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
@@ -23,6 +25,48 @@ class DashboardController extends Controller
             'views'     => Post::where('author_id', auth()->id())->sum('view_count'),
         ];
         return view('dashboard.index', compact('posts', 'stats'));
+    }
+
+    public function analytics()
+    {
+        $userId = auth()->id();
+
+        $totalViews = Post::where('author_id', $userId)->sum('view_count');
+        $totalPosts = Post::where('author_id', $userId)->where('status', 'published')->count();
+
+        $topPosts = Post::where('author_id', $userId)
+            ->where('status', 'published')
+            ->orderByDesc('view_count')
+            ->limit(10)
+            ->get(['id', 'title', 'slug', 'view_count', 'published_at']);
+
+        // Views by month (last 6 months)
+        $viewsByMonth = Post::where('author_id', $userId)
+            ->where('status', 'published')
+            ->where('published_at', '>=', now()->subMonths(6))
+            ->select(
+                DB::raw('DATE_FORMAT(published_at, "%Y-%m") as month'),
+                DB::raw('SUM(view_count) as views'),
+                DB::raw('COUNT(*) as posts')
+            )
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        $commentCount = 0;
+        try {
+            $commentCount = Comment::whereIn('post_id',
+                Post::where('author_id', $userId)->pluck('id')
+            )->count();
+        } catch (\Throwable) {}
+
+        $scheduled = Post::where('author_id', $userId)->where('status', 'scheduled')->count();
+        $drafts    = Post::where('author_id', $userId)->where('status', 'draft')->count();
+
+        return view('dashboard.analytics', compact(
+            'totalViews', 'totalPosts', 'topPosts',
+            'viewsByMonth', 'commentCount', 'scheduled', 'drafts'
+        ));
     }
 
     public function create()

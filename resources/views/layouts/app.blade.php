@@ -112,10 +112,15 @@
         .ticker-track { display:flex; animation: ticker 28s linear infinite; width:max-content; }
         .ticker-track:hover { animation-play-state: paused; }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/nepali-date-converter@1.0.7/dist/nepali-date-converter.umd.js"></script>
     <script>
         (function() {
             if (localStorage.getItem('siteTheme') === 'dark') {
                 document.getElementById('html-root').classList.add('dark');
+            }
+            // Apply Nepali date toggle on load
+            if (localStorage.getItem('nepaliDate') === '1') {
+                document.documentElement.setAttribute('data-nd', '1');
             }
         })();
     </script>
@@ -128,6 +133,13 @@
             this.dark = !this.dark;
             localStorage.setItem('siteTheme', this.dark ? 'dark' : 'light');
             document.getElementById('html-root').classList.toggle('dark', this.dark);
+        },
+        nepaliDate: localStorage.getItem('nepaliDate') === '1',
+        toggleNepaliDate() {
+            this.nepaliDate = !this.nepaliDate;
+            localStorage.setItem('nepaliDate', this.nepaliDate ? '1' : '0');
+            document.documentElement.setAttribute('data-nd', this.nepaliDate ? '1' : '0');
+            window.applyNepaliDates && window.applyNepaliDates();
         },
         formatModal: false,
         mobileMenu: false,
@@ -696,6 +708,17 @@
                         </span>
                         <span class="font-semibold text-gray-900 dark:text-white text-sm leading-tight">Dashboard</span>
                     </a>
+                    {{-- Nepali Date --}}
+                    <button @click="toggleNepaliDate()"
+                        class="flex flex-col items-start gap-3 bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors text-left">
+                        <span class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:linear-gradient(135deg,#dc2626,#b91c1c)">
+                            <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </span>
+                        <div>
+                            <span class="font-semibold text-gray-900 dark:text-white text-sm leading-tight block" x-text="nepaliDate ? 'Show AD' : 'Show BS'"></span>
+                            <span class="text-xs text-gray-400">Nepali Date</span>
+                        </div>
+                    </button>
                     {{-- Support --}}
                     <a href="/support" @click="mobileMenu = false" class="flex flex-col items-start gap-3 bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
                         <span class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:linear-gradient(135deg,#14b8a6,#06b6d4)">
@@ -722,13 +745,25 @@
                 </div>
             </div>
 
-            {{-- Bottom: dark mode + logout --}}
+            {{-- Bottom: dark mode + nepali date + logout --}}
             <div class="mx-3 mb-4 mt-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden">
                 <button @click="toggleDark()"
                     class="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
                     <svg x-show="!dark" class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
                     <svg x-show="dark" class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0z"/></svg>
                     <span x-text="dark ? 'Light Mode' : 'Dark Mode'"></span>
+                </button>
+                <button @click="toggleNepaliDate()"
+                    class="w-full flex items-center justify-between px-4 py-3.5 text-sm font-semibold text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        Nepali Date (BS)
+                    </div>
+                    <span class="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out"
+                        :class="nepaliDate ? 'bg-red-600' : 'bg-gray-200 dark:bg-gray-600'">
+                        <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                            :class="nepaliDate ? 'translate-x-4' : 'translate-x-0'"></span>
+                    </span>
                 </button>
                 <form method="POST" action="/logout">
                     @csrf
@@ -960,6 +995,37 @@ $tabMe      = request()->is('profile*') || request()->is('dashboard*') || reques
 </nav>
 
 @stack('scripts')
+<script>
+// Nepali date conversion
+window.applyNepaliDates = function() {
+    const on = localStorage.getItem('nepaliDate') === '1';
+    document.querySelectorAll('[data-date]').forEach(el => {
+        const raw = el.getAttribute('data-date');
+        if (!raw) return;
+        if (on && window.NepaliDateConverter) {
+            try {
+                const d = new Date(raw);
+                const ad = [d.getFullYear(), d.getMonth() + 1, d.getDate()];
+                const bs = NepaliDateConverter.adToBs(ad[0], ad[1], ad[2]);
+                const months = ['बैशाख','जेठ','असार','साउन','भदौ','असोज','कार्तिक','मंसिर','पुष','माघ','फागुन','चैत'];
+                el.textContent = bs[2] + ' ' + (months[bs[1] - 1] ?? '') + ' ' + bs[0];
+            } catch(e) {}
+        } else {
+            const orig = el.getAttribute('data-date-orig');
+            if (orig) el.textContent = orig;
+        }
+    });
+};
+// Tag all date elements on load
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('[data-date]').forEach(el => {
+        if (!el.getAttribute('data-date-orig')) {
+            el.setAttribute('data-date-orig', el.textContent.trim());
+        }
+    });
+    if (localStorage.getItem('nepaliDate') === '1') window.applyNepaliDates();
+});
+</script>
 <script>
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
