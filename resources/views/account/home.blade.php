@@ -23,6 +23,53 @@
     </div>
 </div>
 
+{{-- Profile completion nudge --}}
+@php $completion = $user->completionScore(); @endphp
+@if($completion['percent'] < 100)
+<div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5 mb-5">
+    <div class="flex items-center justify-between mb-3">
+        <div>
+            <p class="text-sm font-bold text-gray-900 dark:text-white">Profile {{ $completion['percent'] }}% complete</p>
+            <p class="text-xs text-gray-400">{{ $completion['done'] }} of {{ $completion['total'] }} steps done</p>
+        </div>
+        <span class="text-2xl font-black {{ $completion['percent'] >= 80 ? 'text-green-500' : ($completion['percent'] >= 50 ? 'text-yellow-500' : 'text-red-400') }}">{{ $completion['percent'] }}%</span>
+    </div>
+    <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2 mb-4">
+        <div class="h-2 rounded-full transition-all duration-500 {{ $completion['percent'] >= 80 ? 'bg-green-500' : ($completion['percent'] >= 50 ? 'bg-yellow-400' : 'bg-brand-500') }}"
+             style="width: {{ $completion['percent'] }}%"></div>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        @foreach($completion['steps'] as $step)
+        <a href="{{ $step['done'] ? '#' : $step['url'] }}" class="flex items-center gap-2 text-xs {{ $step['done'] ? 'text-gray-400 line-through' : 'text-brand-600 dark:text-brand-400 font-medium hover:underline' }}">
+            @if($step['done'])
+            <svg class="w-3.5 h-3.5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            @else
+            <svg class="w-3.5 h-3.5 text-gray-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke-width="2"/></svg>
+            @endif
+            {{ $step['label'] }}
+        </a>
+        @endforeach
+    </div>
+</div>
+@endif
+
+{{-- Deletion warning banner --}}
+@if($user->isPendingDeletion())
+<div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-2xl p-5 mb-5 flex items-center justify-between gap-4">
+    <div>
+        <p class="text-sm font-bold text-red-700 dark:text-red-400">Account scheduled for deletion</p>
+        <p class="text-xs text-red-600 dark:text-red-300 mt-0.5">
+            Permanently deleted on {{ $user->deletion_requested_at->addDays(30)->format('M d, Y') }}.
+            Cancel any time before then.
+        </p>
+    </div>
+    <form method="POST" action="/account/data-privacy/cancel-deletion">
+        @csrf
+        <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg whitespace-nowrap">Cancel Deletion</button>
+    </form>
+</div>
+@endif
+
 {{-- Quick links grid --}}
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 

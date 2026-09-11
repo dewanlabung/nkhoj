@@ -39,6 +39,10 @@ class User extends Authenticatable
         'two_factor_secret',
         'two_factor_enabled',
         'two_factor_confirmed_at',
+        'deletion_requested_at',
+        'data_export_token',
+        'data_export_requested_at',
+        'data_export_ready_at',
     ];
 
     protected $hidden = ['password', 'remember_token', 'two_factor_secret'];
@@ -55,8 +59,11 @@ class User extends Authenticatable
             'extra_permissions'  => 'array',
             'password'           => 'hashed',
             'balance'                  => 'decimal:2',
-            'two_factor_enabled'       => 'boolean',
-            'two_factor_confirmed_at'  => 'datetime',
+            'two_factor_enabled'        => 'boolean',
+            'two_factor_confirmed_at'   => 'datetime',
+            'deletion_requested_at'     => 'datetime',
+            'data_export_requested_at'  => 'datetime',
+            'data_export_ready_at'      => 'datetime',
         ];
     }
 
@@ -175,6 +182,41 @@ class User extends Authenticatable
     public function recipeRatings()
     {
         return $this->hasMany(\App\Models\RecipeRating::class);
+    }
+
+    public function userSessions()
+    {
+        return $this->hasMany(\App\Models\UserSession::class)->orderByDesc('last_active_at');
+    }
+
+    public function deviceTokens()
+    {
+        return $this->hasMany(\App\Models\DeviceToken::class);
+    }
+
+    public function notificationPreferences()
+    {
+        return $this->hasMany(\App\Models\NotificationPreference::class);
+    }
+
+    public function isPendingDeletion(): bool
+    {
+        return $this->deletion_requested_at !== null;
+    }
+
+    public function completionScore(): array
+    {
+        $steps = [
+            'avatar'   => ['label' => 'Profile photo',        'done' => (bool) $this->avatar_url,          'url' => '/account/personal-info'],
+            'bio'      => ['label' => 'Bio',                   'done' => (bool) $this->bio,                 'url' => '/account/personal-info'],
+            'verified' => ['label' => 'Email verified',        'done' => (bool) $this->email_verified_at,   'url' => '/account/personal-info'],
+            'twofa'    => ['label' => 'Two-factor auth',       'done' => (bool) $this->two_factor_enabled,  'url' => '/account/security'],
+            'post'     => ['label' => 'Published first post',  'done' => $this->posts()->published()->exists(), 'url' => '/dashboard/new'],
+            'website'  => ['label' => 'Website / social link', 'done' => (bool) $this->website,             'url' => '/account/personal-info'],
+        ];
+        $done    = collect($steps)->where('done', true)->count();
+        $percent = (int) round($done / count($steps) * 100);
+        return ['percent' => $percent, 'steps' => $steps, 'done' => $done, 'total' => count($steps)];
     }
 
     public function loginHistories()
