@@ -366,6 +366,10 @@
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/></svg>
                 Cache System
             </a>
+            <a href="/admin/queue-settings" class="sl {{ request()->is('admin/queue-settings*') ? 'on' : '' }}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                Queue Settings
+            </a>
 
             <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-widest px-3 pt-4 pb-1.5">Settings</p>
             <a href="/admin/settings" class="sl {{ request()->is('admin/settings*') ? 'on' : '' }}">

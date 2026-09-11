@@ -247,6 +247,8 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     // Cache & Backup
     Route::get('/cache',                     [AdminController::class, 'cache']);
     Route::post('/cache/clear',              [AdminController::class, 'clearCache']);
+    Route::get('/queue-settings',            [AdminController::class, 'queueSettings']);
+    Route::post('/queue-settings',           [AdminController::class, 'updateQueueSettings']);
     Route::get('/backup',                    [AdminController::class, 'backup']);
 
     // Deploy

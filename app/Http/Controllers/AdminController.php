@@ -1102,6 +1102,30 @@ class AdminController extends Controller
         return view('admin.cache');
     }
 
+    public function queueSettings()
+    {
+        $this->requireAdmin();
+        $s = $this->getSettings();
+        return view('admin.queue-settings', ['s' => $s]);
+    }
+
+    public function updateQueueSettings(Request $request)
+    {
+        $this->requireAdmin();
+        $request->validate([
+            'queue_connection' => 'required|in:sync,database,redis,beanstalkd,sqs',
+        ]);
+
+        $s = $this->getSettings();
+        $s['queue']['connection'] = $request->input('queue_connection');
+        $this->saveSettings($s);
+
+        // Apply immediately for this request cycle
+        config(['queue.default' => $s['queue']['connection']]);
+
+        return back()->with('success', 'Queue driver set to "' . $s['queue']['connection'] . '". No restart needed.');
+    }
+
     public function clearCache(Request $request)
     {
         $this->requireAdmin();
