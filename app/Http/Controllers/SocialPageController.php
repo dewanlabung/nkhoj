@@ -281,7 +281,7 @@ class SocialPageController extends Controller
 
     // ─── Follow ────────────────────────────────────────────────────────────────
 
-    public function follow(string $slug)
+    public function follow(Request $request, string $slug)
     {
         $page = SocialPage::where('slug', $slug)->firstOrFail();
         $user = auth()->user();

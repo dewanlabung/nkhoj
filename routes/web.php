@@ -584,3 +584,4 @@ Route::get('/events/create',             [\App\Http\Controllers\EventController:
 Route::post('/events',                   [\App\Http\Controllers\EventController::class, 'store'])->middleware('auth');
 Route::get('/events/{slug}',             [\App\Http\Controllers\EventController::class, 'show']);
 Route::post('/events/{event}/attend',    [\App\Http\Controllers\EventController::class, 'attend'])->middleware('auth');
+Route::get('/events/{event}/attendees/export', [\App\Http\Controllers\EventController::class, 'exportAttendees'])->middleware('auth');

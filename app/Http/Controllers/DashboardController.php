@@ -10,11 +10,11 @@ use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Intervention\Image\ImageManager;
-use Intervention\Image\Drivers\Gd\Driver;
+use App\Traits\SavesOptimizedThumbnail;
 
 class DashboardController extends Controller
 {
+    use SavesOptimizedThumbnail;
     public function index()
     {
         $posts = Post::where('author_id', auth()->id())->latest()->paginate(20);
@@ -355,24 +355,4 @@ class DashboardController extends Controller
         $post->tags()->sync($tagIds);
     }
 
-    private function saveOptimizedThumbnail(\Illuminate\Http\UploadedFile $file): string
-    {
-        $filename  = time() . '_' . Str::random(8) . '.webp';
-        $destPath  = public_path('uploads/' . $filename);
-
-        try {
-            $manager = new ImageManager(new Driver());
-            $manager->read($file->getRealPath())
-                ->scaleDown(1200, 675)   // max 16:9 at 1200px wide
-                ->toWebp(80)
-                ->save($destPath);
-        } catch (\Throwable) {
-            // Fallback: plain move without optimization
-            $filename = time() . '_' . Str::slug($file->getClientOriginalName()) . '.' . $file->getClientOriginalExtension();
-            $destPath = public_path('uploads/' . $filename);
-            $file->move(public_path('uploads'), $filename);
-        }
-
-        return '/uploads/' . $filename;
-    }
 }
