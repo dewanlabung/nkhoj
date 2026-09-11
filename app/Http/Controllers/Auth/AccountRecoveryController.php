@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class AccountRecoveryController extends Controller
@@ -22,9 +23,11 @@ class AccountRecoveryController extends Controller
         $request->validate(['email' => 'required|email']);
 
         // Always show success to prevent email enumeration
-        $user = User::where('email', $request->email)
-                    ->orWhere('recovery_email', $request->email)
-                    ->first();
+        $query = User::where('email', $request->email);
+        if (Schema::hasColumn('users', 'recovery_email')) {
+            $query->orWhere('recovery_email', $request->email);
+        }
+        $user = $query->first();
 
         if ($user) {
             Mail::raw(
@@ -51,12 +54,13 @@ class AccountRecoveryController extends Controller
         $request->validate(['login' => 'required|string|max:200']);
 
         $login = $request->input('login');
-        $user  = User::where('email', $login)
-                     ->orWhere('username', $login)
-                     ->orWhere('recovery_email', $login)
-                     ->first();
+        $query = User::where('email', $login)->orWhere('username', $login);
+        if (Schema::hasColumn('users', 'recovery_email')) {
+            $query->orWhere('recovery_email', $login);
+        }
+        $user = $query->first();
 
-        if ($user) {
+        if ($user && Schema::hasColumn('users', 'recovery_token')) {
             $token = Str::random(64);
             $user->update([
                 'recovery_token'            => hash('sha256', $token),
@@ -92,6 +96,10 @@ class AccountRecoveryController extends Controller
             'email'    => 'required|email',
             'password' => 'required|string|min:8|confirmed',
         ]);
+
+        if (!Schema::hasColumn('users', 'recovery_token')) {
+            return back()->withErrors(['token' => 'This reset link is invalid or has expired.']);
+        }
 
         $user = User::where('email', $request->email)
                     ->whereNotNull('recovery_token')
