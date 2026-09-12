@@ -96,6 +96,31 @@ class SettingsController extends BaseAdminController
         return back()->with('success', 'Analytics settings saved.');
     }
 
+    public function authSettings()
+    {
+        $this->requireAdmin();
+        return view('admin.auth-settings', ['s' => $this->settings->get()]);
+    }
+
+    public function updateAuthSettings(Request $request)
+    {
+        $this->requireAdmin();
+        $s = $this->settings->get();
+        $s['auth']['disable_registration']      = $request->boolean('disable_registration');
+        $s['auth']['require_email_confirmation'] = $request->boolean('require_email_confirmation');
+        $s['auth']['social_login_require_account'] = $request->boolean('social_login_require_account');
+        $s['auth']['single_device_login']        = $request->boolean('single_device_login');
+        $s['auth']['domain_blacklist']            = $request->input('domain_blacklist', '');
+        $s['auth']['google_login_enabled']        = $request->boolean('google_login_enabled');
+        $s['auth']['google_client_id']            = $request->input('google_client_id', '');
+        $s['auth']['google_client_secret']        = $request->input('google_client_secret', '');
+        $s['auth']['facebook_login_enabled']      = $request->boolean('facebook_login_enabled');
+        $s['auth']['facebook_client_id']          = $request->input('facebook_client_id', '');
+        $s['auth']['facebook_client_secret']      = $request->input('facebook_client_secret', '');
+        $this->settings->save($s);
+        return back()->with('success', 'Authentication settings saved.');
+    }
+
     public function updateSettingsBehaviour(Request $request)
     {
         $this->requireAdmin();

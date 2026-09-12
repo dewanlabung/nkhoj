@@ -31,6 +31,23 @@ class AppServiceProvider extends ServiceProvider
         // Register Gmail API custom mailer
         Mail::extend('gmail-api', fn() => new GmailApiMailTransport());
 
+        // Apply social OAuth credentials from admin settings
+        $auth = $s['auth'] ?? [];
+        if (!empty($auth['google_client_id'])) {
+            config([
+                'services.google.client_id'     => $auth['google_client_id'],
+                'services.google.client_secret' => $auth['google_client_secret'] ?? config('services.google.client_secret'),
+                'services.google.redirect'       => url('/auth/google/callback'),
+            ]);
+        }
+        if (!empty($auth['facebook_client_id'])) {
+            config([
+                'services.facebook.client_id'     => $auth['facebook_client_id'],
+                'services.facebook.client_secret' => $auth['facebook_client_secret'] ?? config('services.facebook.client_secret'),
+                'services.facebook.redirect'       => url('/auth/facebook/callback'),
+            ]);
+        }
+
         // Apply mail settings so they survive config:cache rebuilds
         $service = $s['email']['service'] ?? 'smtp';
 

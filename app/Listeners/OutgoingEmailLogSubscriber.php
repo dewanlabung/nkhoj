@@ -12,8 +12,15 @@ class OutgoingEmailLogSubscriber
     {
         $msg = $event->message;
 
-        $to = collect($msg->getTo())->keys()->first() ?? '';
-        $from = collect($msg->getFrom())->keys()->first() ?? '';
+        // Guard: skip if already logged (prevents duplicate row on retry/double-fire)
+        if ($msg->getHeaders()->has('X-NK-LOG-ID')) {
+            return;
+        }
+
+        $toAddresses   = $msg->getTo();
+        $fromAddresses = $msg->getFrom();
+        $to   = !empty($toAddresses)   ? $toAddresses[0]->getAddress()   : '';
+        $from = !empty($fromAddresses) ? $fromAddresses[0]->getAddress() : '';
 
         $log = OutgoingEmailLog::create([
             'message_id' => $msg->generateMessageId(),
@@ -24,15 +31,19 @@ class OutgoingEmailLogSubscriber
             'status'     => 'not-sent',
         ]);
 
-        // Attach log ID to message headers so we can match on sent event
         $msg->getHeaders()->addTextHeader('X-NK-LOG-ID', $log->id);
     }
 
     public function handleSent(MessageSent $event): void
     {
-        $msg = $event->message;
+        $sentMsg  = $event->message;
+        $original = method_exists($sentMsg, 'getOriginalMessage')
+            ? $sentMsg->getOriginalMessage()
+            : $sentMsg;
 
-        $header = $msg->getHeaders()->get('X-NK-LOG-ID');
+        if (!method_exists($original, 'getHeaders')) return;
+
+        $header = $original->getHeaders()->get('X-NK-LOG-ID');
         if (!$header) return;
 
         $id = (int) $header->getBodyAsString();

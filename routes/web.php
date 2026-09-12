@@ -233,6 +233,8 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('/settings/social',                     [AdminSettings::class, 'updateSettingsSocial']);
     Route::post('/settings/analytics',                  [AdminSettings::class, 'updateSettingsAnalytics']);
     Route::post('/settings/behaviour',                  [AdminSettings::class, 'updateSettingsBehaviour']);
+    Route::get('/auth-settings',                        [AdminSettings::class, 'authSettings']);
+    Route::post('/auth-settings',                       [AdminSettings::class, 'updateAuthSettings']);
     Route::post('/settings/favicon',                    [AdminSettings::class, 'uploadFavicon']);
     Route::post('/settings/logo-dark',                  [AdminSettings::class, 'uploadLogoDark']);
     Route::post('/settings/logo-light',                 [AdminSettings::class, 'uploadLogoLight']);
