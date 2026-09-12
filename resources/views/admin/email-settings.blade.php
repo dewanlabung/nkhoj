@@ -127,7 +127,7 @@ $active = $em['template'] ?? 'pure-minimalist';
         <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
             <h2 class="font-bold text-gray-900 dark:text-white mb-5">Settings</h2>
 
-            <form method="POST" action="/admin/email-settings" class="space-y-4">
+            <form method="POST" action="/admin/email-settings/smtp" class="space-y-4">
                 @csrf
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">

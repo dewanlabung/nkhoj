@@ -253,6 +253,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     // Email Settings
     Route::get('/email-settings',            [AdminSettings::class, 'emailSettings']);
     Route::post('/email-settings',           [AdminSettings::class, 'updateEmailSettings']);
+    Route::post('/email-settings/smtp',      [AdminSettings::class, 'updateSmtpSettings']);
     Route::post('/email-settings/template',  [AdminSettings::class, 'updateEmailTemplate']);
     Route::post('/email-settings/test',      [AdminSettings::class, 'sendTestEmail']);
 
