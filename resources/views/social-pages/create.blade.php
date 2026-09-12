@@ -68,6 +68,37 @@
                     </div>
                 </label>
 
+                <label class="block cursor-pointer" :class="form.page_type === 'public_place' ? 'ring-2 ring-teal-500 rounded-2xl' : ''">
+                    <input type="radio" x-model="form.page_type" value="public_place" class="sr-only">
+                    <div class="border-2 rounded-2xl p-5 transition"
+                         :class="form.page_type === 'public_place' ? 'border-teal-500 bg-teal-50' : 'border-gray-200 hover:border-gray-300 bg-white'">
+                        <div class="flex items-start gap-4">
+                            <div class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
+                                 style="background: linear-gradient(135deg,#14b8a6,#0891b2)">
+                                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <p class="font-bold text-gray-900 text-base">Public Place</p>
+                                    <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0"
+                                         :class="form.page_type === 'public_place' ? 'border-teal-600 bg-teal-600' : 'border-gray-300'">
+                                        <div x-show="form.page_type === 'public_place'" class="w-2 h-2 bg-white rounded-full"></div>
+                                    </div>
+                                </div>
+                                <p class="text-gray-500 text-sm mt-1">For hospitals, banks, government offices, parks, temples, community centers, and other public venues.</p>
+                                <div class="mt-3 flex flex-wrap gap-2">
+                                    <span class="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-medium">🏥 Hospital & Clinic</span>
+                                    <span class="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-medium">🏦 Bank</span>
+                                    <span class="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-medium">🏛️ Government</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </label>
+
             </div>
             <p class="text-gray-400 text-xs text-center mt-4">You can change this setting later in Page Settings.</p>
         </div>
@@ -141,7 +172,7 @@
         <div x-show="step === 3" x-transition>
             <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Add categories</h2>
             <p class="text-gray-500 text-sm mb-1"
-               x-text="'Choose what best describes your business.'">
+               x-text="form.page_type === 'public_place' ? 'Choose what type of public place this is.' : 'Choose what best describes your business.'">
             </p>
             <p class="text-gray-400 text-xs mb-4">You can add up to 3.</p>
 
@@ -297,14 +328,22 @@ function pageCreate() {
             'Construction', 'Technology', 'Non-profit', 'Government', 'Automotive',
             'Beauty & Spa', 'Sports & Fitness', 'Photography', 'Event Planning',
         ],
+        publicPlaceCategories: [
+            'Hospital', 'Clinic & Health Center', 'Bank & ATM', 'Government Office',
+            'Police Station', 'Fire Station', 'School', 'College & University',
+            'Library', 'Park & Garden', 'Temple & Religious Site', 'Church',
+            'Mosque', 'Community Center', 'Shopping Mall', 'Market & Bazaar',
+            'Airport', 'Bus Station', 'Museum & Heritage Site', 'Sports Stadium',
+            'Cinema & Theater', 'Embassy', 'Post Office', 'Court',
+        ],
         filteredCategories: [],
 
         get currentPopularCategories() {
-            return this.businessCategories;
+            return this.form.page_type === 'public_place' ? this.publicPlaceCategories : this.businessCategories;
         },
 
         init() {
-            this.filteredCategories = [...this.businessCategories];
+            this.filteredCategories = this.form.page_type === 'public_place' ? [...this.publicPlaceCategories] : [...this.businessCategories];
         },
 
         get canProceed() {
@@ -323,7 +362,7 @@ function pageCreate() {
             if (this.canProceed && this.step < this.totalSteps) {
                 this.step++;
                 if (this.step === 3) {
-                    this.filteredCategories = [...this.businessCategories];
+                    this.filteredCategories = this.form.page_type === 'public_place' ? [...this.publicPlaceCategories] : [...this.businessCategories];
                 }
             }
         },
@@ -383,7 +422,7 @@ function pageCreate() {
         },
 
         filterCategories() {
-            const all = this.businessCategories;
+            const all = this.form.page_type === 'public_place' ? this.publicPlaceCategories : this.businessCategories;
             const q = this.catSearch.toLowerCase();
             this.filteredCategories = all.filter(c => c.toLowerCase().includes(q));
             if (this.catSearch && !all.find(c => c.toLowerCase() === q)) {
