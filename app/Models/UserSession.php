@@ -23,6 +23,23 @@ class UserSession extends Model
         return $this->belongsTo(User::class);
     }
 
+    public static function invalidateOtherSessions(int $userId, string $currentSessionId): void
+    {
+        $others = static::where('user_id', $userId)
+            ->where('session_id', '!=', $currentSessionId)
+            ->pluck('session_id');
+
+        foreach ($others as $sid) {
+            \Illuminate\Support\Facades\DB::table(config('session.table', 'sessions'))
+                ->where('id', $sid)
+                ->delete();
+        }
+
+        static::where('user_id', $userId)
+            ->where('session_id', '!=', $currentSessionId)
+            ->delete();
+    }
+
     public static function upsertForRequest(\Illuminate\Http\Request $request, int $userId): void
     {
         $sid = session()->getId();
