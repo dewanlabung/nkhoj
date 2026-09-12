@@ -86,15 +86,12 @@ class DashboardController extends BaseAdminController
     {
         $this->requireAdmin();
 
-        $chartLabels = [];
-        $chartViews  = [];
+        $dailyAnalytics = \App\Models\DailyAnalytic::getLast30Days();
+        $chartLabels = $dailyAnalytics['labels'];
+        $chartViews  = $dailyAnalytics['views'];
         $chartUsers  = [];
         for ($i = 29; $i >= 0; $i--) {
-            $date = now()->subDays($i);
-            $chartLabels[] = $date->format('d M');
-            $chartViews[]  = (int) Post::whereDate('published_at', $date->toDateString())
-                ->where('status', 'published')->sum('view_count');
-            $chartUsers[]  = User::whereDate('created_at', $date->toDateString())->count();
+            $chartUsers[] = User::whereDate('created_at', now()->subDays($i)->toDateString())->count();
         }
 
         $topPosts = Post::with(['author', 'category'])
