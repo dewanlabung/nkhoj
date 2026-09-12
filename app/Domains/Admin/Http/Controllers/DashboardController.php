@@ -86,10 +86,19 @@ class DashboardController extends BaseAdminController
     {
         $this->requireAdmin();
 
-        $dailyAnalytics = \App\Models\DailyAnalytic::getLast30Days();
-        $chartLabels = $dailyAnalytics['labels'];
-        $chartViews  = $dailyAnalytics['views'];
-        $chartUsers  = [];
+        try {
+            $dailyAnalytics = \App\Models\DailyAnalytic::getLast30Days();
+            $chartLabels    = $dailyAnalytics['labels'];
+            $chartViews     = $dailyAnalytics['views'];
+        } catch (\Throwable) {
+            $chartLabels = [];
+            $chartViews  = [];
+            for ($i = 29; $i >= 0; $i--) {
+                $chartLabels[] = now()->subDays($i)->format('d M');
+                $chartViews[]  = 0;
+            }
+        }
+        $chartUsers = [];
         for ($i = 29; $i >= 0; $i--) {
             $chartUsers[] = User::whereDate('created_at', now()->subDays($i)->toDateString())->count();
         }
