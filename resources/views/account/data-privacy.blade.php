@@ -7,7 +7,7 @@
     {{-- Data export --}}
     <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
         <h2 class="font-bold text-gray-900 dark:text-white mb-1">Export Your Data</h2>
-        <p class="text-sm text-gray-400 mb-5">Download a copy of everything you've created on Nkhoj — posts, comments, bookmarks, and account details — as a JSON file. The download link will be emailed to you.</p>
+        <p class="text-sm text-gray-400 mb-5">Download a copy of everything you've created on Nkhoj — posts, comments, bookmarks, and account details — as a JSON file. The download link will appear on this page (and emailed to you if mail is set up).</p>
 
         @if(session('success'))<div class="mb-4 px-4 py-3 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-xl text-sm">{{ session('success') }}</div>@endif
         @if(session('info'))<div class="mb-4 px-4 py-3 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-xl text-sm">{{ session('info') }}</div>@endif
