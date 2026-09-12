@@ -39,6 +39,7 @@ class User extends Authenticatable
         'two_factor_secret',
         'two_factor_enabled',
         'two_factor_confirmed_at',
+        'two_factor_recovery_codes',
         'deletion_requested_at',
         'data_export_token',
         'data_export_requested_at',
@@ -49,7 +50,7 @@ class User extends Authenticatable
         'recovery_token_expires_at',
     ];
 
-    protected $hidden = ['password', 'remember_token', 'two_factor_secret'];
+    protected $hidden = ['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'];
 
     protected function casts(): array
     {
@@ -63,8 +64,9 @@ class User extends Authenticatable
             'extra_permissions'  => 'array',
             'password'           => 'hashed',
             'balance'                  => 'decimal:2',
-            'two_factor_enabled'        => 'boolean',
-            'two_factor_confirmed_at'   => 'datetime',
+            'two_factor_enabled'          => 'boolean',
+            'two_factor_confirmed_at'    => 'datetime',
+            'two_factor_recovery_codes'  => 'array',
             'deletion_requested_at'        => 'datetime',
             'data_export_requested_at'     => 'datetime',
             'data_export_ready_at'         => 'datetime',
