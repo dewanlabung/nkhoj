@@ -74,7 +74,7 @@
     </div>
 
     {{-- ── FB-style profile section ────────────────────────── --}}
-    <div class="max-w-2xl mx-auto">
+    <div class="max-w-5xl mx-auto px-0 md:px-4">
 
         {{-- White card containing avatar + info + actions --}}
         <div class="bg-white dark:bg-gray-800 shadow-sm pb-3 mb-3">
@@ -96,14 +96,18 @@
             </div>
             <div class="flex-1 pb-1 min-w-0">
                 <div class="flex items-center gap-1.5 flex-wrap">
-                    <h1 class="text-xl font-bold text-gray-900 dark:text-white leading-tight">{{ $page->name }}</h1>
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white leading-tight">{{ $page->name }}</h1>
                     @if($page->is_verified)
-                        <svg class="w-5 h-5 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                        <svg class="w-6 h-6 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                     @endif
                 </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    @if($page->first_category)<span>{{ $page->first_category }}</span>@if($page->username) &middot; @endif@endif
+                    @if($page->username)<span class="text-gray-400">&#64;{{ $page->username }}</span>@endif
+                </p>
                 <p class="text-sm text-gray-600 dark:text-gray-300 mt-0.5">
                     <strong>{{ number_format($page->followers_count) }}</strong> followers
-                    @if($posts->total() ?? 0) &middot; <strong>{{ number_format($posts->total()) }}</strong> posts @endif
+                    @if(($posts->total() ?? 0) > 0) &middot; <strong>{{ number_format($posts->total()) }}</strong> posts @endif
                     @if($page->reviews_count > 0) &middot; ⭐ {{ number_format($page->rating_avg, 1) }} @endif
                 </p>
             </div>
@@ -295,27 +299,14 @@
         </div>
         @endif
 
-        {{-- Highlights --}}
-        @if($page->highlights && count($page->highlights))
-        <div class="flex gap-2 overflow-x-auto pb-1 mb-4 -mx-1 px-1">
-            @foreach($page->highlights as $hl)
-            <a href="{{ $hl['url'] ?? '#' }}" target="_blank"
-               class="flex-shrink-0 flex flex-col items-center gap-1 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-2.5 text-center hover:bg-gray-100 transition min-w-[80px]">
-                <span class="text-xl">{{ $hl['icon'] ?? '🔗' }}</span>
-                <span class="text-xs font-semibold text-gray-700 truncate max-w-[80px]">{{ $hl['title'] ?? '' }}</span>
-            </a>
-            @endforeach
-        </div>
-        @endif
-
         </div>{{-- /white card --}}
 
         {{-- Sticky tab bar --}}
-        <div class="sticky top-0 z-20 bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 flex gap-1 overflow-x-auto px-2">
-            @foreach(['posts'=>'Posts','photos'=>'Photos','qna'=>'Q&A','products'=>'Shop','events'=>'Events','reviews'=>'Reviews','about'=>'About'] as $tab => $label)
+        <div class="sticky top-0 z-20 bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 flex items-center overflow-x-auto px-2 md:px-4">
+            @foreach(['posts'=>'All','photos'=>'Photos','qna'=>'Q&A','events'=>'Events','reviews'=>'Reviews','about'=>'About'] as $tab => $label)
                 <button @click="activeTab = '{{ $tab }}'"
-                    class="pt-3 pb-3 px-3 text-sm font-semibold whitespace-nowrap transition"
-                    :class="activeTab === '{{ $tab }}' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'">
+                    class="pt-4 pb-4 px-3 md:px-4 text-[15px] font-semibold whitespace-nowrap transition-colors border-b-[3px]"
+                    :class="activeTab === '{{ $tab }}' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t'">
                     {{ $label }}
                     @if($tab === 'reviews' && $page->reviews_count > 0)
                         <span class="ml-1 text-xs bg-gray-100 px-1.5 py-0.5 rounded-full">{{ $page->reviews_count }}</span>
@@ -327,52 +318,151 @@
             @endforeach
         </div>
 
-        {{-- ========== Stories Carousel ========== --}}
-        @if(isset($activeStories) && $activeStories->count())
-        <div class="mt-3 bg-white dark:bg-gray-800 rounded-2xl px-4 py-3 overflow-x-auto mb-3">
-            <div class="flex gap-3">
-                @foreach($activeStories as $story)
-                <div class="flex-shrink-0 w-20 cursor-pointer" x-data="{ show: false }">
-                    <div @click="show = true"
-                        class="w-20 h-28 rounded-2xl overflow-hidden relative border-2 border-blue-500"
-                        style="{{ $story->image_url ? '' : 'background:'.($story->bg_color ?? '#1877f2') }}">
-                        @if($story->image_url)
-                        <img src="{{ $story->image_url }}" class="w-full h-full object-cover">
+        {{-- ========== TAB: Posts ========== --}}
+        <div x-show="activeTab === 'posts'" class="mt-3 md:flex md:gap-4 md:items-start">
+
+            {{-- ── LEFT SIDEBAR (desktop only) ── --}}
+            <div class="hidden md:block w-[360px] flex-shrink-0 space-y-4">
+
+                {{-- Details card --}}
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4">
+                    <h3 class="font-bold text-gray-900 dark:text-white mb-3">Details</h3>
+                    <div class="space-y-3 text-sm text-gray-700 dark:text-gray-300">
+                        @if($page->bio)
+                        <p class="leading-relaxed">{{ $page->bio }}</p>
                         @endif
-                        @if($story->caption)
-                        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent px-1 pb-1">
-                            <p class="text-white text-[9px] font-medium truncate">{{ $story->caption }}</p>
+                        @if($page->first_category || $isOpen !== null)
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            <span>{{ $page->first_category ?: ($page->page_type === 'business' ? 'Business' : 'Organization') }}</span>
+                            @if($isOpen === true)
+                                <span class="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-semibold">Always open</span>
+                            @elseif($isOpen === false)
+                                <span class="text-xs px-2 py-0.5 bg-red-100 text-red-600 rounded-full font-semibold">Closed now</span>
+                            @endif
+                        </div>
+                        @endif
+                        @if($page->reviews_count > 0)
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+                            <span>{{ number_format($page->rating_avg, 0) }}% recommend ({{ number_format($page->reviews_count) }} reviews)</span>
+                        </div>
+                        @endif
+                        @if($page->location)
+                        <div class="flex items-start gap-2">
+                            <svg class="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+                            <span>{{ $page->location }}</span>
+                        </div>
+                        @endif
+                        @if($page->website)
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+                            <a href="{{ $page->website }}" target="_blank" class="text-blue-600 hover:underline truncate">{{ $page->website }}</a>
+                        </div>
+                        @endif
+                        @if($page->email)
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            <span>{{ $page->email }}</span>
+                        </div>
+                        @endif
+                        @if($page->phone)
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                            <span>{{ $page->phone }}</span>
+                        </div>
+                        @endif
+                        @if($page->username)
+                        <div class="flex items-center gap-2 text-gray-400">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            <span>&#64;{{ $page->username }}</span>
                         </div>
                         @endif
                     </div>
-                    {{-- Story viewer modal --}}
-                    <div x-show="show" x-cloak @click="show = false"
-                        class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-                        <div class="max-w-sm w-full" @click.stop>
-                            <div class="rounded-2xl overflow-hidden relative aspect-[9/16]"
-                                style="{{ $story->image_url ? '' : 'background:'.($story->bg_color ?? '#1877f2') }}">
-                                @if($story->image_url)
-                                <img src="{{ $story->image_url }}" class="w-full h-full object-cover">
-                                @endif
-                                @if($story->caption)
-                                <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                                    <p class="text-white text-base font-medium">{{ $story->caption }}</p>
+                    <button @click="activeTab = 'about'" class="mt-4 w-full py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-semibold rounded-xl transition">
+                        See all details
+                    </button>
+                </div>
+
+                {{-- Photos card --}}
+                @if($photos->count())
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-bold text-gray-900 dark:text-white">Photos</h3>
+                        <button @click="activeTab = 'photos'" class="text-sm font-semibold text-blue-600 hover:underline">See all photos</button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-1 rounded-xl overflow-hidden">
+                        @foreach($photos->take(9) as $photo)
+                        <a href="{{ $photo->image_url }}" target="_blank" class="aspect-square overflow-hidden bg-gray-100 block">
+                            <img src="{{ $photo->image_url }}" class="w-full h-full object-cover hover:opacity-90 transition" alt="">
+                        </a>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
+                {{-- Highlights --}}
+                @if($page->highlights && count($page->highlights))
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4">
+                    <h3 class="font-bold text-gray-900 dark:text-white mb-3">Highlights</h3>
+                    <div class="flex flex-wrap gap-2">
+                        @foreach($page->highlights as $hl)
+                        <a href="{{ $hl['url'] ?? '#' }}" target="_blank"
+                           class="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm hover:bg-gray-100 dark:hover:bg-gray-600 transition">
+                            <span>{{ $hl['icon'] ?? '🔗' }}</span>
+                            <span class="font-medium text-gray-700 dark:text-gray-300">{{ $hl['title'] ?? '' }}</span>
+                        </a>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
+            </div>{{-- /left sidebar --}}
+
+            {{-- ── RIGHT COLUMN: Posts feed ── --}}
+            <div class="flex-1 min-w-0">
+
+            {{-- Stories carousel --}}
+            @if(isset($activeStories) && $activeStories->count())
+            <div class="bg-white dark:bg-gray-800 rounded-2xl px-4 py-3 overflow-x-auto mb-3">
+                <div class="flex gap-3">
+                    @foreach($activeStories as $story)
+                    <div class="flex-shrink-0 w-20 cursor-pointer" x-data="{ show: false }">
+                        <div @click="show = true"
+                            class="w-20 h-28 rounded-2xl overflow-hidden relative border-2 border-blue-500"
+                            style="{{ $story->image_url ? '' : 'background:'.($story->bg_color ?? '#1877f2') }}">
+                            @if($story->image_url)<img src="{{ $story->image_url }}" class="w-full h-full object-cover">@endif
+                            @if($story->caption)
+                            <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent px-1 pb-1">
+                                <p class="text-white text-[9px] font-medium truncate">{{ $story->caption }}</p>
+                            </div>
+                            @endif
+                        </div>
+                        <div x-show="show" x-cloak @click="show = false" class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+                            <div class="max-w-sm w-full" @click.stop>
+                                <div class="rounded-2xl overflow-hidden relative aspect-[9/16]" style="{{ $story->image_url ? '' : 'background:'.($story->bg_color ?? '#1877f2') }}">
+                                    @if($story->image_url)<img src="{{ $story->image_url }}" class="w-full h-full object-cover">@endif
+                                    @if($story->caption)<div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-4"><p class="text-white text-base font-medium">{{ $story->caption }}</p></div>@endif
+                                    <button @click="show = false" class="absolute top-3 right-3 w-8 h-8 bg-black/40 rounded-full flex items-center justify-center text-white"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
                                 </div>
-                                @endif
-                                <button @click="show = false" class="absolute top-3 right-3 w-8 h-8 bg-black/40 rounded-full flex items-center justify-center text-white">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                </button>
                             </div>
                         </div>
                     </div>
+                    @endforeach
                 </div>
-                @endforeach
             </div>
-        </div>
-        @endif
+            @endif
+            {{-- Posts header --}}
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm px-4 py-3 mb-3 flex items-center justify-between">
+                <h2 class="font-bold text-gray-900 dark:text-white text-lg">Posts</h2>
+                <div class="relative" x-data="{ fOpen: false }" @click.outside="fOpen = false">
+                    <button @click="fOpen = !fOpen" class="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300 transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707l-6.414 6.414A1 1 0 0014 13.828V19a1 1 0 01-.553.894l-4 2A1 1 0 018 21v-7.172a1 1 0 00-.293-.707L1.293 6.707A1 1 0 011 6V4z"/></svg>
+                        Filters
+                    </button>
+                </div>
+            </div>
 
-        {{-- ========== TAB: Posts ========== --}}
-        <div x-show="activeTab === 'posts'" class="mt-3">
             {{-- Create post form (managers only) --}}
             @if($isManager)
             {{-- ── FB-Lite style composer trigger bar ──────────────────── --}}
@@ -788,6 +878,7 @@
                     <p class="text-gray-500 font-medium">No posts yet</p>
                 </div>
             @endif
+            </div>{{-- /right column --}}
         </div>
 
         {{-- ========== TAB: Events ========== --}}
