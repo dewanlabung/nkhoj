@@ -8,7 +8,7 @@
 @endpush
 
 @section('content')
-<div class="bg-white min-h-screen" x-data="{ activeTab: 'posts' }">
+<div class="bg-gray-100 dark:bg-gray-900 min-h-screen" x-data="{ activeTab: 'posts' }">
 
     {{-- SEO & Open Graph --}}
     @section('og')
@@ -57,7 +57,7 @@
     @endsection
 
     {{-- Cover photo --}}
-    <div class="relative h-32 md:h-48 bg-gray-300 overflow-hidden">
+    <div class="relative h-52 md:h-72 bg-gray-300 overflow-hidden">
         @if($page->cover_url)
             <img src="{{ $page->cover_url }}" alt="Cover" class="w-full h-full object-cover">
         @else
@@ -73,13 +73,16 @@
         @endif
     </div>
 
-    {{-- ── FB Lite–style profile section ────────────────────────── --}}
+    {{-- ── FB-style profile section ────────────────────────── --}}
     <div class="max-w-2xl mx-auto">
 
+        {{-- White card containing avatar + info + actions --}}
+        <div class="bg-white dark:bg-gray-800 shadow-sm pb-3 mb-3">
+
         {{-- Avatar + name row --}}
-        <div class="flex items-end gap-4 px-4 -mt-10 mb-3">
+        <div class="flex items-end gap-4 px-4 -mt-16 mb-3">
             <div class="relative flex-shrink-0">
-                <div class="w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-gray-200 shadow-md">
+                <div class="w-32 h-32 rounded-full border-4 border-white dark:border-gray-800 overflow-hidden bg-gray-200 shadow-md">
                     <img src="{{ $page->avatar }}" alt="{{ $page->name }}" class="w-full h-full object-cover">
                 </div>
                 @if($page->last_post_at && $page->last_post_at->gt(now()->subDays(7)))
@@ -93,12 +96,12 @@
             </div>
             <div class="flex-1 pb-1 min-w-0">
                 <div class="flex items-center gap-1.5 flex-wrap">
-                    <h1 class="text-xl font-bold text-gray-900 leading-tight">{{ $page->name }}</h1>
+                    <h1 class="text-xl font-bold text-gray-900 dark:text-white leading-tight">{{ $page->name }}</h1>
                     @if($page->is_verified)
                         <svg class="w-5 h-5 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                     @endif
                 </div>
-                <p class="text-sm text-gray-600 mt-0.5">
+                <p class="text-sm text-gray-600 dark:text-gray-300 mt-0.5">
                     <strong>{{ number_format($page->followers_count) }}</strong> followers
                     @if($posts->total() ?? 0) &middot; <strong>{{ number_format($posts->total()) }}</strong> posts @endif
                     @if($page->reviews_count > 0) &middot; ⭐ {{ number_format($page->rating_avg, 1) }} @endif
@@ -131,8 +134,8 @@
             @endif
         </div>
 
-        {{-- Action buttons: two full-width columns --}}
-        <div class="px-4 mb-1">
+        {{-- Action buttons --}}
+        <div class="px-4 mb-3">
             <div class="flex gap-2">
                 @if($isOwner)
                     <a href="/pages/{{ $page->slug }}/dashboard"
@@ -305,16 +308,14 @@
         </div>
         @endif
 
-        @if($page->bio)
-            <p class="text-gray-700 text-sm mb-4">{{ $page->bio }}</p>
-        @endif
+        </div>{{-- /white card --}}
 
-        {{-- Tabs --}}
-        <div class="border-b border-gray-200 flex gap-1 mb-6 overflow-x-auto">
+        {{-- Sticky tab bar --}}
+        <div class="sticky top-0 z-20 bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 flex gap-1 overflow-x-auto px-2">
             @foreach(['posts'=>'Posts','photos'=>'Photos','qna'=>'Q&A','products'=>'Shop','events'=>'Events','reviews'=>'Reviews','about'=>'About'] as $tab => $label)
                 <button @click="activeTab = '{{ $tab }}'"
-                    class="pb-3 px-3 text-sm font-semibold whitespace-nowrap transition"
-                    :class="activeTab === '{{ $tab }}' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'">
+                    class="pt-3 pb-3 px-3 text-sm font-semibold whitespace-nowrap transition"
+                    :class="activeTab === '{{ $tab }}' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'">
                     {{ $label }}
                     @if($tab === 'reviews' && $page->reviews_count > 0)
                         <span class="ml-1 text-xs bg-gray-100 px-1.5 py-0.5 rounded-full">{{ $page->reviews_count }}</span>
@@ -328,7 +329,7 @@
 
         {{-- ========== Stories Carousel ========== --}}
         @if(isset($activeStories) && $activeStories->count())
-        <div class="px-4 py-3 overflow-x-auto">
+        <div class="mt-3 bg-white dark:bg-gray-800 rounded-2xl px-4 py-3 overflow-x-auto mb-3">
             <div class="flex gap-3">
                 @foreach($activeStories as $story)
                 <div class="flex-shrink-0 w-20 cursor-pointer" x-data="{ show: false }">
@@ -371,7 +372,7 @@
         @endif
 
         {{-- ========== TAB: Posts ========== --}}
-        <div x-show="activeTab === 'posts'">
+        <div x-show="activeTab === 'posts'" class="mt-3">
             {{-- Create post form (managers only) --}}
             @if($isManager)
             {{-- ── FB-Lite style composer trigger bar ──────────────────── --}}
@@ -527,7 +528,7 @@
             @endif
 
             @if($posts->count())
-                <div class="space-y-0">
+                <div class="space-y-3">
                     @foreach($posts as $post)
                     @php
                         $myReaction = auth()->check() ? $post->reactionBy(auth()->user()) : null;
@@ -535,7 +536,7 @@
                         $reactionEmojis = ['like'=>'👍','love'=>'❤️','haha'=>'😂','wow'=>'😮','sad'=>'😢','angry'=>'😡'];
                         $isManager = $isOwner || in_array($userRole, ['admin','editor','moderator']);
                     @endphp
-                    <div class="bg-white border-b border-gray-100 py-4" x-data="{ showComments: false, commentLoaded: false, comments: [], commentBody: '' }">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl mb-3 py-4 shadow-sm" x-data="{ showComments: false, commentLoaded: false, comments: [], commentBody: '' }">
                         {{-- Post header --}}
                         <div class="flex items-center gap-2.5 px-4 mb-3">
                             <img src="{{ $page->avatar }}" class="w-10 h-10 rounded-full object-cover flex-shrink-0">
@@ -790,7 +791,7 @@
         </div>
 
         {{-- ========== TAB: Events ========== --}}
-        <div x-show="activeTab === 'events'">
+        <div x-show="activeTab === 'events'" class="mt-3">
             @if($events->count())
                 <div class="space-y-4">
                     @foreach($events as $ev)
@@ -819,7 +820,7 @@
         </div>
 
         {{-- ========== TAB: Reviews ========== --}}
-        <div x-show="activeTab === 'reviews'">
+        <div x-show="activeTab === 'reviews'" class="mt-3">
             {{-- Write a review --}}
             @auth
             @if(!$isOwner)
@@ -905,7 +906,7 @@
         </div>
 
         {{-- ========== TAB: About ========== --}}
-        <div x-show="activeTab === 'about'">
+        <div x-show="activeTab === 'about'" class="mt-3">
             <div class="space-y-5">
                 {{-- Manager: Announcement editor --}}
                 @if($isManager)
@@ -1140,7 +1141,7 @@
         </div>
 
         {{-- ========== TAB: Photos ========== --}}
-        <div x-show="activeTab === 'photos'">
+        <div x-show="activeTab === 'photos'" class="mt-3">
             @if($photos->count())
                 <div class="grid grid-cols-3 gap-1">
                     @foreach($photos as $photo)
@@ -1161,7 +1162,7 @@
         </div>
 
         {{-- ========== TAB: Q&A ========== --}}
-        <div x-show="activeTab === 'qna'">
+        <div x-show="activeTab === 'qna'" class="mt-3">
             {{-- Submit question --}}
             @auth
             @if(!$isManager)
