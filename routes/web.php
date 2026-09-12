@@ -12,7 +12,14 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\AdminController;
+use App\Domains\Admin\Http\Controllers\DashboardController as AdminDashboard;
+use App\Domains\Admin\Http\Controllers\UserController as AdminUser;
+use App\Domains\Admin\Http\Controllers\ContentController as AdminContent;
+use App\Domains\Admin\Http\Controllers\SettingsController as AdminSettings;
+use App\Domains\Admin\Http\Controllers\MembershipAdminController as AdminMembership;
+use App\Domains\Admin\Http\Controllers\SupportController as AdminSupport;
+use App\Domains\Admin\Http\Controllers\AiController as AdminAi;
+use App\Domains\Admin\Http\Controllers\SocialPageAdminController as AdminSocialPage;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\SitemapController;
@@ -115,160 +122,160 @@ Route::post('/two-factor-challenge', [\App\Http\Controllers\TwoFactorController:
 // Admin panel
 Route::middleware('auth')->prefix('admin')->group(function () {
     // Dashboard
-    Route::get('/', [AdminController::class, 'index']);
-    Route::get('/analytics', [AdminController::class, 'analytics']);
-    Route::get('/search-analytics', [AdminController::class, 'searchAnalytics']);
+    Route::get('/', [AdminDashboard::class, 'index']);
+    Route::get('/analytics', [AdminDashboard::class, 'analytics']);
+    Route::get('/search-analytics', [AdminDashboard::class, 'searchAnalytics']);
 
     // Users
-    Route::get('/users',                          [AdminController::class, 'users']);
-    Route::get('/users/create',                   [AdminController::class, 'createUser']);
-    Route::post('/users',                         [AdminController::class, 'storeUser']);
-    Route::get('/users/stop-impersonating',       [AdminController::class, 'stopImpersonating']);
-    Route::get('/users/{id}',                     [AdminController::class, 'showUser']);
-    Route::get('/users/{id}/edit',                [AdminController::class, 'editUser']);
-    Route::put('/users/{id}',                     [AdminController::class, 'updateUser']);
-    Route::delete('/users/{id}',                  [AdminController::class, 'deleteUser']);
-    Route::post('/users/{id}/role',               [AdminController::class, 'updateUserRole']);
-    Route::post('/users/{id}/ban',                [AdminController::class, 'banUser']);
-    Route::post('/users/{id}/verify-email',       [AdminController::class, 'verifyEmail']);
-    Route::post('/users/{id}/reward-system',      [AdminController::class, 'toggleRewardSystem']);
-    Route::post('/users/{id}/impersonate',        [AdminController::class, 'impersonate']);
-    Route::get('/users/{id}/permissions',         [AdminController::class, 'userPermissions']);
-    Route::put('/users/{id}/permissions',         [AdminController::class, 'updateUserPermissions']);
+    Route::get('/users',                          [AdminUser::class, 'users']);
+    Route::get('/users/create',                   [AdminUser::class, 'createUser']);
+    Route::post('/users',                         [AdminUser::class, 'storeUser']);
+    Route::get('/users/stop-impersonating',       [AdminUser::class, 'stopImpersonating']);
+    Route::get('/users/{id}',                     [AdminUser::class, 'showUser']);
+    Route::get('/users/{id}/edit',                [AdminUser::class, 'editUser']);
+    Route::put('/users/{id}',                     [AdminUser::class, 'updateUser']);
+    Route::delete('/users/{id}',                  [AdminUser::class, 'deleteUser']);
+    Route::post('/users/{id}/role',               [AdminUser::class, 'updateUserRole']);
+    Route::post('/users/{id}/ban',                [AdminUser::class, 'banUser']);
+    Route::post('/users/{id}/verify-email',       [AdminUser::class, 'verifyEmail']);
+    Route::post('/users/{id}/reward-system',      [AdminUser::class, 'toggleRewardSystem']);
+    Route::post('/users/{id}/impersonate',        [AdminUser::class, 'impersonate']);
+    Route::get('/users/{id}/permissions',         [AdminUser::class, 'userPermissions']);
+    Route::put('/users/{id}/permissions',         [AdminUser::class, 'updateUserPermissions']);
 
     // Content
-    Route::get('/categories',                [AdminController::class, 'categories']);
-    Route::post('/categories',               [AdminController::class, 'storeCategory']);
-    Route::post('/categories/reorder',       [AdminController::class, 'reorderCategories']);
-    Route::put('/categories/{id}',           [AdminController::class, 'updateCategory']);
-    Route::delete('/categories/{id}',        [AdminController::class, 'deleteCategory']);
+    Route::get('/categories',                [AdminContent::class, 'categories']);
+    Route::post('/categories',               [AdminContent::class, 'storeCategory']);
+    Route::post('/categories/reorder',       [AdminContent::class, 'reorderCategories']);
+    Route::put('/categories/{id}',           [AdminContent::class, 'updateCategory']);
+    Route::delete('/categories/{id}',        [AdminContent::class, 'deleteCategory']);
 
     // Posts
-    Route::get('/posts',                     [AdminController::class, 'posts']);
-    Route::post('/posts/{id}/status',        [AdminController::class, 'updatePostStatus']);
-    Route::post('/posts/{id}/toggle-pro',    [AdminController::class, 'togglePostPro']);
-    Route::delete('/posts/{id}',             [AdminController::class, 'deletePost']);
-    Route::post('/posts/bulk',               [AdminController::class, 'bulkPostAction']);
+    Route::get('/posts',                     [AdminContent::class, 'posts']);
+    Route::post('/posts/{id}/status',        [AdminContent::class, 'updatePostStatus']);
+    Route::post('/posts/{id}/toggle-pro',    [AdminContent::class, 'togglePostPro']);
+    Route::delete('/posts/{id}',             [AdminContent::class, 'deletePost']);
+    Route::post('/posts/bulk',               [AdminContent::class, 'bulkPostAction']);
 
     // Comments
-    Route::get('/comments',                  [AdminController::class, 'comments']);
-    Route::post('/comments/{id}/approve',    [AdminController::class, 'approveComment']);
-    Route::delete('/comments/{id}',          [AdminController::class, 'deleteComment']);
+    Route::get('/comments',                  [AdminContent::class, 'comments']);
+    Route::post('/comments/{id}/approve',    [AdminContent::class, 'approveComment']);
+    Route::delete('/comments/{id}',          [AdminContent::class, 'deleteComment']);
 
     // Content Reports
     Route::get('/reports',         [\App\Http\Controllers\ContentReportController::class, 'adminIndex']);
     Route::patch('/reports/{id}',  [\App\Http\Controllers\ContentReportController::class, 'adminAction']);
 
     // Tags
-    Route::get('/tags',                      [AdminController::class, 'tags']);
-    Route::post('/tags',                     [AdminController::class, 'storeTag']);
-    Route::patch('/tags/{id}',               [AdminController::class, 'updateTag']);
-    Route::delete('/tags/{id}',              [AdminController::class, 'deleteTag']);
+    Route::get('/tags',                      [AdminContent::class, 'tags']);
+    Route::post('/tags',                     [AdminContent::class, 'storeTag']);
+    Route::patch('/tags/{id}',               [AdminContent::class, 'updateTag']);
+    Route::delete('/tags/{id}',              [AdminContent::class, 'deleteTag']);
 
     // Questions
-    Route::get('/questions',                       [AdminController::class, 'questions']);
-    Route::post('/questions/{id}/status',          [AdminController::class, 'updateQuestionStatus']);
-    Route::delete('/questions/{id}',               [AdminController::class, 'deleteQuestion']);
-    Route::delete('/answers/{id}',                 [AdminController::class, 'deleteAnswer']);
+    Route::get('/questions',                       [AdminContent::class, 'questions']);
+    Route::post('/questions/{id}/status',          [AdminContent::class, 'updateQuestionStatus']);
+    Route::delete('/questions/{id}',               [AdminContent::class, 'deleteQuestion']);
+    Route::delete('/answers/{id}',                 [AdminContent::class, 'deleteAnswer']);
 
     // Polls
-    Route::get('/polls',                     [AdminController::class, 'polls']);
-    Route::post('/polls',                    [AdminController::class, 'storePoll']);
-    Route::delete('/polls/{id}',             [AdminController::class, 'deletePoll']);
+    Route::get('/polls',                     [AdminContent::class, 'polls']);
+    Route::post('/polls',                    [AdminContent::class, 'storePoll']);
+    Route::delete('/polls/{id}',             [AdminContent::class, 'deletePoll']);
 
     // Ads
-    Route::get('/ads',                       [AdminController::class, 'ads']);
-    Route::post('/ads',                      [AdminController::class, 'storeAd']);
-    Route::put('/ads/{id}',                  [AdminController::class, 'updateAd']);
-    Route::delete('/ads/{id}',               [AdminController::class, 'deleteAd']);
+    Route::get('/ads',                       [AdminContent::class, 'ads']);
+    Route::post('/ads',                      [AdminContent::class, 'storeAd']);
+    Route::put('/ads/{id}',                  [AdminContent::class, 'updateAd']);
+    Route::delete('/ads/{id}',               [AdminContent::class, 'deleteAd']);
 
     // Widgets
-    Route::get('/widgets',                   [AdminController::class, 'widgets']);
-    Route::post('/widgets',                  [AdminController::class, 'storeWidget']);
-    Route::get('/widgets/{id}/edit',         [AdminController::class, 'editWidget']);
-    Route::put('/widgets/{id}',              [AdminController::class, 'updateWidget']);
-    Route::delete('/widgets/{id}',           [AdminController::class, 'deleteWidget']);
+    Route::get('/widgets',                   [AdminSettings::class, 'widgets']);
+    Route::post('/widgets',                  [AdminSettings::class, 'storeWidget']);
+    Route::get('/widgets/{id}/edit',         [AdminSettings::class, 'editWidget']);
+    Route::put('/widgets/{id}',              [AdminSettings::class, 'updateWidget']);
+    Route::delete('/widgets/{id}',           [AdminSettings::class, 'deleteWidget']);
 
     // Media
-    Route::get('/media',                     [AdminController::class, 'media']);
-    Route::post('/media/upload',             [AdminController::class, 'uploadMedia']);
-    Route::delete('/media/{filename}',       [AdminController::class, 'deleteMedia'])->where('filename', '.*');
+    Route::get('/media',                     [AdminContent::class, 'media']);
+    Route::post('/media/upload',             [AdminContent::class, 'uploadMedia']);
+    Route::delete('/media/{filename}',       [AdminContent::class, 'deleteMedia'])->where('filename', '.*');
 
     // Contact messages
-    Route::get('/contacts',                  [AdminController::class, 'contacts']);
-    Route::post('/contacts/{id}/read',       [AdminController::class, 'markContactRead']);
-    Route::delete('/contacts/{id}',          [AdminController::class, 'deleteContact']);
+    Route::get('/contacts',                  [AdminContent::class, 'contacts']);
+    Route::post('/contacts/{id}/read',       [AdminContent::class, 'markContactRead']);
+    Route::delete('/contacts/{id}',          [AdminContent::class, 'deleteContact']);
 
     // Newsletter
-    Route::get('/newsletter',                [AdminController::class, 'newsletter']);
-    Route::post('/newsletter/send',          [AdminController::class, 'sendNewsletter']);
-    Route::get('/newsletter/export',         [AdminController::class, 'exportSubscribers']);
-    Route::delete('/newsletter/{id}',        [AdminController::class, 'deleteSubscriber']);
+    Route::get('/newsletter',                [AdminContent::class, 'newsletter']);
+    Route::post('/newsletter/send',          [AdminContent::class, 'sendNewsletter']);
+    Route::get('/newsletter/export',         [AdminContent::class, 'exportSubscribers']);
+    Route::delete('/newsletter/{id}',        [AdminContent::class, 'deleteSubscriber']);
 
     // Content Settings
-    Route::get('/content-settings',          [AdminController::class, 'contentSettings']);
-    Route::post('/content-settings',         [AdminController::class, 'updateContentSettings']);
-    Route::post('/content-settings/ai',      [AdminController::class, 'updateAiSettings']);
-    Route::post('/content-settings/auto-delete', [AdminController::class, 'updateAutoDelete']);
+    Route::get('/content-settings',          [AdminSettings::class, 'contentSettings']);
+    Route::post('/content-settings',         [AdminSettings::class, 'updateContentSettings']);
+    Route::post('/content-settings/ai',      [AdminSettings::class, 'updateAiSettings']);
+    Route::post('/content-settings/auto-delete', [AdminSettings::class, 'updateAutoDelete']);
 
     // Settings hub overview
-    Route::get('/settings-hub',                         [AdminController::class, 'settingsHub']);
+    Route::get('/settings-hub',                         [AdminSettings::class, 'settingsHub']);
     // Settings — main + granular sub-routes
-    Route::get('/settings',                             [AdminController::class, 'settings']);
-    Route::post('/settings',                            [AdminController::class, 'updateSettings']);
-    Route::post('/settings/url',                        [AdminController::class, 'updateSettingsUrl']);
-    Route::post('/settings/name',                       [AdminController::class, 'updateSettingsName']);
-    Route::post('/settings/tagline',                    [AdminController::class, 'updateSettingsTagline']);
-    Route::post('/settings/contact',                    [AdminController::class, 'updateSettingsContact']);
-    Route::post('/settings/social',                     [AdminController::class, 'updateSettingsSocial']);
-    Route::post('/settings/analytics',                  [AdminController::class, 'updateSettingsAnalytics']);
-    Route::post('/settings/behaviour',                  [AdminController::class, 'updateSettingsBehaviour']);
-    Route::post('/settings/favicon',                    [AdminController::class, 'uploadFavicon']);
-    Route::post('/settings/logo-dark',                  [AdminController::class, 'uploadLogoDark']);
-    Route::post('/settings/logo-light',                 [AdminController::class, 'uploadLogoLight']);
-    Route::post('/settings/logo-compact-dark',          [AdminController::class, 'uploadLogoCompactDark']);
-    Route::post('/settings/logo-compact-light',         [AdminController::class, 'uploadLogoCompactLight']);
-    Route::get('/settings/{asset}/remove',              [AdminController::class, 'removeBrandAsset'])->where('asset', '[a-z\-]+');
+    Route::get('/settings',                             [AdminSettings::class, 'settings']);
+    Route::post('/settings',                            [AdminSettings::class, 'updateSettings']);
+    Route::post('/settings/url',                        [AdminSettings::class, 'updateSettingsUrl']);
+    Route::post('/settings/name',                       [AdminSettings::class, 'updateSettingsName']);
+    Route::post('/settings/tagline',                    [AdminSettings::class, 'updateSettingsTagline']);
+    Route::post('/settings/contact',                    [AdminSettings::class, 'updateSettingsContact']);
+    Route::post('/settings/social',                     [AdminSettings::class, 'updateSettingsSocial']);
+    Route::post('/settings/analytics',                  [AdminSettings::class, 'updateSettingsAnalytics']);
+    Route::post('/settings/behaviour',                  [AdminSettings::class, 'updateSettingsBehaviour']);
+    Route::post('/settings/favicon',                    [AdminSettings::class, 'uploadFavicon']);
+    Route::post('/settings/logo-dark',                  [AdminSettings::class, 'uploadLogoDark']);
+    Route::post('/settings/logo-light',                 [AdminSettings::class, 'uploadLogoLight']);
+    Route::post('/settings/logo-compact-dark',          [AdminSettings::class, 'uploadLogoCompactDark']);
+    Route::post('/settings/logo-compact-light',         [AdminSettings::class, 'uploadLogoCompactLight']);
+    Route::get('/settings/{asset}/remove',              [AdminSettings::class, 'removeBrandAsset'])->where('asset', '[a-z\-]+');
 
     // SEO
-    Route::get('/seo',                       [AdminController::class, 'seo']);
-    Route::post('/seo/meta',                 [AdminController::class, 'updateSeoMeta']);
-    Route::post('/seo/robots',               [AdminController::class, 'updateRobots']);
-    Route::post('/seo/settings',             [AdminController::class, 'updateSeoSettings']);
+    Route::get('/seo',                       [AdminSettings::class, 'seo']);
+    Route::post('/seo/meta',                 [AdminSettings::class, 'updateSeoMeta']);
+    Route::post('/seo/robots',               [AdminSettings::class, 'updateRobots']);
+    Route::post('/seo/settings',             [AdminSettings::class, 'updateSeoSettings']);
 
     // Roles & Permissions
-    Route::get('/roles',                     [AdminController::class, 'roles']);
-    Route::post('/roles',                    [AdminController::class, 'storeRole']);
-    Route::put('/roles/{id}',                [AdminController::class, 'updateRole']);
-    Route::delete('/roles/{id}',             [AdminController::class, 'deleteRole']);
+    Route::get('/roles',                     [AdminUser::class, 'roles']);
+    Route::post('/roles',                    [AdminUser::class, 'storeRole']);
+    Route::put('/roles/{id}',                [AdminUser::class, 'updateRole']);
+    Route::delete('/roles/{id}',             [AdminUser::class, 'deleteRole']);
 
     // Email Settings
-    Route::get('/email-settings',            [AdminController::class, 'emailSettings']);
-    Route::post('/email-settings',           [AdminController::class, 'updateEmailSettings']);
-    Route::post('/email-settings/template',  [AdminController::class, 'updateEmailTemplate']);
-    Route::post('/email-settings/test',      [AdminController::class, 'sendTestEmail']);
+    Route::get('/email-settings',            [AdminSettings::class, 'emailSettings']);
+    Route::post('/email-settings',           [AdminSettings::class, 'updateEmailSettings']);
+    Route::post('/email-settings/template',  [AdminSettings::class, 'updateEmailTemplate']);
+    Route::post('/email-settings/test',      [AdminSettings::class, 'sendTestEmail']);
 
     // Security
-    Route::get('/security',                  [AdminController::class, 'security']);
-    Route::post('/security',                 [AdminController::class, 'updateSecurity']);
-    Route::post('/security/captcha',         [AdminController::class, 'updateCaptcha']);
-    Route::post('/security/cron/generate',   [AdminController::class, 'generateCronToken']);
-    Route::post('/security/cron/revoke',     [AdminController::class, 'revokeCronToken']);
+    Route::get('/security',                  [AdminSettings::class, 'security']);
+    Route::post('/security',                 [AdminSettings::class, 'updateSecurity']);
+    Route::post('/security/captcha',         [AdminSettings::class, 'updateCaptcha']);
+    Route::post('/security/cron/generate',   [AdminSettings::class, 'generateCronToken']);
+    Route::post('/security/cron/revoke',     [AdminSettings::class, 'revokeCronToken']);
 
     // Storage
-    Route::get('/storage',                   [AdminController::class, 'storage']);
-    Route::post('/storage',                  [AdminController::class, 'updateStorage']);
+    Route::get('/storage',                   [AdminSettings::class, 'storage']);
+    Route::post('/storage',                  [AdminSettings::class, 'updateStorage']);
 
     // Cache & Backup
-    Route::get('/cache',                     [AdminController::class, 'cache']);
-    Route::post('/cache/clear',              [AdminController::class, 'clearCache']);
-    Route::get('/queue-settings',            [AdminController::class, 'queueSettings']);
-    Route::post('/queue-settings',           [AdminController::class, 'updateQueueSettings']);
-    Route::get('/backup',                    [AdminController::class, 'backup']);
+    Route::get('/cache',                     [AdminSettings::class, 'cache']);
+    Route::post('/cache/clear',              [AdminSettings::class, 'clearCache']);
+    Route::get('/queue-settings',            [AdminSettings::class, 'queueSettings']);
+    Route::post('/queue-settings',           [AdminSettings::class, 'updateQueueSettings']);
+    Route::get('/backup',                    [AdminSettings::class, 'backup']);
 
     // Deploy
-    Route::get('/deploy',                    [AdminController::class, 'deploy']);
-    Route::post('/deploy/run',               [AdminController::class, 'runDeploy']);
+    Route::get('/deploy',                    [AdminSettings::class, 'deploy']);
+    Route::post('/deploy/run',               [AdminSettings::class, 'runDeploy']);
 
     // Navigation
     Route::get('/navigation',                [\App\Http\Controllers\NavigationController::class, 'index']);
@@ -326,46 +333,46 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('/languages/import',         [\App\Http\Controllers\LanguageController::class, 'import']);
 
     // Memberships (admin)
-    Route::get('/memberships',                                      [AdminController::class, 'memberships']);
-    Route::post('/memberships/plans',                               [AdminController::class, 'storePlan']);
-    Route::put('/memberships/plans/{plan}',                         [AdminController::class, 'updatePlan']);
-    Route::post('/memberships/plans/{plan}/toggle',                 [AdminController::class, 'togglePlan']);
-    Route::delete('/memberships/plans/{plan}',                      [AdminController::class, 'deletePlan']);
-    Route::post('/memberships/subscriptions/{subscription}/revoke',   [AdminController::class, 'revokeSubscription']);
-    Route::post('/memberships/subscriptions/{subscription}/activate', [AdminController::class, 'activateSubscription']);
-    Route::post('/memberships/stripe-settings',                       [AdminController::class, 'updateStripeSettings']);
-    Route::post('/memberships/paypal-settings',                       [AdminController::class, 'updatePaypalSettings']);
-    Route::post('/memberships/bank-settings',                         [AdminController::class, 'updateBankSettings']);
-    Route::post('/memberships/premium-settings',                      [AdminController::class, 'updatePremiumSettings']);
+    Route::get('/memberships',                                      [AdminMembership::class, 'memberships']);
+    Route::post('/memberships/plans',                               [AdminMembership::class, 'storePlan']);
+    Route::put('/memberships/plans/{plan}',                         [AdminMembership::class, 'updatePlan']);
+    Route::post('/memberships/plans/{plan}/toggle',                 [AdminMembership::class, 'togglePlan']);
+    Route::delete('/memberships/plans/{plan}',                      [AdminMembership::class, 'deletePlan']);
+    Route::post('/memberships/subscriptions/{subscription}/revoke',   [AdminMembership::class, 'revokeSubscription']);
+    Route::post('/memberships/subscriptions/{subscription}/activate', [AdminMembership::class, 'activateSubscription']);
+    Route::post('/memberships/stripe-settings',                       [AdminMembership::class, 'updateStripeSettings']);
+    Route::post('/memberships/paypal-settings',                       [AdminMembership::class, 'updatePaypalSettings']);
+    Route::post('/memberships/bank-settings',                         [AdminMembership::class, 'updateBankSettings']);
+    Route::post('/memberships/premium-settings',                      [AdminMembership::class, 'updatePremiumSettings']);
 
     // Support tickets (admin)
-    Route::get('/support',                              [AdminController::class, 'supportTickets']);
-    Route::get('/support/{ticket}',                     [AdminController::class, 'supportShow']);
-    Route::post('/support/{ticket}/reply',              [AdminController::class, 'supportReply']);
-    Route::post('/support/{ticket}/assign',             [AdminController::class, 'supportAssign']);
-    Route::post('/support/{ticket}/status',             [AdminController::class, 'supportStatus']);
-    Route::delete('/support/{ticket}',                  [AdminController::class, 'supportDelete']);
+    Route::get('/support',                              [AdminSupport::class, 'supportTickets']);
+    Route::get('/support/{ticket}',                     [AdminSupport::class, 'supportShow']);
+    Route::post('/support/{ticket}/reply',              [AdminSupport::class, 'supportReply']);
+    Route::post('/support/{ticket}/assign',             [AdminSupport::class, 'supportAssign']);
+    Route::post('/support/{ticket}/status',             [AdminSupport::class, 'supportStatus']);
+    Route::delete('/support/{ticket}',                  [AdminSupport::class, 'supportDelete']);
 
     // AI Content
-    Route::get('/ai-content',                           [AdminController::class, 'aiContent']);
-    Route::post('/ai-content/topics',                   [AdminController::class, 'storeAiTopic']);
-    Route::post('/ai-content/topics/{topic}/toggle',    [AdminController::class, 'toggleAiTopic']);
-    Route::delete('/ai-content/topics/{topic}',         [AdminController::class, 'deleteAiTopic']);
-    Route::post('/ai-content/topics/{topic}/run',       [AdminController::class, 'runAiTopic']);
-    Route::post('/ai-content/run-all',                  [AdminController::class, 'runAllAiTopics']);
-    Route::post('/ai-content/settings',                 [AdminController::class, 'updateGeminiSettings']);
-    Route::post('/ai-content/drafts/{post}/publish',    [AdminController::class, 'publishAiDraft']);
-    Route::delete('/ai-content/drafts/{post}',          [AdminController::class, 'deleteAiDraft']);
+    Route::get('/ai-content',                           [AdminAi::class, 'aiContent']);
+    Route::post('/ai-content/topics',                   [AdminAi::class, 'storeAiTopic']);
+    Route::post('/ai-content/topics/{topic}/toggle',    [AdminAi::class, 'toggleAiTopic']);
+    Route::delete('/ai-content/topics/{topic}',         [AdminAi::class, 'deleteAiTopic']);
+    Route::post('/ai-content/topics/{topic}/run',       [AdminAi::class, 'runAiTopic']);
+    Route::post('/ai-content/run-all',                  [AdminAi::class, 'runAllAiTopics']);
+    Route::post('/ai-content/settings',                 [AdminAi::class, 'updateGeminiSettings']);
+    Route::post('/ai-content/drafts/{post}/publish',    [AdminAi::class, 'publishAiDraft']);
+    Route::delete('/ai-content/drafts/{post}',          [AdminAi::class, 'deleteAiDraft']);
 
     // Social Pages (admin module)
-    Route::get('/social-pages',                          [AdminController::class, 'adminSocialPages']);
-    Route::post('/social-pages/{id}/action',             [AdminController::class, 'adminSocialPageAction']);
+    Route::get('/social-pages',                          [AdminSocialPage::class, 'adminSocialPages']);
+    Route::post('/social-pages/{id}/action',             [AdminSocialPage::class, 'adminSocialPageAction']);
 
     // Page Categories
-    Route::get('/page-categories',                       [AdminController::class, 'adminPageCategories']);
-    Route::post('/page-categories',                      [AdminController::class, 'adminPageCategoryStore']);
-    Route::post('/page-categories/{id}/toggle',          [AdminController::class, 'adminPageCategoryToggle']);
-    Route::delete('/page-categories/{id}',               [AdminController::class, 'adminPageCategoryDelete']);
+    Route::get('/page-categories',                       [AdminSocialPage::class, 'adminPageCategories']);
+    Route::post('/page-categories',                      [AdminSocialPage::class, 'adminPageCategoryStore']);
+    Route::post('/page-categories/{id}/toggle',          [AdminSocialPage::class, 'adminPageCategoryToggle']);
+    Route::delete('/page-categories/{id}',               [AdminSocialPage::class, 'adminPageCategoryDelete']);
 });
 
 // ── Account Portal (account.dewanlabung.com.np OR /account/*) ──────────────
@@ -445,7 +452,7 @@ Route::middleware('auth')->prefix('support')->group(function () {
 });
 
 // GitHub deploy webhook (no auth, verified by HMAC secret)
-Route::post('/webhook/deploy', [AdminController::class, 'webhookDeploy'])->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+Route::post('/webhook/deploy', [AdminSettings::class, 'webhookDeploy'])->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
 // Post Series
 Route::get('/series', [\App\Http\Controllers\PostSeriesController::class, 'index']);
