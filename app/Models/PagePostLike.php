@@ -2,13 +2,5 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class PagePostLike extends Model
-{
-    public $timestamps = false;
-    protected $fillable = ['page_post_id', 'user_id', 'reaction'];
-
-    public function post() { return $this->belongsTo(PagePost::class, 'page_post_id'); }
-    public function user() { return $this->belongsTo(User::class); }
-}
+/** @deprecated Use App\Domains\Place\Models\\PagePostLike directly. */
+class PagePostLike extends \App\Domains\Place\Models\PagePostLike {}

@@ -2,12 +2,5 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class EventAttendee extends Model
-{
-    protected $fillable = ['event_id', 'user_id', 'status'];
-
-    public function event() { return $this->belongsTo(Event::class); }
-    public function user()  { return $this->belongsTo(User::class); }
-}
+/** @deprecated Use App\Domains\Events\Models\\EventAttendee directly. */
+class EventAttendee extends \App\Domains\Events\Models\EventAttendee {}
