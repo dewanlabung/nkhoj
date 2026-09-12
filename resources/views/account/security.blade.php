@@ -145,6 +145,34 @@
             </span>
             <span class="text-xs text-gray-400">Since {{ $user->two_factor_confirmed_at?->format('M d, Y') }}</span>
         </div>
+        {{-- Recovery Codes --}}
+        @php $recoveryCodes = $user->two_factor_recovery_codes ?? []; @endphp
+        <div class="mt-5 mb-5 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-xl p-4" x-data="{ showCodes: false }">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">Recovery Codes</p>
+                    <p class="text-xs text-gray-400 mt-0.5">{{ count($recoveryCodes) }} code{{ count($recoveryCodes) !== 1 ? 's' : '' }} remaining — use if you lose your authenticator</p>
+                </div>
+                <button type="button" @click="showCodes = !showCodes"
+                    class="text-xs font-semibold text-brand-600 dark:text-brand-400 hover:underline">
+                    <span x-text="showCodes ? 'Hide' : 'Show'">Show</span>
+                </button>
+            </div>
+            <div x-show="showCodes" x-transition class="mt-3 space-y-1">
+                @forelse($recoveryCodes as $code)
+                <code class="block font-mono text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded px-3 py-1.5 text-gray-700 dark:text-gray-300 select-all">{{ $code }}</code>
+                @empty
+                <p class="text-xs text-gray-400">No recovery codes available.</p>
+                @endforelse
+                <form method="POST" action="/two-factor/recovery-codes/regenerate" class="mt-3">
+                    @csrf
+                    <button type="submit" class="text-xs text-orange-600 hover:text-orange-700 font-medium">
+                        Regenerate all codes (old codes will stop working)
+                    </button>
+                </form>
+            </div>
+        </div>
+
         <form method="POST" action="/two-factor/disable" x-data="{ open: false }">
             @csrf
             <button type="button" @click="open = !open" class="text-sm text-red-600 hover:text-red-700 font-medium">Disable Two-Factor Authentication</button>

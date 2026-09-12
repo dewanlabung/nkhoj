@@ -113,6 +113,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/two-factor/setup',    [\App\Http\Controllers\TwoFactorController::class, 'setup']);
     Route::post('/two-factor/confirm', [\App\Http\Controllers\TwoFactorController::class, 'confirm']);
     Route::post('/two-factor/disable', [\App\Http\Controllers\TwoFactorController::class, 'disable']);
+    Route::post('/two-factor/recovery-codes/regenerate', [\App\Http\Controllers\TwoFactorController::class, 'regenerateRecoveryCodes']);
 });
 
 // 2FA challenge (guest only — user is temporarily logged out)
@@ -261,6 +262,11 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('/security/captcha',         [AdminSettings::class, 'updateCaptcha']);
     Route::post('/security/cron/generate',   [AdminSettings::class, 'generateCronToken']);
     Route::post('/security/cron/revoke',     [AdminSettings::class, 'revokeCronToken']);
+    Route::post('/security/headers',         [\App\Domains\Admin\Http\Controllers\SecurityController::class, 'updateSecurityHeaders']);
+    Route::post('/security/rate-limits',     [\App\Domains\Admin\Http\Controllers\SecurityController::class, 'updateRateLimits']);
+    Route::post('/security/ip-ban',          [\App\Domains\Admin\Http\Controllers\SecurityController::class, 'addBannedIp']);
+    Route::post('/security/ip-unban',        [\App\Domains\Admin\Http\Controllers\SecurityController::class, 'removeBannedIp']);
+    Route::get('/security/analysis',         [\App\Domains\Admin\Http\Controllers\SecurityController::class, 'analysis']);
 
     // Storage
     Route::get('/storage',                   [AdminSettings::class, 'storage']);

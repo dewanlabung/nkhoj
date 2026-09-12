@@ -2,6 +2,7 @@
 
 namespace App\Domains\Events\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 class EventAttendee extends Model

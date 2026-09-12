@@ -44,6 +44,16 @@ class TwoFactorController extends Controller
         return redirect('/account/security')->with('success', 'Two-factor authentication disabled.');
     }
 
+    public function regenerateRecoveryCodes()
+    {
+        $user = auth()->user();
+        if (!$user->two_factor_enabled) {
+            return redirect('/account/security')->with('error', '2FA is not enabled.');
+        }
+        $this->twoFactor->regenerateRecoveryCodes($user);
+        return redirect('/account/security')->with('success', 'Recovery codes regenerated. Save the new codes in a safe place.');
+    }
+
     public function challenge()
     {
         if (!session()->has('2fa_user_id')) {
