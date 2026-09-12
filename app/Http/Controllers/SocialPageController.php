@@ -840,14 +840,18 @@ class SocialPageController extends Controller
 
     public function settings(string $slug)
     {
-        $page = SocialPage::where('slug', $slug)->where('user_id', auth()->id())->firstOrFail();
+        $page = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isManagedBy(auth()->user()), 403);
+        $isOwner = $page->isOwnedBy(auth()->user());
+        $userRole = $page->roleFor(auth()->user());
         $categories = PageCategory::active()->pluck('name')->toArray() ?: SocialPage::CATEGORIES;
-        return view('social-pages.settings', compact('page', 'categories'));
+        return view('social-pages.settings', compact('page', 'categories', 'isOwner', 'userRole'));
     }
 
     public function updateSettings(Request $request, string $slug)
     {
-        $page = SocialPage::where('slug', $slug)->where('user_id', auth()->id())->firstOrFail();
+        $page = SocialPage::where('slug', $slug)->firstOrFail();
+        abort_unless($page->isManagedBy(auth()->user()), 403);
 
         $data = $request->validate([
             'name'                => 'required|string|max:150',
