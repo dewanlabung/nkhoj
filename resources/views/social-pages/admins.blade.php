@@ -77,7 +77,7 @@
                      class="w-10 h-10 rounded-full object-cover border border-gray-200 flex-shrink-0">
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-semibold text-gray-900 truncate">{{ $page->owner->name }}</p>
-                    <p class="text-xs text-gray-400">@{{ $page->owner->username ?? 'owner' }}</p>
+                    <p class="text-xs text-gray-400">&#64;{{ $page->owner->username ?? 'owner' }}</p>
                 </div>
                 <span class="px-2.5 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded-full">Owner</span>
             </div>
@@ -88,7 +88,7 @@
                      class="w-10 h-10 rounded-full object-cover border border-gray-200 flex-shrink-0">
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-semibold text-gray-900 truncate">{{ $admin->user->name }}</p>
-                    <p class="text-xs text-gray-400">@{{ $admin->user->username ?? '' }}</p>
+                    <p class="text-xs text-gray-400">&#64;{{ $admin->user->username ?? '' }}</p>
                     @if($admin->isPending())
                     <p class="text-xs text-amber-500 font-medium">Invite pending</p>
                     @endif
