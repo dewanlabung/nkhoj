@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Listeners\OutgoingEmailLogSubscriber;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
 
@@ -11,6 +13,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Event::subscribe(OutgoingEmailLogSubscriber::class);
+
         $path = storage_path('app/site_settings.json');
         if (!File::exists($path)) return;
 
