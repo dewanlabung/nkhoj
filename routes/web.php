@@ -19,6 +19,7 @@ use App\Domains\Admin\Http\Controllers\SettingsController as AdminSettings;
 use App\Domains\Admin\Http\Controllers\MembershipAdminController as AdminMembership;
 use App\Domains\Admin\Http\Controllers\SupportController as AdminSupport;
 use App\Domains\Admin\Http\Controllers\LogsController as AdminLogs;
+use App\Http\Controllers\Admin\GmailOAuthController;
 use App\Domains\Admin\Http\Controllers\AiController as AdminAi;
 use App\Domains\Admin\Http\Controllers\SocialPageAdminController as AdminSocialPage;
 use App\Http\Controllers\AccountController;
@@ -252,6 +253,10 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::delete('/roles/{id}',             [AdminUser::class, 'deleteRole']);
 
     // Email Settings
+    Route::get('/gmail/connect',             [GmailOAuthController::class, 'redirect']);
+    Route::get('/gmail/callback',            [GmailOAuthController::class, 'callback']);
+    Route::post('/gmail/disconnect',         [GmailOAuthController::class, 'disconnect']);
+
     Route::get('/email-settings',            [AdminSettings::class, 'emailSettings']);
     Route::post('/email-settings',           [AdminSettings::class, 'updateEmailSettings']);
     Route::post('/email-settings/smtp',      [AdminSettings::class, 'updateSmtpSettings']);

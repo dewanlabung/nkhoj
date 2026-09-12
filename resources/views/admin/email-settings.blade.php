@@ -127,6 +127,33 @@ $active = $em['template'] ?? 'pure-minimalist';
         <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
             <h2 class="font-bold text-gray-900 dark:text-white mb-5">Settings</h2>
 
+            {{-- Gmail API connect card --}}
+            @php $gmailEmail = \App\Services\Mail\GmailClient::connectedEmail(); @endphp
+            <div class="mb-4 rounded-lg border {{ $gmailEmail ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/10' : 'border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/30' }} p-4 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 flex-shrink-0 {{ $gmailEmail ? 'text-green-600 dark:text-green-400' : 'text-gray-400' }}" viewBox="0 0 24 24" fill="currentColor"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 010 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.910 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/></svg>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-700 dark:text-gray-200">Gmail API</p>
+                        @if($gmailEmail)
+                        <p class="text-xs text-green-600 dark:text-green-400">Connected as <strong>{{ $gmailEmail }}</strong> · Set "Mail Service" to <strong>Gmail API</strong> below</p>
+                        @else
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Send via Gmail API (bypasses SMTP, avoids SSL issues). Requires Google OAuth.</p>
+                        @endif
+                    </div>
+                </div>
+                @if($gmailEmail)
+                <form method="POST" action="/admin/gmail/disconnect" class="flex-shrink-0">
+                    @csrf
+                    <button type="submit" class="text-xs text-red-500 hover:text-red-700 font-medium border border-red-200 dark:border-red-800 px-3 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">Disconnect</button>
+                </form>
+                @else
+                <a href="/admin/gmail/connect" class="flex-shrink-0 flex items-center gap-1.5 text-xs text-brand-600 dark:text-brand-400 font-medium border border-brand-200 dark:border-brand-700 px-3 py-1.5 rounded-lg hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                    Connect Gmail
+                </a>
+                @endif
+            </div>
+
             <form method="POST" action="/admin/email-settings/smtp" class="space-y-4">
                 @csrf
 
@@ -135,7 +162,7 @@ $active = $em['template'] ?? 'pure-minimalist';
                     <div>
                         <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 block mb-1.5">Mail Service <span class="text-red-400">*</span></label>
                         <select name="mail_service" class="w-full text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-500">
-                            @foreach(['mailpit' => 'Mailpit (Local)', 'sendmail' => 'Sendmail', 'smtp' => 'Custom SMTP', 'mailgun' => 'Mailgun', 'ses' => 'Amazon SES', 'postmark' => 'Postmark', 'resend' => 'Resend', 'brevo' => 'Brevo (Sendinblue)', 'sendgrid' => 'SendGrid'] as $val => $label)
+                            @foreach(['mailpit' => 'Mailpit (Local)', 'sendmail' => 'Sendmail', 'smtp' => 'Custom SMTP', 'gmail-api' => 'Gmail API (OAuth)', 'mailgun' => 'Mailgun', 'ses' => 'Amazon SES', 'postmark' => 'Postmark', 'resend' => 'Resend', 'brevo' => 'Brevo (Sendinblue)', 'sendgrid' => 'SendGrid'] as $val => $label)
                             <option value="{{ $val }}" {{ ($em['service'] ?? 'mailpit') === $val ? 'selected' : '' }}>{{ $label }}</option>
                             @endforeach
                         </select>
