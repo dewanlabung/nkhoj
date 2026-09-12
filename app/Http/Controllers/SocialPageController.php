@@ -25,6 +25,8 @@ use App\Models\PageMilestone;
 use App\Models\PageViewLog;
 use App\Models\SocialPage;
 use App\Models\User;
+use App\Jobs\CreateNotification;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -685,6 +687,14 @@ class SocialPageController extends Controller
             ['invited_by' => auth()->id(), 'role' => $data['role'], 'accepted_at' => null]
         );
 
+        CreateNotification::dispatchSync($invitee->id, 'page_admin_invite', [
+            'page_name'  => $page->name,
+            'page_slug'  => $page->slug,
+            'role'       => $data['role'],
+            'inviter'    => auth()->user()->name,
+            'accept_url' => "/pages/{$page->slug}/admins/accept",
+        ]);
+
         return back()->with('success', "@{$invitee->username} has been invited as {$data['role']}.");
     }
 
@@ -698,6 +708,17 @@ class SocialPageController extends Controller
                            ->firstOrFail();
 
         $invite->update(['accepted_at' => now()]);
+
+        // Mark the invite notification as accepted so the Accept button disappears
+        Notification::where('user_id', auth()->id())
+            ->where('type', 'page_admin_invite')
+            ->whereJsonContains('data->page_slug', $page->slug)
+            ->whereNull('read_at')
+            ->each(function ($n) {
+                $data = $n->data;
+                $data['accepted'] = true;
+                $n->update(['data' => $data, 'read_at' => now()]);
+            });
 
         return redirect("/pages/{$page->slug}")->with('success', "You are now an {$invite->role} of {$page->name}.");
     }
