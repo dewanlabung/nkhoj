@@ -2,11 +2,5 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class NewsletterSubscriber extends Model
-{
-    protected $fillable = ['email', 'name', 'token', 'is_active'];
-
-    protected $casts = ['is_active' => 'boolean'];
-}
+/** @deprecated Use App\Domains\Newsletter\Models\NewsletterSubscriber directly. */
+class NewsletterSubscriber extends \App\Domains\Newsletter\Models\NewsletterSubscriber {}

@@ -2,13 +2,5 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class QuestionFollow extends Model
-{
-    public $timestamps = false;
-    protected $fillable = ['question_id', 'user_id'];
-
-    public function question() { return $this->belongsTo(Question::class); }
-    public function user()     { return $this->belongsTo(User::class); }
-}
+/** @deprecated Use App\Domains\QnA\Models\\QuestionFollow directly. */
+class QuestionFollow extends \App\Domains\QnA\Models\QuestionFollow {}
