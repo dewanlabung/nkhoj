@@ -2,6 +2,7 @@
 
 namespace App\Domains\QnA\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 class QuestionFollow extends Model
