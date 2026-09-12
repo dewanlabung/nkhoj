@@ -1,55 +1,84 @@
+@php
+    $__s        = file_exists(storage_path('app/site_settings.json'))
+                    ? (json_decode(file_get_contents(storage_path('app/site_settings.json')), true) ?? [])
+                    : [];
+    $siteName   = $__s['site_name']   ?? config('app.name', 'nkhoj');
+    $taglineNe  = $__s['tagline_ne']  ?? 'नेपाली समाचार';
+    $taglineEn  = $__s['tagline_en']  ?? '';
+    $showHome   = ($__s['nav_home_page_link'] ?? 'show') === 'show';
+    try {
+        $navItems = \App\Models\NavigationItem::where('is_active', true)
+                        ->whereNull('parent_id')
+                        ->where('language', 'en')
+                        ->orderBy('sort_order')
+                        ->with('children')
+                        ->get();
+    } catch (\Exception $e) {
+        $navItems = collect();
+    }
+    try {
+        $useFallback = $navItems->isEmpty();
+    } catch (\Exception $e) {
+        $useFallback = true;
+    }
+@endphp
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" id="html-root" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'My Account') — Dewanlabung</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('title', 'My Account') — {{ $siteName }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: { extend: { colors: { brand: { 50:'#eff6ff',100:'#dbeafe',400:'#60a5fa',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8' } } } }
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        nepali: ['Noto Sans Devanagari', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: { 50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',500:'#6366f1',600:'#4f46e5',700:'#4338ca',900:'#312e81' }
+                    }
+                }
+            }
         };
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        }
+        (function() {
+            if (localStorage.getItem('siteTheme') === 'dark') {
+                document.getElementById('html-root').classList.add('dark');
+            }
+        })();
     </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/intersect@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
+        [x-cloak] { display: none !important; }
         .nav-item { display:flex; align-items:center; gap:0.75rem; padding:0.75rem 1rem; border-radius:0.75rem; font-size:0.875rem; font-weight:500; color:#374151; text-decoration:none; transition:background 0.15s,color 0.15s; }
         .nav-item:hover { background:#f3f4f6; }
-        .nav-item.active { background:#eff6ff; color:#1d4ed8; }
-        @media (prefers-color-scheme: dark) {
-            .nav-item { color:#d1d5db; }
-            .nav-item:hover { background:rgba(55,65,81,0.5); }
-            .nav-item.active { background:rgba(59,130,246,0.15); color:#93c5fd; }
-        }
+        .nav-item.active { background:#eef2ff; color:#4338ca; }
+        .dark .nav-item { color:#d1d5db; }
+        .dark .nav-item:hover { background:rgba(55,65,81,0.5); }
+        .dark .nav-item.active { background:rgba(99,102,241,0.15); color:#a5b4fc; }
     </style>
+    @stack('head')
 </head>
-<body class="h-full bg-gray-50 dark:bg-gray-900">
+<body class="h-full bg-gray-50 dark:bg-gray-950 font-sans antialiased transition-colors duration-200"
+    x-data="{
+        dark: localStorage.getItem('siteTheme') === 'dark',
+        toggleDark() {
+            this.dark = !this.dark;
+            localStorage.setItem('siteTheme', this.dark ? 'dark' : 'light');
+            document.getElementById('html-root').classList.toggle('dark', this.dark);
+        },
+        formatModal: false,
+        mobileMenu: false,
+    }">
 
-{{-- Top bar --}}
-<header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
-            <a href="{{ url('/') }}" class="flex items-center gap-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-sm">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                Dewanlabung
-            </a>
-            <span class="text-gray-300 dark:text-gray-600">/</span>
-            <span class="text-sm font-semibold text-gray-900 dark:text-white">My Account</span>
-        </div>
-        <div class="flex items-center gap-3">
-            <span class="text-sm text-gray-500 dark:text-gray-400 hidden sm:block">{{ auth()->user()->email }}</span>
-            @if(auth()->user()->avatar_url)
-            <img src="{{ auth()->user()->avatar_url }}" class="w-8 h-8 rounded-full object-cover" alt="">
-            @else
-            <div class="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center text-white text-sm font-bold">
-                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-            </div>
-            @endif
-        </div>
-    </div>
-</header>
+@include('partials.site-header')
 
 <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
     <div class="flex flex-col lg:flex-row gap-6">
@@ -62,7 +91,7 @@
                     @if(auth()->user()->avatar_url)
                     <img src="{{ auth()->user()->avatar_url }}" class="w-16 h-16 rounded-full object-cover mx-auto mb-3" alt="">
                     @else
-                    <div class="w-16 h-16 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-2xl font-bold mx-auto mb-3">
+                    <div class="w-16 h-16 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white text-2xl font-bold mx-auto mb-3">
                         {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                     </div>
                     @endif

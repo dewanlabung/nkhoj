@@ -2,6 +2,7 @@
 
 namespace App\Domains\Place\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 class PageStory extends Model
