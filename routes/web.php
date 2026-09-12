@@ -18,6 +18,7 @@ use App\Domains\Admin\Http\Controllers\ContentController as AdminContent;
 use App\Domains\Admin\Http\Controllers\SettingsController as AdminSettings;
 use App\Domains\Admin\Http\Controllers\MembershipAdminController as AdminMembership;
 use App\Domains\Admin\Http\Controllers\SupportController as AdminSupport;
+use App\Domains\Admin\Http\Controllers\LogsController as AdminLogs;
 use App\Domains\Admin\Http\Controllers\AiController as AdminAi;
 use App\Domains\Admin\Http\Controllers\SocialPageAdminController as AdminSocialPage;
 use App\Http\Controllers\AccountController;
@@ -268,6 +269,12 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('/security/ip-ban',          [\App\Domains\Admin\Http\Controllers\SecurityController::class, 'addBannedIp']);
     Route::post('/security/ip-unban',        [\App\Domains\Admin\Http\Controllers\SecurityController::class, 'removeBannedIp']);
     Route::get('/security/analysis',         [\App\Domains\Admin\Http\Controllers\SecurityController::class, 'analysis']);
+
+    // Logs
+    Route::get('/logs',                      [AdminLogs::class, 'index']);
+    Route::post('/logs/schedule/{id}/rerun', [AdminLogs::class, 'rerunSchedule']);
+    Route::get('/logs/schedule/download',    [AdminLogs::class, 'downloadScheduleLog']);
+    Route::get('/logs/email/download',       [AdminLogs::class, 'downloadEmailLog']);
 
     // Storage
     Route::get('/storage',                   [AdminSettings::class, 'storage']);

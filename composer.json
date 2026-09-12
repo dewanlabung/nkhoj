@@ -11,7 +11,8 @@
         "laravel/framework": "^11.31",
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.0",
-        "pragmarx/google2fa-laravel": "^3.0"
+        "pragmarx/google2fa-laravel": "^3.0",
+        "symfony/stopwatch": "^8.1"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
