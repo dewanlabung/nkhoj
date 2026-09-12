@@ -68,35 +68,6 @@
                     </div>
                 </label>
 
-                <label class="block cursor-pointer" :class="form.page_type === 'creator' ? 'ring-2 ring-purple-500 rounded-2xl' : ''">
-                    <input type="radio" x-model="form.page_type" value="creator" class="sr-only">
-                    <div class="border-2 rounded-2xl p-5 transition"
-                         :class="form.page_type === 'creator' ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-gray-300 bg-white'">
-                        <div class="flex items-start gap-4">
-                            <div class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
-                                 style="background: linear-gradient(135deg,#e91e8c,#9c27b0)">
-                                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.362a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/>
-                                </svg>
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex items-center justify-between">
-                                    <p class="font-bold text-gray-900 text-base">Creator</p>
-                                    <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0"
-                                         :class="form.page_type === 'creator' ? 'border-purple-600 bg-purple-600' : 'border-gray-300'">
-                                        <div x-show="form.page_type === 'creator'" class="w-2 h-2 bg-white rounded-full"></div>
-                                    </div>
-                                </div>
-                                <p class="text-gray-500 text-sm mt-1">For content creators, public figures, artists, influencers, and personalities.</p>
-                                <div class="mt-3 flex flex-wrap gap-2">
-                                    <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">✨ Creator tools</span>
-                                    <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">🔗 Social links</span>
-                                    <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">📊 Audience insights</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </label>
             </div>
             <p class="text-gray-400 text-xs text-center mt-4">You can change this setting later in Page Settings.</p>
         </div>
@@ -105,9 +76,7 @@
         <div x-show="step === 2" x-transition>
             <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Name your Page</h2>
             <p class="text-gray-500 text-sm mb-6"
-               x-text="form.page_type === 'business'
-                   ? 'Use your business name as it appears on your signage or website.'
-                   : 'Use your real name or the name your audience knows you by.'">
+               x-text="'Use your business name as it appears on your signage or website.'">
             </p>
 
             <div class="space-y-4">
@@ -118,7 +87,7 @@
                         type="text"
                         x-model="form.name"
                         @input="onNameInput"
-                        :placeholder="form.page_type === 'business' ? 'e.g. Dewan Café Kathmandu' : 'e.g. Dewan Labung'"
+                        placeholder="e.g. Dewan Café Kathmandu"
                         class="w-full border border-gray-300 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         maxlength="150"
                         autofocus
@@ -172,16 +141,14 @@
         <div x-show="step === 3" x-transition>
             <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Add categories</h2>
             <p class="text-gray-500 text-sm mb-1"
-               x-text="form.page_type === 'business'
-                   ? 'Choose what best describes your business.'
-                   : 'Choose your content niche.'">
+               x-text="'Choose what best describes your business.'">
             </p>
             <p class="text-gray-400 text-xs mb-4">You can add up to 3.</p>
 
             <div class="flex flex-wrap gap-2 border border-gray-300 rounded-xl px-3 py-3 mb-4 min-h-[52px]">
                 <template x-for="(cat, i) in form.categories" :key="i">
                     <span class="inline-flex items-center gap-1 text-sm font-medium px-3 py-1 rounded-full"
-                          :class="form.page_type === 'creator' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'">
+                          class="bg-blue-100 text-blue-800"
                         <span x-text="cat"></span>
                         <button type="button" @click="removeCategory(i)" class="ml-1 hover:opacity-70">&times;</button>
                     </span>
@@ -203,7 +170,7 @@
                         <button type="button" @click="addCategory(cat)"
                                 class="text-sm px-3 py-1.5 rounded-full border transition"
                                 :class="form.categories.includes(cat)
-                                    ? (form.page_type === 'creator' ? 'bg-purple-50 border-purple-400 text-purple-700' : 'bg-blue-50 border-blue-400 text-blue-700')
+                                    ? 'bg-blue-50 border-blue-400 text-blue-700'
                                     : 'border-gray-300 text-gray-700 hover:bg-gray-100'"
                                 x-text="cat">
                         </button>
@@ -217,7 +184,7 @@
                     <button type="button" @click="addCategory(cat)"
                             class="text-sm px-4 py-2 rounded-full border font-medium transition"
                             :class="form.categories.includes(cat)
-                                ? (form.page_type === 'creator' ? 'bg-purple-50 border-purple-400 text-purple-700' : 'bg-blue-50 border-blue-400 text-blue-700')
+                                ? 'bg-blue-50 border-blue-400 text-blue-700'
                                 : 'border-gray-300 text-gray-700 hover:bg-gray-100'"
                             x-text="cat">
                     </button>
@@ -227,16 +194,11 @@
 
         {{-- STEP 4: Bio + social links --}}
         <div x-show="step === 4" x-transition>
-            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2"
-                x-text="form.page_type === 'business' ? 'Describe your business' : 'Add a bio'"></h2>
-            <p class="text-gray-500 text-sm mb-6"
-               x-text="form.page_type === 'business'
-                   ? 'Tell people what you offer. This also helps with SEO.'
-                   : 'Tell your audience what content you create.'">
-            </p>
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Describe your business</h2>
+            <p class="text-gray-500 text-sm mb-6">Tell people what you offer. This also helps with SEO.</p>
             <textarea
                 x-model="form.bio"
-                :placeholder="form.page_type === 'business' ? 'e.g. We offer premium quality products and services in Kathmandu...' : 'e.g. I create tech tutorials and lifestyle content for Nepali audiences...'"
+                placeholder="e.g. We offer premium quality products and services in Kathmandu..."
                 rows="4"
                 maxlength="500"
                 class="w-full border border-gray-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 resize-none"
@@ -265,24 +227,6 @@
                 </div>
             </template>
 
-            {{-- Creator social links --}}
-            <template x-if="form.page_type === 'creator'">
-                <div class="mt-5 space-y-3">
-                    <p class="text-sm font-semibold text-gray-700">Your social links <span class="text-gray-400 font-normal">(optional — helps fans find you)</span></p>
-                    <input type="text" x-model="form.social_links.youtube" placeholder="▶️ YouTube channel URL"
-                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400">
-                    <input type="text" x-model="form.social_links.tiktok" placeholder="🎵 TikTok profile URL"
-                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gray-400">
-                    <input type="text" x-model="form.social_links.instagram" placeholder="📸 Instagram profile URL"
-                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-pink-400">
-                    <input type="text" x-model="form.social_links.twitter" placeholder="𝕏 Twitter/X profile URL"
-                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-400">
-                    <input type="text" x-model="form.social_links.facebook" placeholder="🔵 Facebook profile URL"
-                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-400">
-                    <input type="text" x-model="form.website" placeholder="🔗 Main link (website, Linktree...)"
-                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-purple-400">
-                </div>
-            </template>
         </div>
 
         {{-- Progress dots --}}
@@ -353,15 +297,10 @@ function pageCreate() {
             'Construction', 'Technology', 'Non-profit', 'Government', 'Automotive',
             'Beauty & Spa', 'Sports & Fitness', 'Photography', 'Event Planning',
         ],
-        creatorCategories: [
-            'Content Creator', 'Music', 'Comedy', 'Travel', 'Food & Cooking',
-            'Fashion & Style', 'Tech & Gaming', 'Fitness & Health', 'Art & Design',
-            'Education', 'News & Politics', 'Sports', 'Personal Blog', 'Journalist',
-        ],
         filteredCategories: [],
 
         get currentPopularCategories() {
-            return this.form.page_type === 'creator' ? this.creatorCategories : this.businessCategories;
+            return this.businessCategories;
         },
 
         init() {
@@ -384,9 +323,7 @@ function pageCreate() {
             if (this.canProceed && this.step < this.totalSteps) {
                 this.step++;
                 if (this.step === 3) {
-                    this.filteredCategories = this.form.page_type === 'creator'
-                        ? [...this.creatorCategories]
-                        : [...this.businessCategories];
+                    this.filteredCategories = [...this.businessCategories];
                 }
             }
         },
@@ -446,7 +383,7 @@ function pageCreate() {
         },
 
         filterCategories() {
-            const all = this.form.page_type === 'creator' ? this.creatorCategories : this.businessCategories;
+            const all = this.businessCategories;
             const q = this.catSearch.toLowerCase();
             this.filteredCategories = all.filter(c => c.toLowerCase().includes(q));
             if (this.catSearch && !all.find(c => c.toLowerCase() === q)) {
