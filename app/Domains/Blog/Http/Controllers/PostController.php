@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 
 use App\Models\Bookmark;
 use App\Models\Comment;
+use App\Models\DailyAnalytic;
 use App\Models\Post;
 use App\Models\Tag;
 use App\Models\Widget;
@@ -18,6 +19,7 @@ class PostController extends Controller
         $post = Post::with(['author', 'category', 'tags', 'series'])->published()->where('slug', $slug)->firstOrFail();
 
         $post->increment('view_count');
+        try { DailyAnalytic::incrementPageView(); } catch (\Throwable) {}
 
         $related = Post::with(['author'])
             ->published()
