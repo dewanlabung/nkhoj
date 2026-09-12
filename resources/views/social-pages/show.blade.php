@@ -102,7 +102,8 @@
                     @endif
                 </div>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    @if($page->first_category)<span>{{ $page->first_category }}</span>@if($page->username) &middot; @endif@endif
+                    @if($page->first_category)<span>{{ $page->first_category }}</span>@if($page->username) &middot; @endif
+                    @endif
                     @if($page->username)<span class="text-gray-400">&#64;{{ $page->username }}</span>@endif
                 </p>
                 <p class="text-sm text-gray-600 dark:text-gray-300 mt-0.5">
