@@ -32,19 +32,20 @@ class AppServiceProvider extends ServiceProvider
         Mail::extend('gmail-api', fn() => new GmailApiMailTransport());
 
         // Apply social OAuth credentials from admin settings
-        $auth = $s['auth'] ?? [];
+        $auth   = $s['auth'] ?? [];
+        $appUrl = rtrim(config('app.url'), '/');
         if (!empty($auth['google_client_id'])) {
             config([
                 'services.google.client_id'     => $auth['google_client_id'],
                 'services.google.client_secret' => $auth['google_client_secret'] ?? config('services.google.client_secret'),
-                'services.google.redirect'       => url('/auth/google/callback'),
+                'services.google.redirect'       => $appUrl . '/auth/google/callback',
             ]);
         }
         if (!empty($auth['facebook_client_id'])) {
             config([
                 'services.facebook.client_id'     => $auth['facebook_client_id'],
                 'services.facebook.client_secret' => $auth['facebook_client_secret'] ?? config('services.facebook.client_secret'),
-                'services.facebook.redirect'       => url('/auth/facebook/callback'),
+                'services.facebook.redirect'       => $appUrl . '/auth/facebook/callback',
             ]);
         }
 

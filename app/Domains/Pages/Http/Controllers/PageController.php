@@ -101,4 +101,10 @@ class PageController extends Controller
         Page::findOrFail($id)->delete();
         return back()->with('success', 'Page deleted.');
     }
+
+    public function showPublic(string $slug)
+    {
+        $page = Page::where('slug', $slug)->where('status', 'active')->firstOrFail();
+        return view('pages.show', compact('page'));
+    }
 }

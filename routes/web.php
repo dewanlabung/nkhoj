@@ -690,3 +690,8 @@ Route::middleware('auth')->group(function () {
 
 // ─── QR Profile Card ──────────────────────────────────────────────────────────
 Route::get('/profile/{username}/qr-card',                   [\App\Http\Controllers\QrCardController::class, 'show']);
+
+// ─── Static Pages (catch-all — must be last) ──────────────────────────────────
+// Serves admin-created pages at /{slug} e.g. /privacy-policy, /terms
+Route::get('/{slug}', [\App\Http\Controllers\PageController::class, 'showPublic'])
+    ->where('slug', '[a-z0-9]+(?:-[a-z0-9]+)*');
