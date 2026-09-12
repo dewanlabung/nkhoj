@@ -17,6 +17,7 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\MembershipController;
+use App\Domains\Membership\Http\Controllers\WebhookController;
 use App\Http\Controllers\PollController;
 use App\Http\Controllers\SocialPageController;
 
@@ -431,7 +432,7 @@ Route::post('/membership/{plan}/process', [MembershipController::class, 'process
 Route::post('/membership/cancel', [MembershipController::class, 'cancel'])->middleware('auth');
 
 // Stripe webhook (no auth/csrf)
-Route::post('/webhook/stripe', [MembershipController::class, 'webhook'])->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+Route::post('/webhook/stripe', [WebhookController::class, 'stripe'])->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 
 // Support Center (frontend — auth required)
 Route::middleware('auth')->prefix('support')->group(function () {
