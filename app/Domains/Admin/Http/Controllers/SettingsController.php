@@ -496,6 +496,20 @@ class SettingsController extends BaseAdminController
     public function updateEmailSettings(Request $request)
     {
         $this->requireAdmin();
+        $request->validate(['contact_email' => 'nullable|email|max:200']);
+        $s = $this->settings->get();
+        $s['email'] = array_merge($s['email'] ?? [], [
+            'verification'    => $request->boolean('email_verification'),
+            'contact_forward' => $request->boolean('contact_forward'),
+            'contact_email'   => $request->input('contact_email', ''),
+        ]);
+        $this->settings->save($s);
+        return back()->with('success', 'Email settings saved.');
+    }
+
+    public function updateSmtpSettings(Request $request)
+    {
+        $this->requireAdmin();
         $request->validate([
             'mail_host'     => 'nullable|string|max:200',
             'mail_port'     => 'nullable|integer|min:1|max:65535',
@@ -506,20 +520,16 @@ class SettingsController extends BaseAdminController
         ]);
         $s = $this->settings->get();
         $s['email'] = array_merge($s['email'] ?? [], [
-            'service'         => $request->input('mail_service', 'mailpit'),
-            'protocol'        => $request->input('mail_protocol', 'smtp'),
-            'encryption'      => $request->input('mail_encryption', 'tls'),
-            'host'            => $request->input('mail_host', ''),
-            'port'            => (int) $request->input('mail_port', 587),
-            'username'        => $request->input('mail_username', ''),
-            'password'        => $request->input('mail_password') ?: ($s['email']['password'] ?? ''),
-            'from_address'    => $request->input('mail_from', ''),
-            'reply_to'        => $request->input('reply_to', ''),
-            'title'           => $request->input('mail_title', config('app.name')),
-            'verification'    => $request->boolean('email_verification'),
-            'contact_forward' => $request->boolean('contact_forward'),
-            'contact_email'   => $request->input('contact_email', ''),
-            'template'        => $s['email']['template'] ?? 'pure-minimalist',
+            'service'      => $request->input('mail_service', 'mailpit'),
+            'protocol'     => $request->input('mail_protocol', 'smtp'),
+            'encryption'   => $request->input('mail_encryption', 'tls'),
+            'host'         => $request->input('mail_host', ''),
+            'port'         => (int) $request->input('mail_port', 587),
+            'username'     => $request->input('mail_username', ''),
+            'password'     => $request->input('mail_password') ?: ($s['email']['password'] ?? ''),
+            'from_address' => $request->input('mail_from', ''),
+            'reply_to'     => $request->input('reply_to', ''),
+            'title'        => $request->input('mail_title', config('app.name')),
         ]);
         $this->settings->save($s);
         config([
@@ -532,7 +542,7 @@ class SettingsController extends BaseAdminController
             'mail.from.address'            => $s['email']['from_address'] ?: config('mail.from.address'),
             'mail.from.name'               => $s['email']['title'] ?: config('app.name'),
         ]);
-        return back()->with('success', 'Email settings saved.');
+        return back()->with('success', 'SMTP settings saved.');
     }
 
     public function updateEmailTemplate(Request $request)

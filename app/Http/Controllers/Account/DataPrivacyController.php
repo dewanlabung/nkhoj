@@ -31,7 +31,7 @@ class DataPrivacyController extends Controller
 
         ExportAccountData::dispatch($user->id);
 
-        return back()->with('success', 'Export started. You will receive an email when it is ready.');
+        return back()->with('success', 'Export started. Refresh this page in a moment — a download link will appear here when ready (an email will also be sent if mail is configured).');
     }
 
     public function download(Request $request)

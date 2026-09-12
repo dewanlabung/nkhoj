@@ -49,14 +49,21 @@ class ExportAccountData implements ShouldQueue
             'data_export_ready_at' => now(),
         ]);
 
-        // Send email with download link
-        Mail::raw(
-            "Hi {$user->name},\n\nYour account data export is ready.\n\nDownload it here (valid 24 hours):\n" .
-            url("/account/export/download?token={$token}") .
-            "\n\nThis link expires after 24 hours.\n\n— Nkhoj",
-            function ($m) use ($user) {
-                $m->to($user->email)->subject('Your Nkhoj account data export is ready');
-            }
-        );
+        // Send email with download link — silently skip if SMTP is unavailable
+        try {
+            Mail::raw(
+                "Hi {$user->name},\n\nYour account data export is ready.\n\nDownload it here (valid 24 hours):\n" .
+                url("/account/export/download?token={$token}") .
+                "\n\nThis link expires after 24 hours.\n\n— Nkhoj",
+                function ($m) use ($user) {
+                    $m->to($user->email)->subject('Your Nkhoj account data export is ready');
+                }
+            );
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('ExportAccountData: email send failed', [
+                'user_id' => $user->id,
+                'error'   => $e->getMessage(),
+            ]);
+        }
     }
 }
