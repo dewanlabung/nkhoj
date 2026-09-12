@@ -2,6 +2,8 @@
 
 namespace App\Domains\QnA\Models;
 
+use App\Models\Category;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
