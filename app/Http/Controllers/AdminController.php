@@ -744,6 +744,12 @@ class AdminController extends Controller
     }
 
     // ── Settings ──────────────────────────────────────────────
+    public function settingsHub()
+    {
+        $this->requireAdmin();
+        return view('admin.settings-hub');
+    }
+
     public function settings()
     {
         $this->requireAdmin();

@@ -210,6 +210,8 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('/content-settings/ai',      [AdminController::class, 'updateAiSettings']);
     Route::post('/content-settings/auto-delete', [AdminController::class, 'updateAutoDelete']);
 
+    // Settings hub overview
+    Route::get('/settings-hub',                         [AdminController::class, 'settingsHub']);
     // Settings — main + granular sub-routes
     Route::get('/settings',                             [AdminController::class, 'settings']);
     Route::post('/settings',                            [AdminController::class, 'updateSettings']);
