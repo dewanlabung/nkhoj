@@ -4,6 +4,13 @@
 @section('content')
 @php
 $auth = $s['auth'] ?? [];
+
+/**
+ * Toggle macro — avoids the label+sr-only double-fire bug.
+ * The <label> wrapper sends a second click to the sr-only checkbox,
+ * which bubbles back to @click and reverses the state immediately.
+ * Solution: no <label>, @click on the pill div, @click.stop on the checkbox.
+ */
 @endphp
 
 @if(session('success'))
@@ -40,14 +47,14 @@ $auth = $s['auth'] ?? [];
                         <p class="text-sm font-semibold text-gray-700 dark:text-gray-200">Disable registration</p>
                         <p class="text-xs text-gray-400 mt-0.5">All registration-related functionality will be disabled and hidden from users.</p>
                     </div>
-                    <label class="flex items-center cursor-pointer flex-shrink-0 ml-4">
+                    <div class="flex-shrink-0 ml-4">
                         <input type="hidden" name="disable_registration" value="0">
-                        <div class="relative" @click="on = !on">
-                            <input type="checkbox" name="disable_registration" value="1" class="sr-only" :checked="on">
+                        <div class="relative w-12 h-6 cursor-pointer" @click="on = !on">
+                            <input type="checkbox" name="disable_registration" value="1" class="sr-only" :checked="on" @click.stop>
                             <div class="w-12 h-6 rounded-full transition-colors" :class="on ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-600'"></div>
                             <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform" :class="on ? 'translate-x-6' : ''"></div>
                         </div>
-                    </label>
+                    </div>
                 </div>
 
                 {{-- Require email confirmation --}}
@@ -57,14 +64,14 @@ $auth = $s['auth'] ?? [];
                         <p class="text-sm font-semibold text-gray-700 dark:text-gray-200">Require email confirmation</p>
                         <p class="text-xs text-gray-400 mt-0.5">Require newly registered users to validate their email address before being able to login.</p>
                     </div>
-                    <label class="flex items-center cursor-pointer flex-shrink-0 ml-4">
+                    <div class="flex-shrink-0 ml-4">
                         <input type="hidden" name="require_email_confirmation" value="0">
-                        <div class="relative" @click="on = !on">
-                            <input type="checkbox" name="require_email_confirmation" value="1" class="sr-only" :checked="on">
+                        <div class="relative w-12 h-6 cursor-pointer" @click="on = !on">
+                            <input type="checkbox" name="require_email_confirmation" value="1" class="sr-only" :checked="on" @click.stop>
                             <div class="w-12 h-6 rounded-full transition-colors" :class="on ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-600'"></div>
                             <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform" :class="on ? 'translate-x-6' : ''"></div>
                         </div>
-                    </label>
+                    </div>
                 </div>
 
             </div>
@@ -79,24 +86,21 @@ $auth = $s['auth'] ?? [];
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Configure general settings for social login.</p>
             </div>
             <div class="lg:col-span-3 p-6 space-y-5">
-
-                {{-- Social login requires existing account --}}
                 <div class="flex items-center justify-between"
                      x-data="{ on: {{ ($auth['social_login_require_account'] ?? false) ? 'true' : 'false' }} }">
                     <div>
                         <p class="text-sm font-semibold text-gray-700 dark:text-gray-200">Social login requires existing account</p>
                         <p class="text-xs text-gray-400 mt-0.5">Users will only be able to login via socials if they have connected it from their account settings page.</p>
                     </div>
-                    <label class="flex items-center cursor-pointer flex-shrink-0 ml-4">
+                    <div class="flex-shrink-0 ml-4">
                         <input type="hidden" name="social_login_require_account" value="0">
-                        <div class="relative" @click="on = !on">
-                            <input type="checkbox" name="social_login_require_account" value="1" class="sr-only" :checked="on">
+                        <div class="relative w-12 h-6 cursor-pointer" @click="on = !on">
+                            <input type="checkbox" name="social_login_require_account" value="1" class="sr-only" :checked="on" @click.stop>
                             <div class="w-12 h-6 rounded-full transition-colors" :class="on ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-600'"></div>
                             <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform" :class="on ? 'translate-x-6' : ''"></div>
                         </div>
-                    </label>
+                    </div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -115,14 +119,14 @@ $auth = $s['auth'] ?? [];
                         <p class="text-sm font-semibold text-gray-700 dark:text-gray-200">Single device login</p>
                         <p class="text-xs text-gray-400 mt-0.5">Logging in on a new device will automatically log out all other sessions.</p>
                     </div>
-                    <label class="flex items-center cursor-pointer flex-shrink-0 ml-4">
+                    <div class="flex-shrink-0 ml-4">
                         <input type="hidden" name="single_device_login" value="0">
-                        <div class="relative" @click="on = !on">
-                            <input type="checkbox" name="single_device_login" value="1" class="sr-only" :checked="on">
+                        <div class="relative w-12 h-6 cursor-pointer" @click="on = !on">
+                            <input type="checkbox" name="single_device_login" value="1" class="sr-only" :checked="on" @click.stop>
                             <div class="w-12 h-6 rounded-full transition-colors" :class="on ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-600'"></div>
                             <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform" :class="on ? 'translate-x-6' : ''"></div>
                         </div>
-                    </label>
+                    </div>
                 </div>
             </div>
         </div>
@@ -155,23 +159,21 @@ $auth = $s['auth'] ?? [];
             </div>
             <div class="lg:col-span-3 p-6 space-y-4">
 
-                {{-- Enable toggle --}}
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-semibold text-gray-700 dark:text-gray-200">Google login</p>
                         <p class="text-xs text-gray-400 mt-0.5">Enable logging into the site via Google.</p>
                     </div>
-                    <label class="flex items-center cursor-pointer flex-shrink-0 ml-4">
+                    <div class="flex-shrink-0 ml-4">
                         <input type="hidden" name="google_login_enabled" value="0">
-                        <div class="relative" @click="open = !open">
-                            <input type="checkbox" name="google_login_enabled" value="1" class="sr-only" :checked="open">
+                        <div class="relative w-12 h-6 cursor-pointer" @click="open = !open">
+                            <input type="checkbox" name="google_login_enabled" value="1" class="sr-only" :checked="open" @click.stop>
                             <div class="w-12 h-6 rounded-full transition-colors" :class="open ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-600'"></div>
                             <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform" :class="open ? 'translate-x-6' : ''"></div>
                         </div>
-                    </label>
+                    </div>
                 </div>
 
-                {{-- Credentials (shown when enabled) --}}
                 <div x-show="open" x-cloak class="space-y-3 border-t border-gray-50 dark:border-gray-700 pt-4">
                     <div>
                         <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 block mb-1.5">Google Client ID</label>
@@ -213,14 +215,14 @@ $auth = $s['auth'] ?? [];
                         <p class="text-sm font-semibold text-gray-700 dark:text-gray-200">Facebook login</p>
                         <p class="text-xs text-gray-400 mt-0.5">Enable logging into the site via Facebook.</p>
                     </div>
-                    <label class="flex items-center cursor-pointer flex-shrink-0 ml-4">
+                    <div class="flex-shrink-0 ml-4">
                         <input type="hidden" name="facebook_login_enabled" value="0">
-                        <div class="relative" @click="open = !open">
-                            <input type="checkbox" name="facebook_login_enabled" value="1" class="sr-only" :checked="open">
+                        <div class="relative w-12 h-6 cursor-pointer" @click="open = !open">
+                            <input type="checkbox" name="facebook_login_enabled" value="1" class="sr-only" :checked="open" @click.stop>
                             <div class="w-12 h-6 rounded-full transition-colors" :class="open ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-600'"></div>
                             <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform" :class="open ? 'translate-x-6' : ''"></div>
                         </div>
-                    </label>
+                    </div>
                 </div>
 
                 <div x-show="open" x-cloak class="space-y-3 border-t border-gray-50 dark:border-gray-700 pt-4">

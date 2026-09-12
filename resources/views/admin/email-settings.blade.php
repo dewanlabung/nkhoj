@@ -50,14 +50,14 @@ $active = $em['template'] ?? 'pure-minimalist';
                         <p class="text-sm font-semibold text-gray-700 dark:text-gray-200">Email Verification</p>
                         <p class="text-xs text-gray-400 mt-0.5">Require users to verify their email after registration.</p>
                     </div>
-                    <label class="flex items-center cursor-pointer flex-shrink-0 ml-4">
+                    <div class="flex-shrink-0 ml-4">
                         <input type="hidden" name="email_verification" value="0">
-                        <div class="relative" @click="on = !on">
-                            <input type="checkbox" name="email_verification" value="1" class="sr-only" :checked="on">
+                        <div class="relative w-12 h-6 cursor-pointer" @click="on = !on">
+                            <input type="checkbox" name="email_verification" value="1" class="sr-only" :checked="on" @click.stop>
                             <div class="w-12 h-6 rounded-full transition-colors" :class="on ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-600'"></div>
                             <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform" :class="on ? 'translate-x-6' : ''"></div>
                         </div>
-                    </label>
+                    </div>
                 </div>
 
                 {{-- Contact forward toggle --}}
@@ -66,14 +66,14 @@ $active = $em['template'] ?? 'pure-minimalist';
                         <p class="text-sm font-semibold text-gray-700 dark:text-gray-200">Send Contact Messages to Email Address</p>
                         <p class="text-xs text-gray-400 mt-0.5">Forward contact form submissions to an inbox.</p>
                     </div>
-                    <label class="flex items-center cursor-pointer flex-shrink-0 ml-4">
+                    <div class="flex-shrink-0 ml-4">
                         <input type="hidden" name="contact_forward" value="0">
-                        <div class="relative" @click="on = !on; showEmail = !showEmail">
-                            <input type="checkbox" name="contact_forward" value="1" class="sr-only" :checked="on">
+                        <div class="relative w-12 h-6 cursor-pointer" @click="on = !on; showEmail = !showEmail">
+                            <input type="checkbox" name="contact_forward" value="1" class="sr-only" :checked="on" @click.stop>
                             <div class="w-12 h-6 rounded-full transition-colors" :class="on ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-600'"></div>
                             <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform" :class="on ? 'translate-x-6' : ''"></div>
                         </div>
-                    </label>
+                    </div>
                 </div>
 
                 {{-- Contact email --}}
