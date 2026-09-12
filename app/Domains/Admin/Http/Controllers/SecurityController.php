@@ -3,12 +3,13 @@
 namespace App\Domains\Admin\Http\Controllers;
 
 use App\Models\LoginHistory;
-use App\Models\User;
+use App\Services\SiteSettingsService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class SecurityController extends BaseAdminController
 {
+    public function __construct(private SiteSettingsService $settings) {}
+
     // ── IP Ban Management ────────────────────────────────────────
 
     public function addBannedIp(Request $request)
@@ -30,7 +31,7 @@ class SecurityController extends BaseAdminController
             'reason' => 'nullable|string|max:255',
         ]);
 
-        $s = $this->settings->get();
+        $s      = $this->settings->get();
         $banned = $s['security']['banned_ips'] ?? [];
         $ip     = trim($data['ip']);
 
@@ -50,7 +51,7 @@ class SecurityController extends BaseAdminController
         $ip = trim($request->input('ip', ''));
         if (!$ip) return back()->with('error', 'No IP provided.');
 
-        $s = $this->settings->get();
+        $s      = $this->settings->get();
         $banned = $s['security']['banned_ips'] ?? [];
         $banned = array_values(array_filter($banned, fn($b) => trim($b) !== $ip));
 
@@ -66,13 +67,14 @@ class SecurityController extends BaseAdminController
     {
         $this->requireAdmin();
 
-        $recentThreats = LoginHistory::where('successful', false)
+        // Column is 'success', not 'successful'
+        $recentThreats = LoginHistory::where('success', false)
             ->where('created_at', '>=', now()->subDays(7))
             ->orderByDesc('created_at')
             ->limit(50)
             ->get(['ip_address', 'user_agent', 'created_at', 'user_id']);
 
-        $topAttackerIps = LoginHistory::where('successful', false)
+        $topAttackerIps = LoginHistory::where('success', false)
             ->where('created_at', '>=', now()->subDays(7))
             ->selectRaw('ip_address, COUNT(*) as attempts')
             ->groupBy('ip_address')
@@ -80,7 +82,7 @@ class SecurityController extends BaseAdminController
             ->limit(10)
             ->get();
 
-        $s = $this->settings->get();
+        $s         = $this->settings->get();
         $bannedIps = $s['security']['banned_ips'] ?? [];
 
         return view('admin.security-analysis', compact('recentThreats', 'topAttackerIps', 'bannedIps', 's'));
@@ -92,10 +94,10 @@ class SecurityController extends BaseAdminController
     {
         $this->requireAdmin();
         $data = $request->validate([
-            'rate_comments_per_minute'  => 'nullable|integer|min:1|max:1000',
-            'rate_posts_per_minute'     => 'nullable|integer|min:1|max:1000',
-            'rate_api_per_minute'       => 'nullable|integer|min:1|max:10000',
-            'rate_login_per_minute'     => 'nullable|integer|min:1|max:100',
+            'rate_comments_per_minute' => 'nullable|integer|min:1|max:1000',
+            'rate_posts_per_minute'    => 'nullable|integer|min:1|max:1000',
+            'rate_api_per_minute'      => 'nullable|integer|min:1|max:10000',
+            'rate_login_per_minute'    => 'nullable|integer|min:1|max:100',
         ]);
 
         $s = $this->settings->get();

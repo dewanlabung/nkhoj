@@ -24,25 +24,29 @@ return new class extends Migration {
         });
 
         // FAQ / pinned questions on a page (admin-curated)
-        Schema::create('page_faqs', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('social_page_id')->constrained('social_pages')->cascadeOnDelete();
-            $table->string('question', 300);
-            $table->text('answer');
-            $table->unsignedSmallInteger('display_order')->default(0);
-            $table->timestamps();
-            $table->index(['social_page_id', 'display_order']);
-        });
+        if (!Schema::hasTable('page_faqs')) {
+            Schema::create('page_faqs', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('social_page_id')->constrained('social_pages')->cascadeOnDelete();
+                $table->string('question', 300);
+                $table->text('answer');
+                $table->unsignedSmallInteger('display_order')->default(0);
+                $table->timestamps();
+                $table->index(['social_page_id', 'display_order']);
+            });
+        }
 
         // Milestones (auto-generated at follower thresholds)
-        Schema::create('page_milestones', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('social_page_id')->constrained('social_pages')->cascadeOnDelete();
-            $table->string('milestone_type', 40); // followers, years, posts
-            $table->unsignedBigInteger('milestone_value');
-            $table->timestamp('achieved_at');
-            $table->unique(['social_page_id', 'milestone_type', 'milestone_value']);
-        });
+        if (!Schema::hasTable('page_milestones')) {
+            Schema::create('page_milestones', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('social_page_id')->constrained('social_pages')->cascadeOnDelete();
+                $table->string('milestone_type', 40); // followers, years, posts
+                $table->unsignedBigInteger('milestone_value');
+                $table->timestamp('achieved_at');
+                $table->unique(['social_page_id', 'milestone_type', 'milestone_value']);
+            });
+        }
     }
 
     public function down(): void
