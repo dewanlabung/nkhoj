@@ -2,21 +2,5 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class CommentReaction extends Model
-{
-    public $timestamps = false;
-
-    protected $fillable = ['comment_id', 'user_id', 'session_key', 'emoji'];
-
-    protected function casts(): array
-    {
-        return ['created_at' => 'datetime'];
-    }
-
-    public function comment()
-    {
-        return $this->belongsTo(Comment::class);
-    }
-}
+/** @deprecated Use App\Domains\Blog\Models\CommentReaction directly. Shim kept for morph-type backward-compatibility. */
+class CommentReaction extends \App\Domains\Blog\Models\CommentReaction {}
