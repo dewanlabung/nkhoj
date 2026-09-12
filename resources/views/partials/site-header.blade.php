@@ -602,5 +602,6 @@
             </button>
         </div>
         @endguest
+        @endauth
     </div>
 </div>
