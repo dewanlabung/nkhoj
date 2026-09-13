@@ -2,6 +2,7 @@
 /public/hot
 /public/storage
 /public/build
+/public/tinymce
 /storage/*.key
 /storage/app/public/*
 storage/framework/cache/*

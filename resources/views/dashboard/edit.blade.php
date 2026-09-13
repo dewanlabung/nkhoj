@@ -101,11 +101,9 @@
                             Content <span class="text-red-400">*</span>
                         </label>
                     </div>
-                    <input type="hidden" id="body-hidden" name="body" value="{{ old('body', $bodyText) }}" required>
-                    <div data-tiptap-editor
-                         data-tiptap-target="body-hidden"
-                         data-tiptap-content="{{ old('body', $bodyText) }}"
-                         class="px-2 pb-2"></div>
+                    <textarea id="body-editor" name="body" rows="20" required
+                        placeholder="Start writing your article…"
+                        class="w-full text-sm border-0 outline-none focus:outline-none focus:ring-0 bg-transparent px-6 pb-6 dark:text-white leading-relaxed">{{ old('body', $bodyText) }}</textarea>
                 </div>
 
                 {{-- Sources --}}
@@ -434,5 +432,5 @@ function editForm() {
     }
 }
 </script>
-@vite('resources/js/islands/editor.jsx')
+@include('partials.tinymce', ['editorId' => 'body-editor', 'height' => 560])
 @endsection
