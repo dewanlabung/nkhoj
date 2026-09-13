@@ -38,6 +38,16 @@ class OutgoingMailCredentialsValidator
 
         $encryption = ($s['encryption'] ?? 'tls') === 'none' ? null : ($s['encryption'] ?? 'tls');
 
+        $fromAddress = $s['from_address'] ?? '';
+        if (empty($fromAddress) || $fromAddress === 'null') {
+            $fromAddress = config('mail.from.address', '');
+        }
+        // Construct a plausible from address from the SMTP host as last resort
+        if (empty($fromAddress) || $fromAddress === 'null') {
+            $host = preg_replace('/^(smtp\.|mail\.)/', '', ($s['host'] ?? 'example.com'));
+            $fromAddress = 'noreply@' . ($host ?: 'example.com');
+        }
+
         Config::set([
             'mail.default'                 => $mailer,
             'mail.mailers.smtp.host'       => $s['host'] ?? '',
@@ -45,7 +55,7 @@ class OutgoingMailCredentialsValidator
             'mail.mailers.smtp.encryption' => $encryption,
             'mail.mailers.smtp.username'   => $s['username'] ?? '',
             'mail.mailers.smtp.password'   => $s['password'] ?? '',
-            'mail.from.address'            => $s['from_address'] ?? config('mail.from.address'),
+            'mail.from.address'            => $fromAddress,
             'mail.from.name'               => $s['title'] ?? config('app.name'),
         ]);
 
