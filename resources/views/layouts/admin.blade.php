@@ -344,30 +344,6 @@
                 Settings
             </a>
 
-            {{-- SEO & Discovery --}}
-            <div x-data="{ open: {{ request()->is('admin/seo*') || request()->is('admin/google-news*') || request()->is('admin/rss-feeds*') ? 'true' : 'false' }} }">
-                <button @click="open = !open" class="sl w-full justify-between {{ request()->is('admin/seo*') || request()->is('admin/google-news*') || request()->is('admin/rss-feeds*') ? 'on' : '' }}">
-                    <span class="flex items-center gap-2.5">
-                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        SEO &amp; Discovery
-                    </span>
-                    <svg class="w-3.5 h-3.5 transition-transform" :class="open ? 'rotate-90' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                </button>
-                <div x-show="open" x-cloak class="ml-4 mt-0.5 space-y-0.5 border-l border-white/10 pl-3">
-                    <a href="/admin/seo" class="sl text-[12.5px] {{ request()->is('admin/seo*') ? 'on' : '' }}">
-                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        SEO Tools
-                    </a>
-                    <a href="/admin/google-news" class="sl text-[12.5px] {{ request()->is('admin/google-news*') ? 'on' : '' }}">
-                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 5c7.18 0 13 5.82 13 13M6 11a7 7 0 017 7m-6 0a1 1 0 11-2 0 1 1 0 012 0z"/></svg>
-                        Google News
-                    </a>
-                    <a href="/admin/rss-feeds" class="sl text-[12.5px] {{ request()->is('admin/rss-feeds*') ? 'on' : '' }}">
-                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h7"/></svg>
-                        RSS Feeds
-                    </a>
-                </div>
-            </div>
 
             <a href="/admin/logs" class="sl {{ request()->is('admin/logs*') ? 'on' : '' }}">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
