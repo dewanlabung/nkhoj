@@ -279,4 +279,16 @@ class User extends Authenticatable
         if ($this->isAdmin() || $this->isEditor()) return true;
         return $this->activeSubscription() !== null;
     }
+
+    public function isBanned(): bool
+    {
+        return (bool) $this->is_banned;
+    }
+
+    public function hasPermission(string $permission): bool
+    {
+        if ($this->isAdmin()) return true;
+        $extra = $this->extra_permissions ?? [];
+        return in_array($permission, $extra, true);
+    }
 }

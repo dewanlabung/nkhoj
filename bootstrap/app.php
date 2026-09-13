@@ -13,11 +13,13 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+            'verified'      => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+            'optional.auth' => \App\Http\Middleware\OptionalAuthenticate::class,
         ]);
         $middleware->web(append: [
             \App\Http\Middleware\TrackLastSeen::class,
             \App\Http\Middleware\CheckIpBan::class,
+            \App\Http\Middleware\ForbidBannedUser::class,
             \App\Http\Middleware\SecurityHeaders::class,
         ]);
     })
