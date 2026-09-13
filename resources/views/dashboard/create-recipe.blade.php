@@ -131,9 +131,11 @@
                         </label>
                         <p class="text-xs text-gray-400 mb-3">Step-by-step cooking instructions. You can use the editor toolbar to add images, numbered lists, and formatting.</p>
                     </div>
-                    <textarea id="body-editor" name="body" rows="20" required
-                        placeholder="Step 1: Preheat the oven…"
-                        class="w-full text-sm border-0 outline-none focus:outline-none focus:ring-0 bg-transparent px-6 pb-6 dark:text-white leading-relaxed">{{ old('body') }}</textarea>
+                    <input type="hidden" id="body-hidden" name="body" value="{{ old('body') }}" required>
+                    <div data-tiptap-editor
+                         data-tiptap-target="body-hidden"
+                         data-tiptap-content="{{ old('body') }}"
+                         class="px-2 pb-2"></div>
                 </div>
 
                 {{-- Tips & Notes --}}
@@ -389,5 +391,5 @@ function recipeForm() {
     }
 }
 </script>
-@include('partials.tinymce', ['editorId' => 'body-editor', 'height' => 520])
+@vite('resources/js/islands/editor.jsx')
 @endsection

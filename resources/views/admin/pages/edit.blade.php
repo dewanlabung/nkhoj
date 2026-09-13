@@ -35,8 +35,10 @@
                 </div>
                 <div>
                     <label class="text-xs font-semibold text-gray-600 dark:text-gray-400 block mb-1.5">Content</label>
-                    <textarea id="page-content-editor" name="content" rows="12"
-                        class="w-full text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-y">{{ old('content', $page->content) }}</textarea>
+                    <input type="hidden" id="page-content-hidden" name="content" value="{{ old('content', $page->content) }}">
+                    <div data-tiptap-editor
+                         data-tiptap-target="page-content-hidden"
+                         data-tiptap-content="{{ old('content', $page->content) }}"></div>
                 </div>
             </div>
         </div>
@@ -103,6 +105,6 @@
     </form>
 </div>
 @push('scripts')
-@include('partials.tinymce', ['editorId' => 'page-content-editor', 'height' => 420])
+@vite('resources/js/islands/editor.jsx')
 @endpush
 @endsection
