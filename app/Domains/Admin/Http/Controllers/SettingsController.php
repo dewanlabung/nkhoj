@@ -96,6 +96,26 @@ class SettingsController extends BaseAdminController
         return back()->with('success', 'Analytics settings saved.');
     }
 
+    public function appearance()
+    {
+        $this->requireAdmin();
+        return view('admin.appearance', ['s' => $this->settings->get()]);
+    }
+
+    public function updateAppearance(Request $request)
+    {
+        $this->requireAdmin();
+        $request->validate([
+            'brand_color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'custom_css'  => 'nullable|string|max:65535',
+        ]);
+        $s = $this->settings->get();
+        $s['appearance']['brand_color'] = $request->input('brand_color', '#6366f1');
+        $s['appearance']['custom_css']  = $request->input('custom_css', '');
+        $this->settings->save($s);
+        return back()->with('success', 'Appearance saved.');
+    }
+
     public function authSettings()
     {
         $this->requireAdmin();
