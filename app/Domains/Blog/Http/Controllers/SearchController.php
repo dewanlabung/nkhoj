@@ -68,7 +68,7 @@ class SearchController extends Controller
             $ft   = $query; // for MATCH…AGAINST
 
             $counts['posts'] = Post::published()
-                ->where(fn($q) => $q->whereRaw('MATCH(title,body) AGAINST(? IN BOOLEAN MODE)', [$ft])
+                ->where(fn($q) => $q->whereRaw('MATCH(title,excerpt) AGAINST(? IN BOOLEAN MODE)', [$ft])
                     ->orWhere('title', 'like', $like))
                 ->count();
 
@@ -113,7 +113,7 @@ class SearchController extends Controller
             $results = match ($type) {
                 'posts' => Post::with(['author', 'category', 'tags'])
                     ->published()
-                    ->where(fn($q) => $q->whereRaw('MATCH(title,body) AGAINST(? IN BOOLEAN MODE)', [$ft])
+                    ->where(fn($q) => $q->whereRaw('MATCH(title,excerpt) AGAINST(? IN BOOLEAN MODE)', [$ft])
                         ->orWhere('title', 'like', $like))
                     ->orderByRaw("CASE WHEN title LIKE ? THEN 0 ELSE 1 END", [$like])
                     ->orderByDesc('published_at')
@@ -228,7 +228,7 @@ class SearchController extends Controller
         return [
             'posts' => Post::with(['author', 'category'])
                 ->published()
-                ->where(fn($q) => $q->whereRaw('MATCH(title,body) AGAINST(? IN BOOLEAN MODE)', [$ft])
+                ->where(fn($q) => $q->whereRaw('MATCH(title,excerpt) AGAINST(? IN BOOLEAN MODE)', [$ft])
                     ->orWhere('title', 'like', $like))
                 ->orderByRaw("CASE WHEN title LIKE ? THEN 0 ELSE 1 END", [$like])
                 ->orderByDesc('published_at')
