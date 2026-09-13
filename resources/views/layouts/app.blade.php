@@ -85,6 +85,38 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+    @php
+        $__brandHex = $__s['appearance']['brand_color'] ?? '#6366f1';
+        // Generate shade palette from base hex
+        function __hexToHsl(string $hex): array {
+            $hex = ltrim($hex, '#');
+            $r = hexdec(substr($hex,0,2))/255; $g = hexdec(substr($hex,2,2))/255; $b = hexdec(substr($hex,4,2))/255;
+            $max = max($r,$g,$b); $min = min($r,$g,$b); $l = ($max+$min)/2;
+            if ($max === $min) { $h = $s = 0; } else {
+                $d = $max-$min; $s = $l > 0.5 ? $d/(2-$max-$min) : $d/($max+$min);
+                $h = match(true) { $max===$r => ($g-$b)/$d + ($g<$b?6:0), $max===$g => ($b-$r)/$d+2, default => ($r-$g)/$d+4 };
+                $h /= 6;
+            }
+            return [round($h*360), round($s*100), round($l*100)];
+        }
+        function __hslToHex(int $h, int $s, int $l): string {
+            $s/=100; $l/=100; $c=(1-abs(2*$l-1))*$s; $x=$c*(1-abs(fmod($h/60,2)-1)); $m=$l-$c/2;
+            if ($h<60){$r=$c;$g=$x;$b=0;}elseif($h<120){$r=$x;$g=$c;$b=0;}elseif($h<180){$r=0;$g=$c;$b=$x;}
+            elseif($h<240){$r=0;$g=$x;$b=$c;}elseif($h<300){$r=$x;$g=0;$b=$c;}else{$r=$c;$g=0;$b=$x;}
+            return sprintf('#%02x%02x%02x',round(($r+$m)*255),round(($g+$m)*255),round(($b+$m)*255));
+        }
+        [$__h, $__s, $__l] = __hexToHsl($__brandHex);
+        $__brand = [
+            50  => __hslToHex($__h, max(0,$__s-20), min(98,$__l+44)),
+            100 => __hslToHex($__h, max(0,$__s-10), min(96,$__l+38)),
+            200 => __hslToHex($__h, $__s,            min(92,$__l+28)),
+            500 => $__brandHex,
+            600 => __hslToHex($__h, min(100,$__s+5), max(5,$__l-8)),
+            700 => __hslToHex($__h, min(100,$__s+8), max(5,$__l-18)),
+            900 => __hslToHex($__h, min(100,$__s+10),max(5,$__l-32)),
+        ];
+        $__customCss = $__s['appearance']['custom_css'] ?? '';
+    @endphp
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -96,12 +128,18 @@
                         nepali: ['Noto Sans Devanagari', 'sans-serif'],
                     },
                     colors: {
-                        brand: { 50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',500:'#6366f1',600:'#4f46e5',700:'#4338ca',900:'#312e81' }
+                        brand: {
+                            50:'{{ $__brand[50] }}',100:'{{ $__brand[100] }}',200:'{{ $__brand[200] }}',
+                            500:'{{ $__brand[500] }}',600:'{{ $__brand[600] }}',700:'{{ $__brand[700] }}',900:'{{ $__brand[900] }}'
+                        }
                     }
                 }
             }
         }
     </script>
+    @if($__customCss)
+    <style id="site-custom-css">{!! $__customCss !!}</style>
+    @endif
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/intersect@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
