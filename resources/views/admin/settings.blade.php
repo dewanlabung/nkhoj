@@ -56,11 +56,31 @@ $tabs = [
 ];
 @endphp
 
-<div class="flex gap-6" x-data="{ tab: new URLSearchParams(window.location.search).get('tab') || 'general' }">
+<div class="flex flex-col md:flex-row gap-4 md:gap-6" x-data="{ tab: new URLSearchParams(window.location.search).get('tab') || 'general' }">
 
-    {{-- ── LEFT SIDEBAR ──────────────────────────────────────── --}}
-    <div class="w-52 flex-shrink-0">
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden sticky top-6">
+    {{-- ── TAB NAV: horizontal strip on mobile, vertical sidebar on md+ ── --}}
+    <div class="md:w-52 md:flex-shrink-0">
+
+        {{-- Mobile: horizontal scrollable strip --}}
+        <div class="md:hidden bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto">
+            <nav class="flex min-w-max">
+                @foreach($tabs as $key => $t)
+                <button @click="tab = '{{ $key }}'; history.replaceState(null,'','?tab={{ $key }}')"
+                    :class="tab === '{{ $key }}'
+                        ? 'text-brand-600 dark:text-brand-400 border-b-2 border-brand-500 font-semibold'
+                        : 'text-gray-500 dark:text-gray-400 border-b-2 border-transparent'"
+                    class="flex flex-col items-center gap-1 px-4 py-3 text-[11px] whitespace-nowrap transition-colors">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="{{ $t['icon'] }}"/>
+                    </svg>
+                    {{ $t['label'] }}
+                </button>
+                @endforeach
+            </nav>
+        </div>
+
+        {{-- Desktop: sticky vertical sidebar --}}
+        <div class="hidden md:block bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden sticky top-6">
             <p class="px-4 pt-4 pb-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Configuration</p>
             <nav class="pb-2">
                 @foreach($tabs as $key => $t)
