@@ -146,7 +146,7 @@ class UserController extends BaseAdminController
         if ($user->id === auth()->id()) return back()->with('error', 'Cannot impersonate yourself.');
         session(['impersonating_admin_id' => auth()->id()]);
         auth()->loginUsingId($id);
-        return redirect('/')->with('info', 'You are now logged in as ' . $user->name . '. <a href="/admin/users/stop-impersonating" class="underline font-semibold">Return to Admin</a>');
+        return redirect('/');
     }
 
     public function stopImpersonating()

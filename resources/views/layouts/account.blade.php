@@ -80,6 +80,18 @@
 
 @include('partials.site-header')
 
+{{-- Impersonation banner --}}
+@if(session('impersonating_admin_id'))
+<div class="bg-amber-500 text-white px-4 py-2 flex items-center justify-center gap-4 text-sm font-medium z-50 sticky top-0">
+    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+    <span>You are logged in as <strong>{{ auth()->user()->name }}</strong></span>
+    <a href="/admin/users/stop-impersonating"
+       class="bg-white/20 hover:bg-white/30 transition-colors px-3 py-1 rounded-full text-xs font-bold">
+        Return to Admin
+    </a>
+</div>
+@endif
+
 <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
     <div class="flex flex-col lg:flex-row gap-6">
 
