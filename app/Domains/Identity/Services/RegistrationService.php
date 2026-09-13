@@ -3,6 +3,7 @@
 namespace App\Domains\Identity\Services;
 
 use App\Models\User;
+use App\Events\UserCreated;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -20,6 +21,8 @@ class RegistrationService
             'role'             => 'author',
             'email_verified_at' => $requireEmailConfirmation ? null : now(),
         ]);
+
+        event(new UserCreated($user, $data));
 
         if ($requireEmailConfirmation) {
             event(new Registered($user));

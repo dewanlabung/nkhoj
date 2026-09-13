@@ -77,9 +77,9 @@ class User extends Authenticatable
 
     public function displayName(): string
     {
-        if ($this->first_name || $this->last_name) {
-            return trim($this->first_name . ' ' . $this->last_name);
-        }
+        if ($this->username) return $this->username;
+        $full = trim($this->first_name . ' ' . $this->last_name);
+        if ($full) return $full;
         return $this->name;
     }
 
@@ -207,6 +207,36 @@ class User extends Authenticatable
         return $this->hasMany(\App\Models\NotificationPreference::class);
     }
 
+    public function otpCodes()
+    {
+        return $this->hasMany(\App\Models\OtpCode::class);
+    }
+
+    public function emailVerificationOtpIsValid(string $code): bool
+    {
+        $otp = $this->otpCodes()
+            ->where('type', 'email_verification')
+            ->first();
+
+        return $otp && $otp->code === $code && !$otp->isExpired();
+    }
+
+    public function sendEmailVerificationNotification(): void
+    {
+        $otp = \App\Models\OtpCode::createForEmailVerification($this);
+        $this->notify(new \App\Notifications\VerifyEmailWithOtpNotification($otp->code));
+    }
+
+    public function bans()
+    {
+        return $this->morphMany(\App\Models\Ban::class, 'bannable');
+    }
+
+    public function activeBan(): ?\App\Models\Ban
+    {
+        return $this->bans()->active()->latest()->first();
+    }
+
     public function isPendingDeletion(): bool
     {
         return $this->deletion_requested_at !== null;
@@ -295,7 +325,8 @@ class User extends Authenticatable
 
     public function isBanned(): bool
     {
-        return (bool) $this->is_banned;
+        // Check the bans table first (timed/permanent bans); fall back to legacy boolean
+        return $this->bans()->active()->exists() || (bool) $this->is_banned;
     }
 
     public function hasPermission(string $permission): bool

@@ -146,6 +146,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::delete('/users/{id}',                  [AdminUser::class, 'deleteUser']);
     Route::post('/users/{id}/role',               [AdminUser::class, 'updateUserRole']);
     Route::post('/users/{id}/ban',                [AdminUser::class, 'banUser']);
+    Route::get('/users/export/csv',              [AdminUser::class, 'exportCsv']);
     Route::post('/users/{id}/verify-email',       [AdminUser::class, 'verifyEmail']);
     Route::post('/users/{id}/reward-system',      [AdminUser::class, 'toggleRewardSystem']);
     Route::post('/users/{id}/impersonate',        [AdminUser::class, 'impersonate']);

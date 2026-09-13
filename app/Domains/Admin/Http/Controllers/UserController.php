@@ -2,6 +2,9 @@
 
 namespace App\Domains\Admin\Http\Controllers;
 
+use App\Events\UserBanned;
+use App\Events\UsersDeleted;
+use App\Models\Ban;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -102,7 +105,9 @@ class UserController extends BaseAdminController
         $user = User::findOrFail($id);
         if ($user->id === auth()->id()) return back()->with('error', 'Cannot delete yourself.');
         if ($user->role === 'admin')    return back()->with('error', 'Cannot delete an admin account.');
+        $users = collect([$user]);
         $user->delete();
+        event(new UsersDeleted($users));
         return redirect('/admin/users')->with('success', 'User deleted.');
     }
 
@@ -139,6 +144,24 @@ class UserController extends BaseAdminController
         return back()->with('success', 'Permissions updated.');
     }
 
+    public function exportCsv()
+    {
+        $this->requireAdmin();
+        $columns = ['id', 'name', 'username', 'email', 'role', 'is_banned', 'email_verified_at', 'created_at'];
+        $filename = 'users_' . now()->format('YmdHis') . '.csv';
+
+        return response()->streamDownload(function () use ($columns) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, $columns);
+            User::select($columns)->orderBy('id')->chunk(200, function ($users) use ($out, $columns) {
+                foreach ($users as $user) {
+                    fputcsv($out, array_map(fn($c) => $user->$c ?? '', $columns));
+                }
+            });
+            fclose($out);
+        }, $filename, ['Content-Type' => 'text/csv']);
+    }
+
     public function impersonate(int $id)
     {
         $this->requireAdmin();
@@ -146,7 +169,7 @@ class UserController extends BaseAdminController
         if ($user->id === auth()->id()) return back()->with('error', 'Cannot impersonate yourself.');
         session(['impersonating_admin_id' => auth()->id()]);
         auth()->loginUsingId($id);
-        return redirect('/')->with('info', 'You are now logged in as ' . $user->name . '. <a href="/admin/users/stop-impersonating" class="underline font-semibold">Return to Admin</a>');
+        return redirect('/');
     }
 
     public function stopImpersonating()
@@ -170,8 +193,31 @@ class UserController extends BaseAdminController
         $this->requireAdmin();
         $user = User::findOrFail($id);
         if ($user->id === auth()->id()) return back()->with('error', 'Cannot ban yourself.');
-        $user->update(['is_banned' => !($user->is_banned ?? false)]);
-        return back()->with('success', $user->is_banned ? 'User banned.' : 'User unbanned.');
+        if ($user->role === 'admin')    return back()->with('error', 'Cannot ban an admin account.');
+
+        if ($user->isBanned()) {
+            // Unban: delete all active bans and clear is_banned
+            $user->bans()->delete();
+            $user->update(['is_banned' => false]);
+            return back()->with('success', 'User unbanned.');
+        }
+
+        $data = request()->validate([
+            'comment'    => 'nullable|string|max:255',
+            'ban_until'  => 'nullable|date|after:now',
+            'permanent'  => 'nullable|boolean',
+        ]);
+
+        $ban = $user->bans()->create([
+            'comment'        => $data['comment'] ?? null,
+            'expired_at'     => ($data['permanent'] ?? true) ? null : ($data['ban_until'] ?? null),
+            'created_by_id'  => auth()->id(),
+        ]);
+
+        $user->update(['is_banned' => true]);
+        event(new UserBanned($user, $ban));
+
+        return back()->with('success', 'User banned.');
     }
 
     // ── Roles ─────────────────────────────────────────────────

@@ -28,6 +28,12 @@ Schedule::command('stories:purge-expired')->hourly();
 // Clean old log table entries
 Schedule::command('logs:clean')->daily();
 
+// Purge expired ban records (timed bans whose expiry has passed)
+Schedule::command('bans:delete-expired')->daily();
+
+// Purge expired OTP verification codes
+Schedule::command('otp:delete-expired')->hourly();
+
 // ── Schedule monitoring ─────────────────────────────────────────────────────
 // Attach before/after hooks to every scheduled event to record run history.
 app()->booted(function () {

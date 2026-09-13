@@ -26,6 +26,21 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
+        // Check domain blacklist before attempting auth
+        $domain = strtolower(substr(strrchr($credentials['email'], '@'), 1));
+        $blacklist = array_filter(array_map('trim', explode(',', $this->authSettings()['domain_blacklist'] ?? '')));
+        if ($blacklist && in_array($domain, $blacklist, true)) {
+            return back()->withErrors(['email' => 'Registration is not allowed from this email domain.']);
+        }
+
+        // Check if user is banned before auth attempt (shows reason)
+        $candidate = User::where('email', $credentials['email'])->first();
+        if ($candidate?->isBanned()) {
+            $comment = $candidate->activeBan()?->comment;
+            $message = $comment ? 'Account suspended: ' . $comment : 'Your account has been suspended.';
+            return back()->withErrors(['email' => $message]);
+        }
+
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
             $user = Auth::user();
