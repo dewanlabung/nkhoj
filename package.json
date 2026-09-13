@@ -15,6 +15,14 @@
         "vite": "^5.4.11"
     },
     "dependencies": {
-        "alpinejs": "^3.14.3"
+        "@tiptap/extension-character-count": "^3.31.3",
+        "@tiptap/extension-image": "^3.31.3",
+        "@tiptap/extension-placeholder": "^3.31.3",
+        "@tiptap/react": "^3.31.3",
+        "@tiptap/starter-kit": "^3.31.3",
+        "@vitejs/plugin-react": "^4.7.0",
+        "alpinejs": "^3.14.3",
+        "react": "^19.3.0",
+        "react-dom": "^19.3.0"
     }
 }
