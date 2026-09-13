@@ -12,7 +12,7 @@
         <a href="/profile/{{ $user->username }}">
             <p class="font-semibold text-sm text-gray-900">{{ $user->name }}</p>
         </a>
-        <p class="text-xs text-brand-500">@{{ $user->username }}</p>
+        <p class="text-xs text-brand-500">{{ '@' . $user->username }}</p>
         @if($user->bio)
         <p class="text-xs text-gray-400 mt-0.5 line-clamp-1">{{ $user->bio }}</p>
         @endif
