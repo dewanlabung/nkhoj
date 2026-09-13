@@ -69,7 +69,6 @@ _common_ref/
 .claude/Validation/
 .claude/Votes/
 .claude/Workspaces/
-.claude/common/
 .claude/common.zip
 .claude/helpers.php
 .claude/routes/
