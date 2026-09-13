@@ -25,13 +25,14 @@ class OtpCode extends Model
         return $this->expires_at->isPast();
     }
 
-    public static function createForEmailVerification(User $user): self
+    public static function createForEmailVerification(User|int $user): self
     {
+        $userId = $user instanceof User ? $user->id : $user;
         // Invalidate any existing OTP for this user + type before creating a new one
-        self::where('user_id', $user->id)->where('type', 'email_verification')->delete();
+        self::where('user_id', $userId)->where('type', 'email_verification')->delete();
 
         return self::create([
-            'user_id'    => $user->id,
+            'user_id'    => $userId,
             'code'       => str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT),
             'type'       => 'email_verification',
             'expires_at' => now()->addMinutes(30),

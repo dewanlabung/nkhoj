@@ -212,6 +212,21 @@ class User extends Authenticatable
         return $this->hasMany(\App\Models\OtpCode::class);
     }
 
+    public function emailVerificationOtpIsValid(string $code): bool
+    {
+        $otp = $this->otpCodes()
+            ->where('type', 'email_verification')
+            ->first();
+
+        return $otp && $otp->code === $code && !$otp->isExpired();
+    }
+
+    public function sendEmailVerificationNotification(): void
+    {
+        $otp = \App\Models\OtpCode::createForEmailVerification($this);
+        $this->notify(new \App\Notifications\VerifyEmailWithOtpNotification($otp->code));
+    }
+
     public function bans()
     {
         return $this->morphMany(\App\Models\Ban::class, 'bannable');
