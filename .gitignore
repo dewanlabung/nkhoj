@@ -38,4 +38,38 @@ Thumbs.db
 !storage/framework/sessions/.gitkeep
 !storage/framework/views/.gitkeep
 !storage/logs/.gitkeep
+
+# Local Vebto common package reference (not committed)
 _common_ref/
+
+# .claude/ Vebto reference files — local only, do not commit from feature branches
+# (these files live on master; ignore the extracted copies here)
+.claude/Admin/
+.claude/Auth/
+.claude/Billing/
+.claude/Channels/
+.claude/Comments/
+.claude/CommonServiceProvider.php
+.claude/Core/
+.claude/Csv/
+.claude/Database/
+.claude/Domains/
+.claude/Files/
+.claude/Generators/
+.claude/Localizations/
+.claude/Logging/
+.claude/Notifications/
+.claude/Pages/
+.claude/Reports/
+.claude/SSR/
+.claude/Search/
+.claude/ServerTiming/
+.claude/Settings/
+.claude/Tags/
+.claude/Validation/
+.claude/Votes/
+.claude/Workspaces/
+.claude/common/
+.claude/common.zip
+.claude/helpers.php
+.claude/routes/

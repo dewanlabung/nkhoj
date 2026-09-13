@@ -3,8 +3,10 @@
 namespace App\Domains\Admin\Http\Controllers;
 
 use App\Models\Widget;
+use App\Services\DotEnvEditor;
 use App\Services\SiteSettingsService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
@@ -138,6 +140,17 @@ class SettingsController extends BaseAdminController
         $s['auth']['facebook_client_id']          = $request->input('facebook_client_id', '');
         $s['auth']['facebook_client_secret']      = $request->input('facebook_client_secret', '');
         $this->settings->save($s);
+
+        // Persist OAuth credentials to .env for config:cache compatibility
+        $auth = $s['auth'];
+        (new DotEnvEditor())->write(array_filter([
+            'GOOGLE_CLIENT_ID'       => $auth['google_client_id'] ?: null,
+            'GOOGLE_CLIENT_SECRET'   => $auth['google_client_secret'] ?: null,
+            'FACEBOOK_CLIENT_ID'     => $auth['facebook_client_id'] ?: null,
+            'FACEBOOK_CLIENT_SECRET' => $auth['facebook_client_secret'] ?: null,
+        ]));
+        try { Artisan::call('config:clear'); } catch (\Throwable) {}
+
         return back()->with('success', 'Authentication settings saved.');
     }
 
@@ -577,16 +590,44 @@ class SettingsController extends BaseAdminController
             'title'        => $request->input('mail_title', config('app.name')),
         ]);
         $this->settings->save($s);
-        config([
-            'mail.default'                 => $s['email']['protocol'] === 'smtp' ? 'smtp' : 'sendmail',
-            'mail.mailers.smtp.host'       => $s['email']['host'],
-            'mail.mailers.smtp.port'       => $s['email']['port'],
-            'mail.mailers.smtp.encryption' => $s['email']['encryption'] === 'none' ? null : $s['email']['encryption'],
-            'mail.mailers.smtp.username'   => $s['email']['username'],
-            'mail.mailers.smtp.password'   => $s['email']['password'],
-            'mail.from.address'            => $s['email']['from_address'] ?: config('mail.from.address'),
-            'mail.from.name'               => $s['email']['title'] ?: config('app.name'),
+
+        $em = $s['email'];
+        $mailer = match($em['service'] ?? 'smtp') {
+            'gmail-api' => 'gmail-api',
+            'mailgun'   => 'mailgun',
+            'ses'       => 'ses',
+            'sendmail'  => 'sendmail',
+            default     => 'smtp',
+        };
+        $encryption = ($em['encryption'] ?? 'tls') === 'none' ? null : ($em['encryption'] ?? 'tls');
+
+        // Persist to .env so credentials survive config:cache rebuilds
+        (new DotEnvEditor())->write([
+            'MAIL_MAILER'       => $mailer,
+            'MAIL_HOST'         => $em['host'] ?: 'null',
+            'MAIL_PORT'         => $em['port'] ?: 587,
+            'MAIL_USERNAME'     => $em['username'] ?: 'null',
+            'MAIL_PASSWORD'     => $em['password'] ?: 'null',
+            'MAIL_ENCRYPTION'   => $encryption ?: 'null',
+            'MAIL_FROM_ADDRESS' => $em['from_address'] ?: 'null',
+            'MAIL_FROM_NAME'    => $em['title'] ?: config('app.name'),
         ]);
+
+        // Apply to running config immediately
+        config([
+            'mail.default'                 => $mailer,
+            'mail.mailers.smtp.host'       => $em['host'],
+            'mail.mailers.smtp.port'       => $em['port'],
+            'mail.mailers.smtp.encryption' => $encryption,
+            'mail.mailers.smtp.username'   => $em['username'],
+            'mail.mailers.smtp.password'   => $em['password'],
+            'mail.from.address'            => $em['from_address'] ?: config('mail.from.address'),
+            'mail.from.name'               => $em['title'] ?: config('app.name'),
+        ]);
+
+        // Clear config cache so .env changes take effect on next request
+        try { Artisan::call('config:clear'); } catch (\Throwable) {}
+
         return back()->with('success', 'SMTP settings saved.');
     }
 
