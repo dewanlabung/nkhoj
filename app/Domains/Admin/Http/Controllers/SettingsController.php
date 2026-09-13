@@ -4,6 +4,7 @@ namespace App\Domains\Admin\Http\Controllers;
 
 use App\Models\Widget;
 use App\Services\DotEnvEditor;
+use App\Services\OutgoingMailCredentialsValidator;
 use App\Services\SiteSettingsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -631,6 +632,22 @@ class SettingsController extends BaseAdminController
         return back()->with('success', 'SMTP settings saved.');
     }
 
+    public function testSmtpConnection(Request $request)
+    {
+        $this->requireAdmin();
+        $s = $this->settings->get();
+        $em = $s['email'] ?? [];
+
+        $recipient = auth()->user()->email;
+        $error = (new OutgoingMailCredentialsValidator())->validate($em, $recipient);
+
+        if ($error) {
+            return back()->with('error', $error);
+        }
+
+        return back()->with('success', 'Test email sent to ' . $recipient . '. Check your inbox.');
+    }
+
     public function updateEmailTemplate(Request $request)
     {
         $this->requireAdmin();
@@ -644,14 +661,17 @@ class SettingsController extends BaseAdminController
     {
         $this->requireAdmin();
         $request->validate(['test_email' => 'required|email']);
-        try {
-            \Mail::raw('This is a test email from ' . config('app.name') . '. Your mail configuration is working correctly.', function ($m) use ($request) {
-                $m->to($request->test_email)->subject('Test Email – ' . config('app.name'));
-            });
-            return back()->with('success', 'Test email sent to ' . $request->test_email);
-        } catch (\Throwable $e) {
-            return back()->with('error', 'Failed: ' . $e->getMessage());
+
+        $s  = $this->settings->get();
+        $em = $s['email'] ?? [];
+
+        $error = (new OutgoingMailCredentialsValidator())->validate($em, $request->test_email);
+
+        if ($error) {
+            return back()->with('error', $error);
         }
+
+        return back()->with('success', 'Test email sent to ' . $request->test_email . '. Check your inbox.');
     }
 
     // ── Deploy ─────────────────────────────────────────────────
