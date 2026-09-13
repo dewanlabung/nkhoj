@@ -3,7 +3,7 @@
 namespace App\Domains\QnA\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-
+use App\Traits\SavesOptimizedThumbnail;
 use Illuminate\Http\Request;
 use App\Models\Question;
 use App\Models\Answer;
@@ -20,6 +20,7 @@ use Illuminate\Support\Str;
 
 class QuestionController extends Controller
 {
+    use SavesOptimizedThumbnail;
     private function sidebarData(): array
     {
         return [
@@ -200,7 +201,7 @@ class QuestionController extends Controller
 
         $imagePath = null;
         if ($request->hasFile('featured_image')) {
-            $imagePath = $request->file('featured_image')->store('questions', 'public');
+            $imagePath = $this->saveOptimizedThumbnail($request->file('featured_image'), 'questions');
         }
 
         $question = Question::create([
@@ -515,7 +516,7 @@ class QuestionController extends Controller
         }
 
         if ($request->hasFile('featured_image')) {
-            $question->featured_image = $request->file('featured_image')->store('questions', 'public');
+            $question->featured_image = $this->saveOptimizedThumbnail($request->file('featured_image'), 'questions');
         }
 
         $question->fill([

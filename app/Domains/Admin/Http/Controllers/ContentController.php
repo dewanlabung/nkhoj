@@ -201,38 +201,70 @@ class ContentController extends BaseAdminController
 
     // ── Media ──────────────────────────────────────────────────
 
-    public function media()
+    public function media(Request $request)
     {
         $this->requireAdmin();
-        $dir   = public_path('uploads');
-        $files = [];
-        $total = 0;
-        if (File::exists($dir)) {
-            foreach (File::files($dir) as $f) {
+        $baseDir  = public_path('uploads');
+        $folders  = ['posts', 'events', 'pages', 'questions', 'recipes', 'profiles', 'stories', 'reels/thumbs'];
+        $folder   = $request->query('folder', '');
+        $files    = [];
+        $total    = 0;
+
+        $scanDir = $folder && in_array($folder, $folders)
+            ? $baseDir . '/' . $folder
+            : $baseDir;
+
+        if (File::exists($scanDir)) {
+            $allFiles = $folder ? File::files($scanDir) : File::allFiles($scanDir);
+            foreach ($allFiles as $f) {
                 $size    = $f->getSize();
                 $total  += $size;
-                $files[] = ['name' => $f->getFilename(), 'ext' => strtolower($f->getExtension()), 'size' => $this->formatBytes($size), 'modified' => $f->getMTime()];
+                $relPath = ltrim(str_replace($baseDir, '', $f->getRealPath()), '/\\');
+                $files[] = [
+                    'name'     => $f->getFilename(),
+                    'rel_path' => $relPath,
+                    'folder'   => dirname($relPath) === '.' ? '' : dirname($relPath),
+                    'url'      => '/uploads/' . str_replace('\\', '/', $relPath),
+                    'ext'      => strtolower($f->getExtension()),
+                    'size'     => $this->formatBytes($size),
+                    'modified' => $f->getMTime(),
+                ];
             }
             usort($files, fn($a, $b) => $b['modified'] - $a['modified']);
         }
-        return view('admin.media', ['files' => $files, 'totalSize' => $this->formatBytes($total)]);
+
+        return view('admin.media', [
+            'files'     => $files,
+            'folders'   => $folders,
+            'folder'    => $folder,
+            'totalSize' => $this->formatBytes($total),
+        ]);
     }
 
     public function uploadMedia(Request $request)
     {
         $this->requireAdmin();
         $request->validate(['files' => 'required', 'files.*' => 'file|max:51200']);
+
+        $allowed = ['posts', 'events', 'pages', 'questions', 'recipes', 'profiles', 'stories'];
+        $folder  = $request->input('folder', '');
+        $subdir  = ($folder && in_array($folder, $allowed)) ? $folder : '';
+        $dir     = public_path('uploads' . ($subdir ? '/' . $subdir : ''));
+        File::ensureDirectoryExists($dir, 0755);
+
         foreach ($request->file('files', []) as $file) {
             $name = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads'), $name);
+            $file->move($dir, $name);
         }
         return back()->with('success', 'Files uploaded.');
     }
 
-    public function deleteMedia(string $filename)
+    public function deleteMedia(Request $request, string $filename)
     {
         $this->requireAdmin();
-        $path = public_path('uploads/' . basename($filename));
+        // $filename may include a subfolder prefix like "posts/abc.webp"
+        $rel  = ltrim(str_replace(['..', '//'], '', $filename), '/\\');
+        $path = public_path('uploads/' . $rel);
         if (File::exists($path)) File::delete($path);
         return back()->with('success', 'File deleted.');
     }
