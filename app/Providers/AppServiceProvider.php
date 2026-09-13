@@ -61,6 +61,7 @@ class AppServiceProvider extends ServiceProvider
             ]);
         } elseif (!empty($s['email']['host'])) {
             config([
+                'mail.default'                 => 'smtp',
                 'mail.mailers.smtp.host'       => $s['email']['host'],
                 'mail.mailers.smtp.port'       => $s['email']['port'] ?? 587,
                 'mail.mailers.smtp.encryption' => ($s['email']['encryption'] ?? 'tls') === 'none' ? null : ($s['email']['encryption'] ?? 'tls'),
