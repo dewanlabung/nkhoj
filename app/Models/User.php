@@ -242,6 +242,19 @@ class User extends Authenticatable
         return $this->nkhojNotifications()->whereNull('read_at')->count();
     }
 
+    /**
+     * Scope: users who have opted into at least one channel for a given notification type.
+     * Mirrors BeDesk's whereNeedsNotificationFor() pattern.
+     */
+    public function scopeWantsNotification($query, string $type, string $channel = 'in_app')
+    {
+        return $query->whereHas('notificationPreferences', function ($q) use ($type, $channel) {
+            $q->where('type', $type)->where($channel, true);
+        })->orWhereDoesntHave('notificationPreferences', function ($q) use ($type) {
+            $q->where('type', $type);
+        });
+    }
+
     public function isEditor(): bool
     {
         return in_array($this->role, ['editor', 'admin']);
