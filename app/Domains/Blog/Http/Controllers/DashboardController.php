@@ -140,7 +140,7 @@ class DashboardController extends Controller
 
         $thumbnailUrl = $data['thumbnail_url'] ?? null;
         if ($request->hasFile('thumbnail')) {
-            $thumbnailUrl = $this->saveOptimizedThumbnail($request->file('thumbnail'));
+            $thumbnailUrl = $this->saveOptimizedThumbnail($request->file('thumbnail'), 'posts');
         }
 
         $slug = Str::slug($data['title']);
@@ -263,7 +263,7 @@ class DashboardController extends Controller
 
         $thumbnailUrl = $data['thumbnail_url'] ?? $post->thumbnail_url;
         if ($request->hasFile('thumbnail')) {
-            $thumbnailUrl = $this->saveOptimizedThumbnail($request->file('thumbnail'));
+            $thumbnailUrl = $this->saveOptimizedThumbnail($request->file('thumbnail'), 'posts');
         }
 
         $faqQ = $request->input('article_faq_q', []);

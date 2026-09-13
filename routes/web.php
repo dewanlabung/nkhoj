@@ -91,6 +91,12 @@ Route::post('/follow/{id}', [\App\Http\Controllers\ProfileController::class, 'fo
 Route::post('/react/{postId}', [\App\Http\Controllers\ReactionController::class, 'store'])->middleware('throttle:30,1');
 
 // Bookmarks + following feed (auth only)
+// User media library (TinyMCE image browser + upload)
+Route::middleware('auth')->prefix('user/media')->group(function () {
+    Route::get('/',       [\App\Http\Controllers\UserMediaController::class, 'index']);
+    Route::post('/upload', [\App\Http\Controllers\UserMediaController::class, 'upload']);
+});
+
 Route::middleware('auth')->group(function () {
     Route::get('/bookmarks', [BookmarkController::class, 'index']);
     Route::post('/bookmarks/toggle', [BookmarkController::class, 'toggle']);

@@ -389,5 +389,5 @@ function recipeForm() {
     }
 }
 </script>
-@include('partials.tinymce', ['editorId' => 'body-editor', 'height' => 520])
+@include('partials.tinymce', ['editorId' => 'body-editor', 'height' => 520, 'mediaType' => 'recipes'])
 @endsection

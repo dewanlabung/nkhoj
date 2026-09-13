@@ -103,6 +103,6 @@
     </form>
 </div>
 @push('scripts')
-@include('partials.tinymce', ['editorId' => 'page-content-editor', 'height' => 420])
+@include('partials.tinymce', ['editorId' => 'page-content-editor', 'height' => 420, 'mediaType' => 'pages'])
 @endpush
 @endsection
