@@ -296,6 +296,11 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/logs/schedule/download',    [AdminLogs::class, 'downloadScheduleLog']);
     Route::get('/logs/email/download',       [AdminLogs::class, 'downloadEmailLog']);
 
+    // Error Log Viewer (with search/filter)
+    Route::get('/error-logs',                [\App\Domains\Admin\Http\Controllers\ErrorLogViewerController::class, 'index']);
+    Route::get('/error-logs/download',       [\App\Domains\Admin\Http\Controllers\ErrorLogViewerController::class, 'download']);
+    Route::post('/error-logs/clear',         [\App\Domains\Admin\Http\Controllers\ErrorLogViewerController::class, 'clear']);
+
     // Storage
     Route::get('/storage',                   [AdminSettings::class, 'storage']);
     Route::post('/storage',                  [AdminSettings::class, 'updateStorage']);
