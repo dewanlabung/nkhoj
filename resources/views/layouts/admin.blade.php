@@ -348,9 +348,13 @@
                 Mail Settings
             </a>
 
-            <a href="/admin/logs" class="sl {{ request()->is('admin/logs*') ? 'on' : '' }}">
+            <a href="/admin/logs" class="sl {{ request()->is('admin/logs') ? 'on' : '' }}">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 System Logs
+            </a>
+            <a href="/admin/error-logs" class="sl {{ request()->is('admin/error-logs*') ? 'on' : '' }}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Error Logs
             </a>
         </nav>
 

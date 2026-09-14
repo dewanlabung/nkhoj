@@ -10,6 +10,9 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
+// Scheduler health check — canary job proving cron is alive (every minute)
+Schedule::command('schedule:health')->everyMinute();
+
 // AI auto-post generation — runs daily at 6:00 AM server time
 Schedule::command('ai:generate-posts')->dailyAt('06:00');
 
