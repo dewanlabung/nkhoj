@@ -29,6 +29,7 @@ use App\Http\Controllers\MembershipController;
 use App\Domains\Membership\Http\Controllers\WebhookController;
 use App\Http\Controllers\PollController;
 use App\Http\Controllers\SocialPageController;
+use App\Http\Controllers\Auth\OtpController;
 
 // Public routes
 Route::get('/', [HomeController::class, 'index']);
@@ -76,6 +77,11 @@ Route::middleware('guest')->group(function () {
     Route::post('/forgot-password', [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'sendPasswordReset'])->middleware('throttle:5,10');
     Route::get('/reset-password',   [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'showResetPassword']);
     Route::post('/reset-password',  [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'resetPassword'])->middleware('throttle:10,10');
+
+    // OTP Email Verification
+    Route::post('/otp/send', [OtpController::class, 'sendOtp'])->middleware('throttle:5,10');
+    Route::post('/otp/verify', [OtpController::class, 'verifyOtp'])->middleware('throttle:10,10');
+    Route::post('/otp/resend', [OtpController::class, 'resendOtp'])->middleware('throttle:5,10');
 });
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth');
 
