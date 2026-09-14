@@ -8,6 +8,7 @@ use App\Services\Mail\GmailClient;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -16,6 +17,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        View::addNamespace('mail', resource_path('views/emails'));
         Event::subscribe(OutgoingEmailLogSubscriber::class);
 
         $path = storage_path('app/site_settings.json');
