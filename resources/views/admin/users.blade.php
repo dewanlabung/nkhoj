@@ -217,7 +217,7 @@ $badgeColorMap = ['admin'=>'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text
                                         </button>
                                     </form>
                                     @else
-                                    <button @click="open = false; openBanModal({{ $user->id }}, '{{ addslashes($user->name) }}')"
+                                    <button @click="open = false; openBanModal({{ $user->id }}, '{{ addslashes($user->name) }}', {{ $user->is_banned ? 'true' : 'false' }})"
                                         class="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 border-t border-gray-50 dark:border-gray-700">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
                                         Suspend User
@@ -268,31 +268,37 @@ $badgeColorMap = ['admin'=>'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text
                 <div class="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
                     <svg class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
                 </div>
-                <h3 class="font-bold text-gray-900 dark:text-white">Suspend User</h3>
+                <h3 class="font-bold text-gray-900 dark:text-white" x-text="isBanned ? 'Unban User' : 'Suspend User'"></h3>
             </div>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Suspending <strong x-text="banName" class="text-gray-900 dark:text-white"></strong>. They will be unable to log in.</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                <span x-show="!isBanned">Suspending <strong x-text="banName" class="text-gray-900 dark:text-white"></strong>. They will be unable to log in.</span>
+                <span x-show="isBanned" x-cloak>Unbanning <strong x-text="banName" class="text-gray-900 dark:text-white"></strong> will restore their access.</span>
+            </p>
             <form :action="'/admin/users/' + banId + '/ban'" method="POST" class="space-y-4">
                 @csrf
-                <div>
-                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Reason <span class="font-normal">(optional)</span></label>
-                    <input type="text" name="comment" maxlength="255" placeholder="e.g. Spam, abuse, policy violation…"
-                        class="w-full text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400">
-                </div>
-                <div x-data="{ permanent: true }">
-                    <label class="flex items-center gap-2 mb-3 cursor-pointer">
-                        <input type="checkbox" name="permanent" value="1" x-model="permanent"
-                            class="rounded border-gray-300 text-orange-500 focus:ring-orange-400">
-                        <span class="text-sm text-gray-700 dark:text-gray-300 font-medium">Permanent ban</span>
-                    </label>
-                    <div x-show="!permanent" x-cloak>
-                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Ban Until</label>
-                        <input type="datetime-local" name="ban_until"
+                <div x-show="!isBanned" x-cloak class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Reason <span class="font-normal">(optional)</span></label>
+                        <input type="text" name="comment" maxlength="255" placeholder="e.g. Spam, abuse, policy violation…"
                             class="w-full text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400">
+                    </div>
+                    <div x-data="{ permanent: true }">
+                        <label class="flex items-center gap-2 mb-3 cursor-pointer">
+                            <input type="checkbox" name="permanent" value="1" x-model="permanent"
+                                class="rounded border-gray-300 text-orange-500 focus:ring-orange-400">
+                            <span class="text-sm text-gray-700 dark:text-gray-300 font-medium">Permanent suspension</span>
+                        </label>
+                        <div x-show="!permanent" x-cloak>
+                            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Suspended Until</label>
+                            <input type="datetime-local" name="ban_until" required
+                                class="w-full text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400">
+                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5">After this date, the user will automatically regain access.</p>
+                        </div>
                     </div>
                 </div>
                 <div class="flex gap-3 pt-1">
                     <button type="button" @click="showBan = false" class="flex-1 py-2.5 text-sm font-semibold text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Cancel</button>
-                    <button type="submit" class="flex-1 py-2.5 text-sm font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-xl transition-colors">Suspend</button>
+                    <button type="submit" class="flex-1 py-2.5 text-sm font-bold text-white transition-colors" :class="isBanned ? 'bg-green-500 hover:bg-green-600' : 'bg-orange-500 hover:bg-orange-600'" x-text="isBanned ? 'Unban' : 'Suspend'"></button>
                 </div>
             </form>
         </div>
@@ -333,6 +339,7 @@ function usersManager() {
         showBan: false,
         banId: null,
         banName: '',
+        isBanned: false,
 
         toggleAll(e) {
             this.selected = e.target.checked
@@ -346,9 +353,10 @@ function usersManager() {
             this.showImpersonate = true;
         },
 
-        openBanModal(id, name) {
+        openBanModal(id, name, isBanned = false) {
             this.banId = id;
             this.banName = name;
+            this.isBanned = isBanned;
             this.showBan = true;
         },
     }
