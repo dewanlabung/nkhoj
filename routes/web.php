@@ -274,6 +274,10 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('/email-settings/template',  [AdminSettings::class, 'updateEmailTemplate']);
     Route::post('/email-settings/test',      [AdminSettings::class, 'sendTestEmail']);
 
+    // Mail Settings (SMTP Configuration)
+    Route::get('/mail-settings',             [\App\Domains\Admin\Http\Controllers\MailSettingsController::class, 'edit']);
+    Route::post('/mail-settings',            [\App\Domains\Admin\Http\Controllers\MailSettingsController::class, 'update']);
+
     // Security
     Route::get('/security',                  [AdminSettings::class, 'security']);
     Route::post('/security',                 [AdminSettings::class, 'updateSecurity']);
