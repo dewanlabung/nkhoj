@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\DirectMessage;
+use App\Models\UserEngagement\DirectMessage;
 use Illuminate\Console\Command;
 
 class PurgeExpiredMessages extends Command

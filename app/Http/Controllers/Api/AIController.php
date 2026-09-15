@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Survey;
+use App\Models\Configuration\Survey;
 use App\Services\AI\OrchestratorAgent;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

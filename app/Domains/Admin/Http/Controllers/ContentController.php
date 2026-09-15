@@ -2,16 +2,16 @@
 
 namespace App\Domains\Admin\Http\Controllers;
 
-use App\Models\AdZone;
-use App\Models\Answer;
-use App\Models\Category;
-use App\Models\Comment;
-use App\Models\ContactMessage;
-use App\Models\NewsletterSubscriber;
-use App\Models\Poll;
-use App\Models\Post;
-use App\Models\Question;
-use App\Models\Tag;
+use App\Models\Configuration\AdZone;
+use App\Models\QnA\Answer;
+use App\Models\Blog\Category;
+use App\Models\Blog\Comment;
+use App\Models\Core\ContactMessage;
+use App\Models\Core\NewsletterSubscriber;
+use App\Models\MediaContent\Poll;
+use App\Models\Blog\Post;
+use App\Models\QnA\Question;
+use App\Models\Blog\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;

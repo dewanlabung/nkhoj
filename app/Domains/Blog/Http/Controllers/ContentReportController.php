@@ -4,9 +4,9 @@ namespace App\Domains\Blog\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\Comment;
-use App\Models\ContentReport;
-use App\Models\Post;
+use App\Models\Blog\Comment;
+use App\Models\LoggingAnalytics\ContentReport;
+use App\Models\Blog\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 

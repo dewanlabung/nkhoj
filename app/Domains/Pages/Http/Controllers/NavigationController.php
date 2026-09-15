@@ -4,10 +4,10 @@ namespace App\Domains\Pages\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\NavigationItem;
-use App\Models\Category;
-use App\Models\Page;
-use App\Models\Tag;
+use App\Models\Core\NavigationItem;
+use App\Models\Blog\Category;
+use App\Models\SocialPages\SocialPages\SocialPages\Page;
+use App\Models\Blog\Tag;
 use Illuminate\Http\Request;
 
 class NavigationController extends Controller

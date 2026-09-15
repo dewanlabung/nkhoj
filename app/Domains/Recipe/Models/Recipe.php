@@ -63,6 +63,6 @@ class Recipe extends Model
 
     public function comments(): MorphMany
     {
-        return $this->morphMany(\App\Core\Models\Comment::class, 'commentable');
+        return $this->morphMany(\App\Models\Blog\Comment::class, 'commentable');
     }
 }

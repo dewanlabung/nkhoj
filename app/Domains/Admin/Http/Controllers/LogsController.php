@@ -2,8 +2,8 @@
 
 namespace App\Domains\Admin\Http\Controllers;
 
-use App\Models\OutgoingEmailLog;
-use App\Models\ScheduleLog;
+use App\Models\LoggingAnalytics\OutgoingEmailLog;
+use App\Models\LoggingAnalytics\ScheduleLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;

@@ -2,9 +2,9 @@
 
 namespace App\Core\Actions;
 
-use App\Core\Models\Comment;
-use App\Core\Models\NotificationActivityLog;
-use App\Models\User;
+use App\Models\Blog\Comment;
+use App\Models\Notifications\NotificationActivityLog;
+use App\Models\UserEngagement\User;
 use Auth;
 use Illuminate\Support\Arr;
 

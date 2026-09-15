@@ -3,9 +3,9 @@
 namespace App\Core\Listeners;
 
 use App\Core\Events\CommentReplyCreated;
-use App\Core\Models\NotificationActivityLog;
+use App\Models\Notifications\NotificationActivityLog;
 use App\Core\Notifications\CommentReceivedReply;
-use App\Models\User;
+use App\Models\UserEngagement\User;
 
 class SendCommentReplyNotification
 {

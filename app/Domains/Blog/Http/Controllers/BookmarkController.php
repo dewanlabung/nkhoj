@@ -5,8 +5,8 @@ namespace App\Domains\Blog\Http\Controllers;
 use App\Http\Controllers\Controller;
 
 use App\Domains\Blog\Services\BookmarkService;
-use App\Models\Bookmark;
-use App\Models\BookmarkCollection;
+use App\Models\Blog\Bookmark;
+use App\Models\Blog\BookmarkCollection;
 use Illuminate\Http\Request;
 
 class BookmarkController extends Controller

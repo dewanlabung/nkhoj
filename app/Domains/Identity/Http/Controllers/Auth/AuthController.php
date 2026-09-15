@@ -4,8 +4,8 @@ namespace App\Domains\Identity\Http\Controllers\Auth;
 
 use App\Domains\Identity\Services\RegistrationService;
 use App\Http\Controllers\Controller;
-use App\Models\LoginHistory;
-use App\Models\User;
+use App\Models\LoggingAnalytics\LoginHistory;
+use App\Models\UserEngagement\User;
 use App\Services\SiteSettingsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -53,10 +53,10 @@ class AuthController extends Controller
 
             try {
                 LoginHistory::record($user->id, 'email');
-                \App\Models\UserSession::upsertForRequest($request, $user->id);
+                \App\Models\UserEngagement\UserSession::upsertForRequest($request, $user->id);
                 \App\Jobs\LoginAnomalyCheck::dispatch($user->id, $request->ip(), $request->userAgent() ?? '');
                 if ($this->authSettings()['single_device_login'] ?? false) {
-                    \App\Models\UserSession::invalidateOtherSessions($user->id, $request->session()->getId());
+                    \App\Models\UserEngagement\UserSession::invalidateOtherSessions($user->id, $request->session()->getId());
                 }
             } catch (\Throwable) {}
 

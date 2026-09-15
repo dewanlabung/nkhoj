@@ -2,10 +2,10 @@
 
 namespace App\Jobs;
 
-use App\Models\DeviceToken;
-use App\Models\Notification;
-use App\Models\NotificationPreference;
-use App\Models\User;
+use App\Models\UserEngagement\DeviceToken;
+use App\Models\Notifications\Notifications\Notification;
+use App\Models\Notifications\Notifications\NotificationPreference;
+use App\Models\UserEngagement\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

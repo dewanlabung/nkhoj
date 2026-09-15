@@ -4,8 +4,8 @@ namespace App\Domains\Blog\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\RssFeed;
-use App\Models\Category;
+use App\Models\Configuration\RssFeed;
+use App\Models\Blog\Category;
 use Illuminate\Http\Request;
 
 class RssFeedController extends Controller

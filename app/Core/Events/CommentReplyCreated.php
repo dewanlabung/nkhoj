@@ -2,7 +2,7 @@
 
 namespace App\Core\Events;
 
-use App\Core\Models\Comment;
+use App\Models\Blog\Comment;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;

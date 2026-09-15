@@ -4,7 +4,7 @@ namespace App\Core\Http\Controllers;
 
 use App\Core\Actions\CrupdateComment;
 use App\Core\Actions\PaginateModelComments;
-use App\Core\Models\Comment;
+use App\Models\Blog\Comment;
 use App\Core\Policies\CommentPolicy;
 use App\Core\Requests\CrupdateCommentRequest;
 use Illuminate\Database\Eloquent\Model;
@@ -178,7 +178,7 @@ class CommentController extends Controller
     protected function resolveModelFromType(string $modelType): Model
     {
         $map = [
-            'post' => \App\Models\Post::class,
+            'post' => \App\Models\Blog\Post::class,
             'article' => \App\Models\Article::class,
             // Add more model mappings as needed
         ];

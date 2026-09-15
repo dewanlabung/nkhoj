@@ -71,7 +71,7 @@ class TwoFactorController extends Controller
             return redirect('/login');
         }
 
-        $user = \App\Models\User::findOrFail($userId);
+        $user = \App\Models\UserEngagement\User::findOrFail($userId);
 
         if (!$this->twoFactor->verifyChallenge($user, $request->code)) {
             return back()->withErrors(['code' => 'Invalid code. Please try again.']);

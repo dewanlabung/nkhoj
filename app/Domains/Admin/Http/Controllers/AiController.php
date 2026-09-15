@@ -2,9 +2,9 @@
 
 namespace App\Domains\Admin\Http\Controllers;
 
-use App\Models\AiPostTopic;
-use App\Models\Category;
-use App\Models\Post;
+use App\Models\QnA\AiPostTopic;
+use App\Models\Blog\Category;
+use App\Models\Blog\Post;
 use App\Services\SiteSettingsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;

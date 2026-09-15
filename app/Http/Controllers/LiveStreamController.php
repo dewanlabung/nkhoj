@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\LiveStream;
-use App\Models\LiveStreamMessage;
+use App\Models\MediaContent\LiveStream;
+use App\Models\MediaContent\LiveStreamMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 

@@ -2,7 +2,7 @@
 
 namespace App\Core\Notifications;
 
-use App\Models\User;
+use App\Models\UserEngagement\User;
 use Illuminate\Support\Arr;
 
 class SystemErrorNotification extends BaseNotification

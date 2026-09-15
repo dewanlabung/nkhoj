@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PostSeries;
+use App\Models\Blog\PostSeries;
 use Illuminate\Http\Request;
 
 class PostSeriesController extends Controller

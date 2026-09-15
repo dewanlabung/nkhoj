@@ -2,7 +2,7 @@
 
 namespace App\Core\Traits;
 
-use App\Models\Ban;
+use App\Models\Memberships\Ban;
 
 trait HasBans
 {

@@ -2,9 +2,9 @@
 
 namespace App\Core\Actions;
 
-use App\Core\Models\NotificationActivityLog;
-use App\Core\Models\NotificationSubscription;
-use App\Models\User;
+use App\Models\Notifications\NotificationActivityLog;
+use App\Models\Notifications\NotificationSubscription;
+use App\Models\UserEngagement\User;
 use File;
 use Ramsey\Uuid\Uuid;
 

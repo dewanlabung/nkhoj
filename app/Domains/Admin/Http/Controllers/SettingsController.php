@@ -2,7 +2,7 @@
 
 namespace App\Domains\Admin\Http\Controllers;
 
-use App\Models\Widget;
+use App\Models\Core\Widget;
 use App\Services\DotEnvEditor;
 use App\Services\OutgoingMailCredentialsValidator;
 use App\Services\SiteSettingsService;

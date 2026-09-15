@@ -5,8 +5,8 @@ namespace App\Domains\Blog\Http\Controllers;
 use App\Http\Controllers\Controller;
 
 use App\Jobs\CreateNotification;
-use App\Models\Comment;
-use App\Models\Post;
+use App\Models\Blog\Comment;
+use App\Models\Blog\Post;
 use Illuminate\Http\Request;
 
 class CommentController extends Controller

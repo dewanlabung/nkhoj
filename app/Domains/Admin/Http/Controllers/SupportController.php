@@ -2,9 +2,9 @@
 
 namespace App\Domains\Admin\Http\Controllers;
 
-use App\Models\SupportReply;
-use App\Models\SupportTicket;
-use App\Models\User;
+use App\Models\Support\SupportReply;
+use App\Models\Support\SupportTicket;
+use App\Models\UserEngagement\User;
 use Illuminate\Http\Request;
 
 class SupportController extends BaseAdminController

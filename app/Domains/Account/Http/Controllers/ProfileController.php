@@ -4,7 +4,7 @@ namespace App\Domains\Account\Http\Controllers;
 
 use App\Domains\Account\Services\FollowService;
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\UserEngagement\User;
 use Illuminate\Http\Request;
 
 class ProfileController extends Controller

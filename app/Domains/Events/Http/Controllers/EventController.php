@@ -4,8 +4,8 @@ namespace App\Domains\Events\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\Event;
-use App\Models\EventAttendee;
+use App\Models\MediaContent\Event;
+use App\Models\MediaContent\EventAttendee;
 use App\Traits\SavesOptimizedThumbnail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;

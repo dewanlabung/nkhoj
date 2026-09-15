@@ -4,7 +4,7 @@ namespace App\Domains\Account\Http\Controllers;
 
 use App\Domains\Account\Services\AccountService;
 use App\Http\Controllers\Controller;
-use App\Models\Subscription;
+use App\Models\Memberships\Subscription;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules\Password;
 

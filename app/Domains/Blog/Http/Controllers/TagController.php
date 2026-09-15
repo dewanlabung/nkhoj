@@ -4,7 +4,7 @@ namespace App\Domains\Blog\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\Tag;
+use App\Models\Blog\Tag;
 
 class TagController extends Controller
 {

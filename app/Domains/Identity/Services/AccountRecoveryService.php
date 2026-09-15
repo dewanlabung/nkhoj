@@ -2,7 +2,7 @@
 
 namespace App\Domains\Identity\Services;
 
-use App\Models\User;
+use App\Models\UserEngagement\User;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;

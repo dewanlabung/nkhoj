@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Models\UserWallet;
-use App\Models\VirtualGift;
+use App\Models\UserEngagement\User;
+use App\Models\UserEngagement\UserWallet;
+use App\Models\Memberships\VirtualGift;
 use Illuminate\Http\Request;
 
 class GiftController extends Controller

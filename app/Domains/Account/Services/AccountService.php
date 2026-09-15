@@ -2,7 +2,7 @@
 
 namespace App\Domains\Account\Services;
 
-use App\Models\User;
+use App\Models\UserEngagement\User;
 use App\Services\HibpService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;

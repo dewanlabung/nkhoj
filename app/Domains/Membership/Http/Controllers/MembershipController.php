@@ -5,8 +5,8 @@ namespace App\Domains\Membership\Http\Controllers;
 use App\Domains\Membership\Services\StripeService;
 use App\Domains\Membership\Services\SubscriptionService;
 use App\Http\Controllers\Controller;
-use App\Models\MembershipPlan;
-use App\Models\Subscription;
+use App\Models\Memberships\MembershipPlan;
+use App\Models\Memberships\Subscription;
 use App\Services\SiteSettingsService;
 use Illuminate\Http\Request;
 

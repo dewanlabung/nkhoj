@@ -5,10 +5,10 @@ namespace App\Domains\Blog\Http\Controllers;
 use App\Http\Controllers\Controller;
 
 use App\Jobs\CreateNotification;
-use App\Models\Category;
-use App\Models\Comment;
-use App\Models\Post;
-use App\Models\Tag;
+use App\Models\Blog\Category;
+use App\Models\Blog\Comment;
+use App\Models\Blog\Post;
+use App\Models\Blog\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;

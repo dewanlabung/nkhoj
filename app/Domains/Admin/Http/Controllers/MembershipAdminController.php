@@ -2,8 +2,8 @@
 
 namespace App\Domains\Admin\Http\Controllers;
 
-use App\Models\MembershipPlan;
-use App\Models\Subscription;
+use App\Models\Memberships\MembershipPlan;
+use App\Models\Memberships\Subscription;
 use App\Services\SiteSettingsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;

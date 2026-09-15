@@ -4,7 +4,7 @@ namespace App\Domains\Identity\Http\Controllers\Auth;
 
 use App\Domains\Identity\Services\SocialAuthService;
 use App\Http\Controllers\Controller;
-use App\Models\LoginHistory;
+use App\Models\LoggingAnalytics\LoginHistory;
 use App\Services\SiteSettingsService;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;

@@ -4,8 +4,8 @@ namespace App\Domains\Blog\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\Category;
-use App\Models\Question;
+use App\Models\Blog\Category;
+use App\Models\QnA\Question;
 
 class CategoryController extends Controller
 {

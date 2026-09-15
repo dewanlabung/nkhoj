@@ -4,7 +4,7 @@ namespace App\Domains\Identity\Http\Controllers\Api\V1;
 
 use App\Domains\Identity\Services\RegistrationService;
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\UserEngagement\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 

@@ -2,7 +2,7 @@
 
 namespace App\Listeners;
 
-use App\Models\OutgoingEmailLog;
+use App\Models\LoggingAnalytics\OutgoingEmailLog;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Mail\Events\MessageSent;
 

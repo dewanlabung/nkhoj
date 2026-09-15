@@ -2,8 +2,8 @@
 
 namespace App\Domains\Membership\Services;
 
-use App\Models\MembershipPlan;
-use App\Models\Subscription;
+use App\Models\Memberships\MembershipPlan;
+use App\Models\Memberships\Subscription;
 
 class SubscriptionService
 {

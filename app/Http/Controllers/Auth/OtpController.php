@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Otp;
-use App\Models\User;
+use App\Models\LoggingAnalytics\Otp;
+use App\Models\UserEngagement\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 

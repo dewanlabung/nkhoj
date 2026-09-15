@@ -3,8 +3,8 @@
 namespace App\Core\Services\Auth;
 
 use App\Core\Contracts\OtpService;
-use App\Models\Otp;
-use App\Models\User;
+use App\Models\LoggingAnalytics\Otp;
+use App\Models\UserEngagement\User;
 use Illuminate\Support\Facades\Mail;
 
 class OtpAuthService implements OtpService

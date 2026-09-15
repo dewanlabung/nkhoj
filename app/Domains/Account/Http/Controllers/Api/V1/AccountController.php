@@ -5,7 +5,7 @@ namespace App\Domains\Account\Http\Controllers\Api\V1;
 use App\Domains\Account\Services\AccountService;
 use App\Domains\Account\Services\FollowService;
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\UserEngagement\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules\Password;
 

@@ -4,31 +4,31 @@ namespace App\Domains\Place\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\Bookmark;
+use App\Models\Blog\Bookmark;
 use Illuminate\Validation\Rule;
-use App\Models\PageActivityLog;
-use App\Models\PageAdmin;
-use App\Models\PageBlock;
-use App\Models\PageCategory;
-use App\Models\PageNotificationPref;
-use App\Models\PagePollOption;
-use App\Models\PagePollVote;
-use App\Models\PagePost;
-use App\Models\PagePostComment;
-use App\Models\PagePostLike;
-use App\Models\PageProduct;
-use App\Models\PageQna;
-use App\Models\PageReport;
-use App\Models\PageReview;
-use App\Models\PageStory;
-use App\Models\PageVerificationRequest;
-use App\Models\PageFaq;
-use App\Models\PageMilestone;
-use App\Models\PageViewLog;
-use App\Models\SocialPage;
-use App\Models\User;
+use App\Models\SocialPages\SocialPages\PageActivityLog;
+use App\Models\SocialPages\SocialPages\PageAdmin;
+use App\Models\SocialPages\SocialPages\PageBlock;
+use App\Models\SocialPages\SocialPages\PageCategory;
+use App\Models\SocialPages\SocialPages\PageNotificationPref;
+use App\Models\SocialPages\SocialPages\PagePollOption;
+use App\Models\SocialPages\SocialPages\PagePollVote;
+use App\Models\SocialPages\SocialPages\PagePost;
+use App\Models\SocialPages\SocialPages\PagePostComment;
+use App\Models\SocialPages\SocialPages\PagePostLike;
+use App\Models\SocialPages\SocialPages\PageProduct;
+use App\Models\SocialPages\SocialPages\PageQna;
+use App\Models\SocialPages\SocialPages\PageReport;
+use App\Models\SocialPages\SocialPages\PageReview;
+use App\Models\SocialPages\SocialPages\PageStory;
+use App\Models\SocialPages\SocialPages\PageVerificationRequest;
+use App\Models\SocialPages\SocialPages\PageFaq;
+use App\Models\SocialPages\SocialPages\PageMilestone;
+use App\Models\SocialPages\SocialPages\PageViewLog;
+use App\Models\SocialPages\SocialPages\SocialPage;
+use App\Models\UserEngagement\User;
 use App\Jobs\CreateNotification;
-use App\Models\Notification;
+use App\Models\Notifications\Notifications\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -480,7 +480,7 @@ class SocialPageController extends Controller
         $page = SocialPage::where('slug', $slug)->where('is_active', true)->firstOrFail();
         $post = PagePost::where('id', $postId)->where('social_page_id', $page->id)->firstOrFail();
 
-        $comment = \App\Models\PagePostComment::create([
+        $comment = \App\Models\SocialPages\PagePostComment::create([
             'page_post_id' => $post->id,
             'user_id'      => auth()->id(),
             'body'         => $request->input('body'),
@@ -504,7 +504,7 @@ class SocialPageController extends Controller
         $page = SocialPage::where('slug', $slug)->firstOrFail();
         $post = PagePost::where('id', $postId)->where('social_page_id', $page->id)->firstOrFail();
 
-        $comment = \App\Models\PagePostComment::where('id', $commentId)
+        $comment = \App\Models\SocialPages\PagePostComment::where('id', $commentId)
             ->where('page_post_id', $postId)
             ->firstOrFail();
 

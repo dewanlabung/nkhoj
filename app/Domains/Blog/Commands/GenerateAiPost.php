@@ -2,10 +2,10 @@
 
 namespace App\Domains\Blog\Commands;
 
-use App\Models\AiPostTopic;
-use App\Models\Category;
-use App\Models\Post;
-use App\Models\User;
+use App\Models\QnA\AiPostTopic;
+use App\Models\Blog\Category;
+use App\Models\Blog\Post;
+use App\Models\UserEngagement\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 

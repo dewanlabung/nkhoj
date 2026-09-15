@@ -2,7 +2,7 @@
 
 namespace App\Domains\Admin\Http\Controllers;
 
-use App\Models\LoginHistory;
+use App\Models\LoggingAnalytics\LoginHistory;
 use App\Services\SiteSettingsService;
 use Illuminate\Http\Request;
 

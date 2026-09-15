@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
-use App\Models\Comment;
-use App\Models\Poll;
-use App\Models\Post;
-use App\Models\Tag;
-use App\Models\User;
-use App\Models\Widget;
+use App\Models\Blog\Category;
+use App\Models\Blog\Comment;
+use App\Models\MediaContent\Poll;
+use App\Models\Blog\Post;
+use App\Models\Blog\Tag;
+use App\Models\UserEngagement\User;
+use App\Models\Core\Widget;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 
