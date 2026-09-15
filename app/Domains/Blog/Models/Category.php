@@ -2,7 +2,7 @@
 
 namespace App\Domains\Blog\Models;
 
-use App\Models\Question;
+use App\Models\QnA\Question;
 use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
