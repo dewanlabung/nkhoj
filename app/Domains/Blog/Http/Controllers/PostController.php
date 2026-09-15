@@ -46,7 +46,7 @@ class PostController extends Controller
         }
 
         $comments = $post->comments()
-            ->with(['author', 'replies.author'])
+            ->with(['author', 'children.author'])
             ->approved()
             ->topLevel()
             ->latest()
