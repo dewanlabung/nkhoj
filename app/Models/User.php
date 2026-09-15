@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Core\Traits\HasBans;
+use App\Core\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -11,7 +13,7 @@ use App\Models\SocialAccount;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, HasBans, HasRoles;
 
     protected $fillable = [
         'uuid',
@@ -83,25 +85,6 @@ class User extends Authenticatable
         return $this->name;
     }
 
-    public function roleLabel(): string
-    {
-        return match($this->role) {
-            'admin'    => 'Super Admin',
-            'editor'   => 'Editor',
-            'reporter' => 'Author',
-            default    => 'Member',
-        };
-    }
-
-    public function roleBadgeClass(): string
-    {
-        return match($this->role) {
-            'admin'    => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-            'editor'   => 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-            'reporter' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-            default    => 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
-        };
-    }
 
     public static function socialPlatforms(): array
     {
@@ -227,15 +210,6 @@ class User extends Authenticatable
         $this->notify(new \App\Notifications\VerifyEmailWithOtpNotification($otp->code));
     }
 
-    public function bans()
-    {
-        return $this->morphMany(\App\Models\Ban::class, 'bannable');
-    }
-
-    public function activeBan(): ?\App\Models\Ban
-    {
-        return $this->bans()->active()->latest()->first();
-    }
 
     public function isPendingDeletion(): bool
     {
@@ -285,20 +259,6 @@ class User extends Authenticatable
         });
     }
 
-    public function isEditor(): bool
-    {
-        return in_array($this->role, ['editor', 'admin']);
-    }
-
-    public function isAdmin(): bool
-    {
-        return $this->role === 'admin';
-    }
-
-    public function isMod(): bool
-    {
-        return in_array($this->role, ['admin', 'editor']);
-    }
 
     public function subscriptions()
     {
@@ -323,16 +283,4 @@ class User extends Authenticatable
         return $this->activeSubscription() !== null;
     }
 
-    public function isBanned(): bool
-    {
-        // Check the bans table first (timed/permanent bans); fall back to legacy boolean
-        return $this->bans()->active()->exists() || (bool) $this->is_banned;
-    }
-
-    public function hasPermission(string $permission): bool
-    {
-        if ($this->isAdmin()) return true;
-        $extra = $this->extra_permissions ?? [];
-        return in_array($permission, $extra, true);
-    }
 }
