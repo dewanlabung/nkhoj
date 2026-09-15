@@ -5,7 +5,7 @@ namespace App\Domains\Blog\Services;
 use App\Models\Blog\Bookmark;
 use App\Models\Blog\BookmarkCollection;
 use App\Models\Blog\Post;
-use App\Models\SocialPages\SocialPages\SocialPages\SocialPage;
+use App\Models\SocialPages\SocialPage;
 use Illuminate\Database\Eloquent\Model;
 
 class BookmarkService

@@ -4,7 +4,7 @@ namespace App\Domains\Pages\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\SocialPages\SocialPages\SocialPages\Page;
+use App\Models\SocialPages\Page;
 use Illuminate\Http\Request;
 
 class PageController extends Controller

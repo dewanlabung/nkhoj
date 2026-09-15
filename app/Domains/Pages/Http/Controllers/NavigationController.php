@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 
 use App\Models\Core\NavigationItem;
 use App\Models\Blog\Category;
-use App\Models\SocialPages\SocialPages\SocialPages\Page;
+use App\Models\SocialPages\Page;
 use App\Models\Blog\Tag;
 use Illuminate\Http\Request;
 
