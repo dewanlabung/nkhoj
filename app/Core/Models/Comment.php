@@ -107,6 +107,22 @@ class Comment extends BaseModel
     }
 
     /**
+     * Get display name for UI (author name or anonymous)
+     */
+    public function displayName(): string
+    {
+        return $this->user?->name ?? 'Anonymous';
+    }
+
+    /**
+     * Alias for content field (backward compatibility with old comment system)
+     */
+    public function getBodyAttribute(): string
+    {
+        return $this->content ?? '';
+    }
+
+    /**
      * Generate hierarchical path for comment
      */
     public function generatePath(): void
