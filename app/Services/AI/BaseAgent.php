@@ -2,7 +2,7 @@
 
 namespace App\Services\AI;
 
-use App\Models\Prompt;
+use App\Models\QnA\Prompt;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Client\Response;

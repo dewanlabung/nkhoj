@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Models\ScheduleLog;
+use App\Models\LoggingAnalytics\ScheduleLog;
 
 class ScheduleHealthCommand extends Command
 {

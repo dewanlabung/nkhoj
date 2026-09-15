@@ -2,13 +2,13 @@
 
 namespace App\Domains\Admin\Http\Controllers;
 
-use App\Models\Category;
-use App\Models\Comment;
-use App\Models\ContactMessage;
-use App\Models\NewsletterSubscriber;
-use App\Models\Post;
-use App\Models\Tag;
-use App\Models\User;
+use App\Models\Blog\Comment;
+use App\Models\Blog\Category;
+use App\Models\Core\ContactMessage;
+use App\Models\Core\NewsletterSubscriber;
+use App\Models\Blog\Post;
+use App\Models\Blog\Tag;
+use App\Models\UserEngagement\User;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends BaseAdminController
@@ -38,10 +38,10 @@ class DashboardController extends BaseAdminController
                 'scheduled_posts'  => Post::where('status', 'scheduled')->count(),
                 'contacts'         => ContactMessage::whereNull('read_at')->count(),
                 'subscribers'      => NewsletterSubscriber::where('is_active', true)->count(),
-                'pending_comments' => Comment::where('is_approved', false)->count(),
+                'pending_comments' => Comment::where('deleted', true)->count(),
             ],
             'recentPosts'    => Post::with('author')->latest()->limit(15)->get(),
-            'recentComments' => Comment::with(['post', 'author'])->latest()->limit(6)->get(),
+            'recentComments' => Comment::with(['commentable', 'user'])->latest()->limit(6)->get(),
             'recentUsers'    => User::latest()->limit(8)->get(),
             'chartLabels'    => $chartLabels,
             'chartData'      => $chartData,
@@ -87,7 +87,7 @@ class DashboardController extends BaseAdminController
         $this->requireAdmin();
 
         try {
-            $dailyAnalytics = \App\Models\DailyAnalytic::getLast30Days();
+            $dailyAnalytics = \App\Models\LoggingAnalytics\DailyAnalytic::getLast30Days();
             $chartLabels    = $dailyAnalytics['labels'];
             $chartViews     = $dailyAnalytics['views'];
         } catch (\Throwable) {

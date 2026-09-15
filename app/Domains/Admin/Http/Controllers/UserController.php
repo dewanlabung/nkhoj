@@ -4,9 +4,9 @@ namespace App\Domains\Admin\Http\Controllers;
 
 use App\Events\UserBanned;
 use App\Events\UsersDeleted;
-use App\Models\Ban;
-use App\Models\Role;
-use App\Models\User;
+use App\Models\Memberships\Ban;
+use App\Models\Core\Role;
+use App\Models\UserEngagement\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 

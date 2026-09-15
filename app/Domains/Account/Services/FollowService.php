@@ -4,7 +4,7 @@ namespace App\Domains\Account\Services;
 
 use App\Jobs\CreateNotification;
 use App\Mail\NewFollowerMail;
-use App\Models\User;
+use App\Models\UserEngagement\User;
 use Illuminate\Support\Facades\Mail;
 
 class FollowService

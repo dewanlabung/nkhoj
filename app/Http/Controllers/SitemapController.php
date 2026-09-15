@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
-use App\Models\Event;
-use App\Models\Post;
-use App\Models\Question;
-use App\Models\Recipe;
-use App\Models\SocialPage;
-use App\Models\Tag;
+use App\Models\Blog\Category;
+use App\Models\MediaContent\Event;
+use App\Models\Blog\Post;
+use App\Models\QnA\Question;
+use App\Models\MediaContent\Recipe;
+use App\Models\SocialPages\SocialPages\SocialPage;
+use App\Models\Blog\Tag;
 
 class SitemapController extends Controller
 {

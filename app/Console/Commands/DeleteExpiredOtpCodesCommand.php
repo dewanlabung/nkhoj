@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\OtpCode;
+use App\Models\LoggingAnalytics\OtpCode;
 use Illuminate\Console\Command;
 
 class DeleteExpiredOtpCodesCommand extends Command

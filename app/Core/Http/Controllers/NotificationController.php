@@ -2,7 +2,7 @@
 
 namespace App\Core\Http\Controllers;
 
-use App\Core\Models\NotificationActivityLog;
+use App\Models\Notifications\NotificationActivityLog;
 use Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Notifications\DatabaseNotification;

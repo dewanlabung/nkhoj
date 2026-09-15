@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Models\OutgoingEmailLog;
-use App\Models\ScheduleLog;
+use App\Models\LoggingAnalytics\OutgoingEmailLog;
+use App\Models\LoggingAnalytics\ScheduleLog;
 use Illuminate\Console\Command;
 
 class CleanLogTables extends Command

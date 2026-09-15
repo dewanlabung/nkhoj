@@ -2,25 +2,25 @@
 
 namespace App\Domains\Admin\Http\Controllers;
 
-use App\Models\AdZone;
-use App\Models\Answer;
-use App\Models\Category;
-use App\Models\Role;
-use App\Models\Widget;
-use App\Models\Comment;
-use App\Models\ContactMessage;
-use App\Models\NewsletterSubscriber;
-use App\Models\Poll;
-use App\Models\PollOption;
-use App\Models\Post;
-use App\Models\Question;
-use App\Models\MembershipPlan;
-use App\Models\Subscription;
-use App\Models\SupportReply;
-use App\Models\SupportTicket;
-use App\Models\Tag;
-use App\Models\User;
-use App\Models\AiPostTopic;
+use App\Models\Configuration\AdZone;
+use App\Models\QnA\Answer;
+use App\Models\Blog\Category;
+use App\Models\Core\Role;
+use App\Models\Core\Widget;
+use App\Models\Blog\Comment;
+use App\Models\Core\ContactMessage;
+use App\Models\Core\NewsletterSubscriber;
+use App\Models\MediaContent\Poll;
+use App\Models\MediaContent\PollOption;
+use App\Models\Blog\Post;
+use App\Models\QnA\Question;
+use App\Models\Memberships\MembershipPlan;
+use App\Models\Memberships\Subscription;
+use App\Models\Support\SupportReply;
+use App\Models\Support\SupportTicket;
+use App\Models\Blog\Tag;
+use App\Models\UserEngagement\User;
+use App\Models\QnA\AiPostTopic;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -392,7 +392,7 @@ class AdminController extends Controller
         if ($request->filled('q'))           $query->where('title', 'like', '%'.$request->q.'%');
         return view('admin.posts', [
             'posts'   => $query->latest()->paginate(20),
-            'allTags' => \App\Models\Tag::orderBy('name_en')->get(['id','name_en']),
+            'allTags' => \App\Models\Blog\Tag::orderBy('name_en')->get(['id','name_en']),
             'counts'  => [
                 'all'       => Post::count(),
                 'published' => Post::where('status','published')->count(),
@@ -1848,7 +1848,7 @@ class AdminController extends Controller
     {
         $this->requireAdmin();
 
-        $query = \App\Models\SocialPage::with('owner')->withCount(['admins', 'reports']);
+        $query = \App\Models\SocialPages\SocialPages\SocialPage::with('owner')->withCount(['admins', 'reports']);
 
         if ($search = $request->input('q')) {
             $query->where('name', 'like', "%{$search}%");
@@ -1865,18 +1865,18 @@ class AdminController extends Controller
 
         $pages = $query->latest()->paginate(25)->withQueryString();
 
-        $pendingVerifications = \App\Models\PageVerificationRequest::with('page')
+        $pendingVerifications = \App\Models\SocialPages\SocialPages\PageVerificationRequest::with('page')
             ->where('status', 'pending')->latest()->get();
 
         $stats = [
-            'total'    => \App\Models\SocialPage::count(),
-            'active'   => \App\Models\SocialPage::where('status', 'active')->count(),
-            'disabled' => \App\Models\SocialPage::where('status', 'disabled')->count(),
-            'verified' => \App\Models\SocialPage::where('is_verified', true)->count(),
+            'total'    => \App\Models\SocialPages\SocialPages\SocialPage::count(),
+            'active'   => \App\Models\SocialPages\SocialPages\SocialPage::where('status', 'active')->count(),
+            'disabled' => \App\Models\SocialPages\SocialPages\SocialPage::where('status', 'disabled')->count(),
+            'verified' => \App\Models\SocialPages\SocialPages\SocialPage::where('is_verified', true)->count(),
             'pending'  => $pendingVerifications->count(),
         ];
 
-        $categories = \App\Models\PageCategory::active()->get();
+        $categories = \App\Models\SocialPages\SocialPages\PageCategory::active()->get();
 
         return view('admin.social-pages', compact('pages', 'pendingVerifications', 'stats', 'categories'));
     }
@@ -1885,14 +1885,14 @@ class AdminController extends Controller
     {
         $this->requireAdmin();
 
-        $page   = \App\Models\SocialPage::findOrFail($id);
+        $page   = \App\Models\SocialPages\SocialPages\SocialPage::findOrFail($id);
         $action = $request->input('action');
 
         switch ($action) {
             case 'verify':
                 $page->update(['is_verified' => true]);
                 // mark any pending verification request as approved
-                \App\Models\PageVerificationRequest::where('social_page_id', $page->id)
+                \App\Models\SocialPages\SocialPages\PageVerificationRequest::where('social_page_id', $page->id)
                     ->where('status', 'pending')
                     ->update(['status' => 'approved', 'reviewed_at' => now(), 'reviewed_by' => auth()->id()]);
                 return back()->with('success', "\"{$page->name}\" has been verified.");
@@ -1925,14 +1925,14 @@ class AdminController extends Controller
                 return back()->with('success', "\"{$name}\" has been permanently deleted.");
 
             case 'approve_verification':
-                $vr = \App\Models\PageVerificationRequest::where('id', $request->input('vr_id'))
+                $vr = \App\Models\SocialPages\SocialPages\PageVerificationRequest::where('id', $request->input('vr_id'))
                     ->where('status', 'pending')->firstOrFail();
                 $vr->update(['status' => 'approved', 'reviewed_at' => now(), 'reviewed_by' => auth()->id()]);
                 $vr->page()->update(['is_verified' => true]);
                 return back()->with('success', 'Verification request approved.');
 
             case 'reject_verification':
-                $vr = \App\Models\PageVerificationRequest::where('id', $request->input('vr_id'))
+                $vr = \App\Models\SocialPages\SocialPages\PageVerificationRequest::where('id', $request->input('vr_id'))
                     ->where('status', 'pending')->firstOrFail();
                 $vr->update([
                     'status'      => 'rejected',
@@ -1949,7 +1949,7 @@ class AdminController extends Controller
     public function adminPageCategories()
     {
         $this->requireAdmin();
-        $categories = \App\Models\PageCategory::orderBy('sort_order')->get();
+        $categories = \App\Models\SocialPages\SocialPages\PageCategory::orderBy('sort_order')->get();
         return view('admin.page-categories', compact('categories'));
     }
 
@@ -1960,8 +1960,8 @@ class AdminController extends Controller
             'name' => 'required|string|max:100|unique:page_categories,name',
             'icon' => 'nullable|string|max:10',
         ]);
-        $max = \App\Models\PageCategory::max('sort_order') ?? 0;
-        \App\Models\PageCategory::create([
+        $max = \App\Models\SocialPages\SocialPages\PageCategory::max('sort_order') ?? 0;
+        \App\Models\SocialPages\SocialPages\PageCategory::create([
             'name'       => $data['name'],
             'slug'       => \Illuminate\Support\Str::slug($data['name']),
             'icon'       => $data['icon'] ?? null,
@@ -1974,7 +1974,7 @@ class AdminController extends Controller
     public function adminPageCategoryToggle(int $id)
     {
         $this->requireAdmin();
-        $cat = \App\Models\PageCategory::findOrFail($id);
+        $cat = \App\Models\SocialPages\SocialPages\PageCategory::findOrFail($id);
         $cat->update(['is_active' => !$cat->is_active]);
         return back()->with('success', $cat->is_active ? 'Category enabled.' : 'Category disabled.');
     }
@@ -1982,7 +1982,7 @@ class AdminController extends Controller
     public function adminPageCategoryDelete(int $id)
     {
         $this->requireAdmin();
-        \App\Models\PageCategory::findOrFail($id)->delete();
+        \App\Models\SocialPages\SocialPages\PageCategory::findOrFail($id)->delete();
         return back()->with('success', 'Category deleted.');
     }
 }

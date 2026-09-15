@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\WatchParty;
-use App\Models\WatchPartyMember;
-use App\Models\WatchPartyMessage;
+use App\Models\UserEngagement\WatchParty;
+use App\Models\UserEngagement\WatchPartyMember;
+use App\Models\UserEngagement\WatchPartyMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 

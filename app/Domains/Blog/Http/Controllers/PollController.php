@@ -4,9 +4,9 @@ namespace App\Domains\Blog\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\Poll;
-use App\Models\PollOption;
-use App\Models\PollVote;
+use App\Models\MediaContent\Poll;
+use App\Models\MediaContent\PollOption;
+use App\Models\MediaContent\PollVote;
 use Illuminate\Http\Request;
 
 class PollController extends Controller

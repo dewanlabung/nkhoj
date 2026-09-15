@@ -4,7 +4,7 @@ namespace App\Core\Notifications;
 
 use App\Core\Traits\GetsUserPreferredNotificationChannels;
 use App\Core\Traits\TracksNotificationActivity;
-use App\Models\User;
+use App\Models\UserEngagement\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 

@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Models\LoginHistory;
-use App\Models\User;
+use App\Models\LoggingAnalytics\LoginHistory;
+use App\Models\UserEngagement\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

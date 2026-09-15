@@ -2,8 +2,8 @@
 
 namespace App\Core\Events;
 
-use App\Models\Ban;
-use App\Models\User;
+use App\Models\Memberships\Ban;
+use App\Models\UserEngagement\User;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;

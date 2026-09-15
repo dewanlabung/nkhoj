@@ -4,8 +4,8 @@ namespace App\Domains\Support\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\ContactMessage;
-use App\Models\NewsletterSubscriber;
+use App\Models\Core\ContactMessage;
+use App\Models\Core\NewsletterSubscriber;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 

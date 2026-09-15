@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BroadcastChannel;
-use App\Models\ChannelMessage;
+use App\Models\UserEngagement\BroadcastChannel;
+use App\Models\UserEngagement\ChannelMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 

@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Ban;
+use App\Models\Memberships\Ban;
 use Illuminate\Console\Command;
 
 class DeleteExpiredBansCommand extends Command

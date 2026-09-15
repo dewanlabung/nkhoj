@@ -2,8 +2,8 @@
 
 namespace App\Events;
 
-use App\Models\User;
-use App\Models\Ban;
+use App\Models\UserEngagement\User;
+use App\Models\Memberships\Ban;
 
 class UserBanned
 {

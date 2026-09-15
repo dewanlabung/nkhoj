@@ -2,7 +2,7 @@
 
 namespace App\Domains\Identity\Services;
 
-use App\Models\User;
+use App\Models\UserEngagement\User;
 use PragmaRX\Google2FA\Google2FA;
 use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;

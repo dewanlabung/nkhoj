@@ -3,7 +3,7 @@
 namespace App\Core\Services\Auth;
 
 use App\Core\Contracts\BanService as BanServiceContract;
-use App\Models\Ban;
+use App\Models\Memberships\Ban;
 use Illuminate\Database\Eloquent\Model;
 
 class BanService implements BanServiceContract

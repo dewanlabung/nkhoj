@@ -2,7 +2,7 @@
 
 namespace App\Domains\Identity\Services;
 
-use App\Models\User;
+use App\Models\UserEngagement\User;
 use App\Events\UserCreated;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Hash;

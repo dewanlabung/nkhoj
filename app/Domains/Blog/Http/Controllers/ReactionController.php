@@ -4,8 +4,8 @@ namespace App\Domains\Blog\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\Post;
-use App\Models\Reaction;
+use App\Models\Blog\Post;
+use App\Models\Blog\Reaction;
 use Illuminate\Http\Request;
 
 class ReactionController extends Controller

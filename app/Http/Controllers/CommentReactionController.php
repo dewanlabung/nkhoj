@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Comment;
-use App\Models\CommentReaction;
+use App\Models\Blog\Comment;
+use App\Models\Blog\CommentReaction;
 use Illuminate\Http\Request;
 
 class CommentReactionController extends Controller

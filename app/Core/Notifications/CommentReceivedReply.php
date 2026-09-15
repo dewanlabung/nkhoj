@@ -2,8 +2,8 @@
 
 namespace App\Core\Notifications;
 
-use App\Core\Models\Comment;
-use App\Models\User;
+use App\Models\Blog\Comment;
+use App\Models\UserEngagement\User;
 use Illuminate\Support\Str;
 
 class CommentReceivedReply extends BaseNotification

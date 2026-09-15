@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Core\Actions\SubscribeUserToNotifications;
-use App\Models\User;
+use App\Models\UserEngagement\User;
 use Illuminate\Console\Command;
 
 class SubscribeUsersToNotifications extends Command

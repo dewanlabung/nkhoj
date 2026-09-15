@@ -2,8 +2,8 @@
 
 namespace App\Core\Traits;
 
-use App\Core\Models\NotificationActivityLog;
-use App\Models\User;
+use App\Models\Notifications\NotificationActivityLog;
+use App\Models\UserEngagement\User;
 
 trait TracksNotificationActivity
 {

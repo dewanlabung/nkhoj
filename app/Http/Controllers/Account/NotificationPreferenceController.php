@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Account;
 
 use App\Http\Controllers\Controller;
-use App\Models\NotificationPreference;
+use App\Models\Notifications\Notifications\NotificationPreference;
 use Illuminate\Http\Request;
 
 class NotificationPreferenceController extends Controller

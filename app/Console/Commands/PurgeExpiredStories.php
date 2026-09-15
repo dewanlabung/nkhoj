@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Story;
+use App\Models\MediaContent\Story;
 use Illuminate\Console\Command;
 
 class PurgeExpiredStories extends Command

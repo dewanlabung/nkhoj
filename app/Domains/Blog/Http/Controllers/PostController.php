@@ -4,12 +4,12 @@ namespace App\Domains\Blog\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\Bookmark;
-use App\Models\Comment;
-use App\Models\DailyAnalytic;
-use App\Models\Post;
-use App\Models\Tag;
-use App\Models\Widget;
+use App\Models\Blog\Bookmark;
+use App\Models\Blog\Comment;
+use App\Models\LoggingAnalytics\DailyAnalytic;
+use App\Models\Blog\Post;
+use App\Models\Blog\Tag;
+use App\Models\Core\Widget;
 use Illuminate\Support\Facades\File;
 
 class PostController extends Controller
@@ -59,7 +59,7 @@ class PostController extends Controller
         if (auth()->check()) {
             $userReaction = $post->reactions()->where('user_id', auth()->id())->value('emoji');
             $isBookmarked = Bookmark::where('user_id', auth()->id())
-                ->where('bookmarkable_type', \App\Models\Post::class)
+                ->where('bookmarkable_type', \App\Models\Blog\Post::class)
                 ->where('bookmarkable_id', $post->id)
                 ->exists();
         }

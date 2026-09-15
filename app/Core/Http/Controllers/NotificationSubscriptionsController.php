@@ -2,8 +2,8 @@
 
 namespace App\Core\Http\Controllers;
 
-use App\Core\Models\NotificationActivityLog;
-use App\Models\User;
+use App\Models\Notifications\NotificationActivityLog;
+use App\Models\UserEngagement\User;
 use File;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;

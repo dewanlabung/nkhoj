@@ -4,9 +4,9 @@ namespace App\Domains\Recipe\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\Recipe;
-use App\Models\RecipeLike;
-use App\Models\RecipeRating;
+use App\Models\MediaContent\Recipe;
+use App\Models\MediaContent\RecipeLike;
+use App\Models\MediaContent\RecipeRating;
 use App\Traits\SavesOptimizedThumbnail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;

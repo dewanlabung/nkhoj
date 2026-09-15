@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Reel;
-use App\Models\ReelLike;
-use App\Models\ReelComment;
+use App\Models\MediaContent\Reel;
+use App\Models\MediaContent\ReelLike;
+use App\Models\MediaContent\ReelComment;
 use App\Traits\SavesOptimizedThumbnail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;

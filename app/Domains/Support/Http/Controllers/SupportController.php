@@ -4,8 +4,8 @@ namespace App\Domains\Support\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\SupportTicket;
-use App\Models\SupportReply;
+use App\Models\Support\SupportTicket;
+use App\Models\Support\SupportReply;
 use Illuminate\Http\Request;
 
 class SupportController extends Controller

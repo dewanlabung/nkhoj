@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Conversation;
-use App\Models\ConversationParticipant;
-use App\Models\DirectMessage;
-use App\Models\User;
+use App\Models\UserEngagement\Conversation;
+use App\Models\UserEngagement\ConversationParticipant;
+use App\Models\UserEngagement\DirectMessage;
+use App\Models\UserEngagement\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 

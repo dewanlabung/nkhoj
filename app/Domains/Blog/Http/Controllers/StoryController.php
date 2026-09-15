@@ -4,8 +4,8 @@ namespace App\Domains\Blog\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\Story;
-use App\Models\StoryHighlight;
+use App\Models\MediaContent\Story;
+use App\Models\MediaContent\StoryHighlight;
 use App\Traits\SavesOptimizedThumbnail;
 use Illuminate\Http\Request;
 
