@@ -5,6 +5,7 @@ namespace App\Domains\Blog\Models;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Post extends Model
@@ -84,9 +85,9 @@ class Post extends Model
         return $query->where('is_featured', true);
     }
 
-    public function comments()
+    public function comments(): MorphMany
     {
-        return $this->hasMany(Comment::class);
+        return $this->morphMany(\App\Core\Models\Comment::class, 'commentable');
     }
 
     public function reactions()
