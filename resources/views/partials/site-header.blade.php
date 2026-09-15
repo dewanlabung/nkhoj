@@ -111,7 +111,7 @@
                 @endif
 
                 @if($useFallback)
-                    @foreach((\App\Models\Category::orderBy('sort_order')->limit(7)->get() ?? collect()) as $cat)
+                    @foreach((\App\Models\Blog\Category::orderBy('sort_order')->limit(7)->get() ?? collect()) as $cat)
                     <a href="/category/{{ $cat->slug }}"
                         class="whitespace-nowrap px-3 py-4 text-sm font-medium font-nepali {{ request()->is('category/'.$cat->slug) ? 'text-brand-600 border-b-2 border-brand-500' : 'text-gray-600 dark:text-gray-300 hover:text-brand-600 border-b-2 border-transparent' }} transition-colors">
                         {{ $cat->name_ne ?? $cat->name_en }}
@@ -577,7 +577,7 @@
             </a>
             @endif
             @if($useFallback)
-                @foreach((\App\Models\Category::orderBy('sort_order')->limit(10)->get() ?? collect()) as $cat)
+                @foreach((\App\Models\Blog\Category::orderBy('sort_order')->limit(10)->get() ?? collect()) as $cat)
                 <a href="/category/{{ $cat->slug }}" @click="mobileMenu = false"
                     class="flex items-center justify-between px-5 py-3 text-sm font-medium font-nepali {{ request()->is('category/'.$cat->slug) ? 'text-brand-600 bg-brand-50 dark:bg-brand-900/20' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }} transition-colors">
                     {{ $cat->name_ne ?? $cat->name_en }}

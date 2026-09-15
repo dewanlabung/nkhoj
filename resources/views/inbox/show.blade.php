@@ -25,7 +25,7 @@
     <div x-show="giftPanel" x-cloak class="bg-white dark:bg-gray-800 border-x border-gray-100 dark:border-gray-700 px-4 py-3 flex-shrink-0">
         <p class="text-xs font-bold text-gray-500 mb-2">Send a gift (balance: <span class="text-brand-500" x-text="coinBalance">{{ $wallet->balance }}</span> 🪙)</p>
         <div class="flex gap-2 flex-wrap">
-            @foreach(\App\Models\VirtualGift::$types as $key => $type)
+            @foreach(\App\Models\Memberships\VirtualGift::$types as $key => $type)
             <form method="POST" action="/gifts/send/{{ $other->id }}">
                 @csrf
                 <input type="hidden" name="gift_type" value="{{ $key }}">

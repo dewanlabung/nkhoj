@@ -113,7 +113,7 @@ function watchParty(partyId, myUserId, hostId) {
         messages: @json($messages->map(fn($m) => ['id' => $m->id, 'name' => $m->user->name, 'body' => $m->body])),
         chatInput: '',
         members: {{ $party->members->count() }},
-        isMember: {{ $party->isMember(auth()->user() ?? new \App\Models\User) ? 'true' : 'false' }},
+        isMember: {{ $party->isMember(auth()->user() ?? new \App\Models\UserEngagement\User) ? 'true' : 'false' }},
         embedSrc: '{{ $embedUrl ?? '' }}',
         seekSeconds: 0,
         lastId: {{ $messages->last()?->id ?? 0 }},

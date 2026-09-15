@@ -8,7 +8,7 @@
     $siteDesc   = $__s['site_description'] ?? 'नेपालको अग्रणी समाचार र ब्लग प्लेटफर्म';
     $showHome   = ($__s['nav_home_page_link'] ?? 'show') === 'show';
     try {
-        $navItems = \App\Models\NavigationItem::where('is_active', true)
+        $navItems = \App\Models\Core\NavigationItem::where('is_active', true)
                         ->whereNull('parent_id')
                         ->where('language', 'en')
                         ->orderBy('sort_order')
@@ -215,7 +215,7 @@
             <div>
                 <h4 class="text-sm font-semibold text-white mb-3">विभागहरू</h4>
                 <ul class="space-y-2 text-sm">
-                    @foreach((\App\Models\Category::limit(5)->get() ?? collect()) as $cat)
+                    @foreach((\App\Models\Blog\Category::limit(5)->get() ?? collect()) as $cat)
                     <li><a href="/category/{{ $cat->slug }}" class="hover:text-white transition-colors font-nepali">{{ $cat->name_ne ?? $cat->name_en }}</a></li>
                     @endforeach
                 </ul>

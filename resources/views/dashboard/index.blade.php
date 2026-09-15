@@ -46,7 +46,7 @@
 
 {{-- Top posts chart --}}
 @php
-    $topPosts = \App\Models\Post::where('author_id', auth()->id())
+    $topPosts = \App\Models\Blog\Post::where('author_id', auth()->id())
         ->where('status', 'published')
         ->orderByDesc('view_count')
         ->limit(5)

@@ -259,7 +259,7 @@
                             <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 block mb-1.5">Category <span class="text-red-400">*</span></label>
                             <select name="category_id" required class="w-full text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500">
                                 <option value="">— Select —</option>
-                                @foreach(\App\Models\Category::whereNull('parent_id')->orderBy('sort_order')->get() as $cat)
+                                @foreach(\App\Models\Blog\Category::whereNull('parent_id')->orderBy('sort_order')->get() as $cat)
                                 <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name_en }}</option>
                                 @foreach($cat->children as $sub)
                                 <option value="{{ $sub->id }}" {{ old('category_id') == $sub->id ? 'selected' : '' }}>&nbsp;&nbsp;↳ {{ $sub->name_en }}</option>

@@ -372,7 +372,7 @@ $cronToken = $s['cron_token'] ?? null;
                 Recent Activity
             </h2>
             @php
-            $recent = \App\Models\User::select('name','username','last_seen_at','role')
+            $recent = \App\Models\UserEngagement\User::select('name','username','last_seen_at','role')
                 ->whereNotNull('last_seen_at')->orderByDesc('last_seen_at')->take(5)->get();
             @endphp
             @if($recent->isEmpty())
