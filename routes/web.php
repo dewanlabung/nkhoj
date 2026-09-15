@@ -85,6 +85,14 @@ Route::middleware('guest')->group(function () {
 });
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth');
 
+// Session management
+Route::middleware('auth')->group(function () {
+    Route::post('/api/session/refresh', function () {
+        request()->session()->regenerateToken();
+        return response()->json(['status' => 'ok', 'message' => 'Session refreshed']);
+    })->name('session.refresh');
+});
+
 // Social OAuth routes
 Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])->name('social.redirect');
 Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'])->name('social.callback');

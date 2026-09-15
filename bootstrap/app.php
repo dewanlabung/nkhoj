@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'optional.auth' => \App\Http\Middleware\OptionalAuthenticate::class,
         ]);
         $middleware->web(append: [
+            \App\Http\Middleware\RefreshCsrfToken::class,
             \App\Http\Middleware\TrackLastSeen::class,
             \App\Http\Middleware\CheckIpBan::class,
             \App\Http\Middleware\ForbidBannedUser::class,
