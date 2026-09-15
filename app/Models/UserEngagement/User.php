@@ -124,7 +124,7 @@ class User extends Authenticatable
 
     public function posts()
     {
-        return $this->hasMany(Post::class, 'author_id');
+        return $this->hasMany(\App\Models\Blog\Post::class, 'author_id');
     }
 
     public function followers()
@@ -139,12 +139,12 @@ class User extends Authenticatable
 
     public function comments()
     {
-        return $this->hasMany(Comment::class);
+        return $this->hasMany(\App\Models\Blog\Comment::class);
     }
 
     public function bookmarks()
     {
-        return $this->hasMany(Bookmark::class);
+        return $this->hasMany(\App\Models\Blog\Bookmark::class);
     }
 
     public function hasSaved(string $type, int $id): bool
@@ -172,27 +172,27 @@ class User extends Authenticatable
 
     public function recipeRatings()
     {
-        return $this->hasMany(\App\Models\RecipeRating::class);
+        return $this->hasMany(\App\Models\MediaContent\RecipeRating::class);
     }
 
     public function userSessions()
     {
-        return $this->hasMany(\App\Models\UserSession::class)->orderByDesc('last_active_at');
+        return $this->hasMany(\App\Models\UserEngagement\UserSession::class)->orderByDesc('last_active_at');
     }
 
     public function deviceTokens()
     {
-        return $this->hasMany(\App\Models\DeviceToken::class);
+        return $this->hasMany(\App\Models\Notifications\DeviceToken::class);
     }
 
     public function notificationPreferences()
     {
-        return $this->hasMany(\App\Models\NotificationPreference::class);
+        return $this->hasMany(\App\Models\Notifications\NotificationPreference::class);
     }
 
     public function otpCodes()
     {
-        return $this->hasMany(\App\Models\OtpCode::class);
+        return $this->hasMany(\App\Models\LoggingAnalytics\OtpCode::class);
     }
 
     public function emailVerificationOtpIsValid(string $code): bool
@@ -206,7 +206,7 @@ class User extends Authenticatable
 
     public function sendEmailVerificationNotification(): void
     {
-        $otp = \App\Models\OtpCode::createForEmailVerification($this);
+        $otp = \App\Models\LoggingAnalytics\OtpCode::createForEmailVerification($this);
         $this->notify(new \App\Notifications\VerifyEmailWithOtpNotification($otp->code));
     }
 
