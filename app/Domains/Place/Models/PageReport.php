@@ -2,7 +2,7 @@
 
 namespace App\Domains\Place\Models;
 
-use App\Models\User;
+use App\Models\UserEngagement\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;

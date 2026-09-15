@@ -2,7 +2,7 @@
 
 namespace App\Domains\Place\Models;
 
-use App\Models\User;
+use App\Models\UserEngagement\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
