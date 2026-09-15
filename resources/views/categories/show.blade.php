@@ -114,7 +114,7 @@
             <div class="space-y-1">
                 @php
                 try {
-                    $allCats = \App\Models\Category::withCount(['posts' => fn($q) => $q->published()])
+                    $allCats = \App\Models\Blog\Category::withCount(['posts' => fn($q) => $q->published()])
                         ->withCount('questions')
                         ->where('is_active', true)
                         ->orderBy('sort_order')

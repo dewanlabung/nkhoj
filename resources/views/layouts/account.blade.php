@@ -7,7 +7,7 @@
     $taglineEn  = $__s['tagline_en']  ?? '';
     $showHome   = ($__s['nav_home_page_link'] ?? 'show') === 'show';
     try {
-        $navItems = \App\Models\NavigationItem::where('is_active', true)
+        $navItems = \App\Models\Core\NavigationItem::where('is_active', true)
                         ->whereNull('parent_id')
                         ->where('language', 'en')
                         ->orderBy('sort_order')

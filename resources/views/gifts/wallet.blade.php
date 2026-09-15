@@ -36,7 +36,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5">
         <h2 class="text-base font-bold text-gray-900 dark:text-white mb-4">Gift Types</h2>
         <div class="grid grid-cols-3 sm:grid-cols-5 gap-3 text-center">
-            @foreach(\App\Models\VirtualGift::$types as $key => $type)
+            @foreach(\App\Models\Memberships\VirtualGift::$types as $key => $type)
             <div class="py-3 rounded-xl bg-gray-50 dark:bg-gray-700">
                 <div class="text-3xl mb-1">{{ $type['emoji'] }}</div>
                 <div class="text-xs font-semibold text-gray-700 dark:text-gray-300">{{ $type['label'] }}</div>
@@ -66,7 +66,7 @@
             <div x-show="tab==='received'" class="space-y-2">
                 @forelse($received as $gift)
                 <div class="flex items-center gap-3 py-2">
-                    <span class="text-2xl">{{ \App\Models\VirtualGift::$types[$gift->gift_type]['emoji'] ?? '🎁' }}</span>
+                    <span class="text-2xl">{{ \App\Models\Memberships\VirtualGift::$types[$gift->gift_type]['emoji'] ?? '🎁' }}</span>
                     <div class="flex-1">
                         <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $gift->sender->name }}</p>
                         <p class="text-xs text-gray-400">{{ $gift->created_at->diffForHumans() }}</p>
@@ -81,7 +81,7 @@
             <div x-show="tab==='sent'" x-cloak class="space-y-2">
                 @forelse($sent as $gift)
                 <div class="flex items-center gap-3 py-2">
-                    <span class="text-2xl">{{ \App\Models\VirtualGift::$types[$gift->gift_type]['emoji'] ?? '🎁' }}</span>
+                    <span class="text-2xl">{{ \App\Models\Memberships\VirtualGift::$types[$gift->gift_type]['emoji'] ?? '🎁' }}</span>
                     <div class="flex-1">
                         <p class="text-sm font-semibold text-gray-900 dark:text-white">To {{ $gift->recipient->name }}</p>
                         <p class="text-xs text-gray-400">{{ $gift->created_at->diffForHumans() }}</p>

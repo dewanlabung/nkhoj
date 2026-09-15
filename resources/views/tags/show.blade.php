@@ -49,7 +49,7 @@
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
             <h3 class="font-bold text-gray-900 mb-4">All Categories</h3>
             <ul class="space-y-2">
-                @foreach(\App\Models\Category::withCount(['posts' => fn($q) => $q->published()])->orderBy('sort_order')->get() as $cat)
+                @foreach(\App\Models\Blog\Category::withCount(['posts' => fn($q) => $q->published()])->orderBy('sort_order')->get() as $cat)
                 <li class="flex items-center justify-between">
                     <a href="/category/{{ $cat->slug }}" class="text-sm text-gray-700 hover:text-brand-600">{{ $cat->name_ne ?? $cat->name_en }}</a>
                     <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{{ $cat->posts_count }}</span>

@@ -16,7 +16,7 @@ html:not(.dark) .opt-menu button:hover { background:#f3f4f6; }
 @section('content')
 @php
 $presets = \App\Http\Controllers\LanguageController::presets();
-$existing = \App\Models\Language::pluck('short_form')->toArray();
+$existing = \App\Models\Core\Language::pluck('short_form')->toArray();
 @endphp
 
 <div x-data="langApp()" @click="closeAll()">

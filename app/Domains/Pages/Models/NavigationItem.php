@@ -32,15 +32,15 @@ class NavigationItem extends Model
             return $this->url ?? '#';
         }
         if ($this->type === 'category' && $this->target_id) {
-            $cat = \App\Models\Category::find($this->target_id);
+            $cat = \App\Models\Blog\Category::find($this->target_id);
             return $cat ? "/category/{$cat->slug}" : '#';
         }
         if ($this->type === 'page' && $this->target_id) {
-            $page = \App\Models\Page::find($this->target_id);
+            $page = \App\Models\SocialPages\Page::find($this->target_id);
             return $page ? "/pages/{$page->slug}" : '#';
         }
         if ($this->type === 'tag' && $this->target_id) {
-            $tag = \App\Models\Tag::find($this->target_id);
+            $tag = \App\Models\Blog\Tag::find($this->target_id);
             return $tag ? "/tag/{$tag->slug}" : '#';
         }
         return '#';

@@ -33,8 +33,8 @@
                     <div class="flex items-center gap-2 flex-wrap mb-1">
                         <span class="font-semibold text-sm text-gray-800">{{ $report->reporter?->name ?? 'Unknown user' }}</span>
                         <span class="text-xs text-gray-400">{{ $report->created_at->diffForHumans() }}</span>
-                        <span class="text-xs bg-gray-100 text-gray-600 rounded-full px-2 py-0.5">{{ $report->reportable_type === \App\Models\Post::class ? 'Post' : 'Comment' }} #{{ $report->reportable_id }}</span>
-                        <span class="text-xs bg-red-50 text-red-600 rounded-full px-2 py-0.5 font-medium">{{ \App\Models\ContentReport::reasons()[$report->reason] ?? $report->reason }}</span>
+                        <span class="text-xs bg-gray-100 text-gray-600 rounded-full px-2 py-0.5">{{ $report->reportable_type === \App\Models\Blog\Post::class ? 'Post' : 'Comment' }} #{{ $report->reportable_id }}</span>
+                        <span class="text-xs bg-red-50 text-red-600 rounded-full px-2 py-0.5 font-medium">{{ \App\Models\LoggingAnalytics\ContentReport::reasons()[$report->reason] ?? $report->reason }}</span>
                     </div>
                     @if($report->details)
                     <p class="text-sm text-gray-600 mb-2">{{ $report->details }}</p>

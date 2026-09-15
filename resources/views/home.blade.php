@@ -65,7 +65,7 @@
             class="whitespace-nowrap px-4 py-1.5 text-sm font-semibold rounded-full transition-colors">
             सम्पूर्ण
         </button>
-        @foreach(\App\Models\Category::orderBy('sort_order')->get() as $cat)
+        @foreach(\App\Models\Blog\Category::orderBy('sort_order')->get() as $cat)
         <button @click="switchTab('/category/{{ $cat->slug }}', $el)"
             :class="activeTab === '/category/{{ $cat->slug }}' ? 'bg-brand-500 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
             class="whitespace-nowrap px-4 py-1.5 text-sm font-medium rounded-full transition-colors font-nepali">

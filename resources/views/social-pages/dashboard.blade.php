@@ -65,7 +65,7 @@
             </div>
 
             @php
-                $postCount  = \App\Models\PagePost::where('social_page_id', $page->id)->count();
+                $postCount  = \App\Models\SocialPages\PagePost::where('social_page_id', $page->id)->count();
                 $totalViews = $page->views_count;
             @endphp
             <div class="grid grid-cols-4 gap-3">
@@ -181,7 +181,7 @@
                 <h3 class="font-bold text-gray-900">Your posts</h3>
                 <a href="/pages/{{ $page->slug }}" class="text-blue-600 text-sm font-semibold hover:underline">+ Create</a>
             </div>
-            @php $recentPosts = \App\Models\PagePost::where('social_page_id', $page->id)->latest()->limit(10)->get(); @endphp
+            @php $recentPosts = \App\Models\SocialPages\PagePost::where('social_page_id', $page->id)->latest()->limit(10)->get(); @endphp
             @if($recentPosts->count())
             <div class="space-y-3">
                 @foreach($recentPosts as $post)
@@ -231,7 +231,7 @@
 
         {{-- TAB: Engagement --}}
         <div x-show="activeTab === 'engagement'">
-            @php $recentReviews = \App\Models\PageReview::where('social_page_id', $page->id)->with('user')->latest()->limit(10)->get(); @endphp
+            @php $recentReviews = \App\Models\SocialPages\PageReview::where('social_page_id', $page->id)->with('user')->latest()->limit(10)->get(); @endphp
             @if($recentReviews->count())
             <div class="space-y-3">
                 @foreach($recentReviews as $review)

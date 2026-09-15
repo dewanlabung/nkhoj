@@ -225,9 +225,9 @@ $label = $cfg['label'] ?? 'ब्रेकिङ';
 @php
 $cfg = $widget->config ?? [];
 $userId = $cfg['user_id'] ?? null;
-$spotlightUser = $userId ? \App\Models\User::find($userId) : null;
+$spotlightUser = $userId ? \App\Models\UserEngagement\User::find($userId) : null;
 if (!$spotlightUser) {
-    $spotlightUser = \App\Models\User::withCount('posts')->orderByDesc('posts_count')->first();
+    $spotlightUser = \App\Models\UserEngagement\User::withCount('posts')->orderByDesc('posts_count')->first();
 }
 $postCount = $spotlightUser?->posts_count ?? $spotlightUser?->posts()->published()->count() ?? 0;
 $bio = $cfg['bio'] ?? $spotlightUser?->bio ?? 'नेपाली पत्रकारिता र लेखनमा समर्पित।';
@@ -369,7 +369,7 @@ $readerLabel = $settings['reader_label'] ?? $cfg['reader_label'] ?? 'Get fresh c
 $siteName = $settings['site_name'] ?? config('app.name', 'नखोज');
 
 // Top authors for stacked avatars
-$avatarAuthors = \App\Models\User::withCount('posts')->orderByDesc('posts_count')->limit(4)->get();
+$avatarAuthors = \App\Models\UserEngagement\User::withCount('posts')->orderByDesc('posts_count')->limit(4)->get();
 
 // Social platform config: [key in settings => [label, color, svg icon path]]
 $socialLinks = [
