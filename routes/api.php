@@ -48,5 +48,28 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
         // Social graph
         Route::post('/users/{id}/follow',[AccountApiController::class, 'follow']);
+
+        // Comments System
+        Route::apiResource('comments', \App\Core\Http\Controllers\CommentController::class);
+        Route::get('/commentable-comments', [\App\Core\Http\Controllers\CommentController::class, 'forCommentable']);
+        Route::post('/comments/{comment}/restore', [\App\Core\Http\Controllers\CommentController::class, 'restore']);
+
+        // Notifications
+        Route::prefix('notifications')->name('notifications.')->group(function () {
+            Route::get('/',                              [\App\Core\Http\Controllers\NotificationController::class, 'index'])->name('index');
+            Route::get('/unread-count',                  [\App\Core\Http\Controllers\NotificationController::class, 'unreadCount'])->name('unread-count');
+            Route::post('/mark-as-read',                 [\App\Core\Http\Controllers\NotificationController::class, 'markAsRead'])->name('mark-as-read');
+            Route::delete('/{ids}',                      [\App\Core\Http\Controllers\NotificationController::class, 'destroy'])->name('destroy');
+            Route::post('/delete-all',                   [\App\Core\Http\Controllers\NotificationController::class, 'deleteAll'])->name('delete-all');
+            Route::get('/activity-logs',                 [\App\Core\Http\Controllers\NotificationController::class, 'activityLogs'])->name('activity-logs');
+            Route::get('/activity-logs/{notifType}',     [\App\Core\Http\Controllers\NotificationController::class, 'activityLogsByType'])->name('activity-logs-by-type');
+        });
+
+        // Notification Subscriptions (Preferences)
+        Route::prefix('notification-subscriptions')->name('notification-subscriptions.')->group(function () {
+            Route::get('/{user}',    [\App\Core\Http\Controllers\NotificationSubscriptionsController::class, 'index'])->name('index');
+            Route::put('/{user}',    [\App\Core\Http\Controllers\NotificationSubscriptionsController::class, 'update'])->name('update');
+            Route::post('/{user}/reset', [\App\Core\Http\Controllers\NotificationSubscriptionsController::class, 'reset'])->name('reset');
+        });
     });
 });

@@ -283,4 +283,12 @@ class User extends Authenticatable
         return $this->activeSubscription() !== null;
     }
 
+    /**
+     * Get user's notification subscription preferences
+     */
+    public function notificationSubscriptions()
+    {
+        return $this->hasMany(\App\Core\Models\NotificationSubscription::class);
+    }
+
 }
