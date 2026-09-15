@@ -4,6 +4,7 @@ namespace App\Domains\Recipe\Models;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
 
 class Recipe extends Model
@@ -58,5 +59,10 @@ class Recipe extends Model
     {
         if (!$user) return false;
         return $this->likes()->where('user_id', $user->id)->exists();
+    }
+
+    public function comments(): MorphMany
+    {
+        return $this->morphMany(\App\Core\Models\Comment::class, 'commentable');
     }
 }
