@@ -7,7 +7,10 @@ use App\Core\Contracts\BanService as BanServiceContract;
 use App\Core\Services\Auth\OtpAuthService;
 use App\Core\Services\Auth\BanService;
 use App\Core\Services\Mail\MailService;
+use App\Core\Events\CommentReplyCreated;
+use App\Core\Listeners\SendCommentReplyNotification;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Event;
 
 class CoreServiceProvider extends ServiceProvider
 {
@@ -19,7 +22,10 @@ class CoreServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        //
+        Event::listen(
+            CommentReplyCreated::class,
+            SendCommentReplyNotification::class
+        );
     }
 
     private function registerAuthServices(): void
