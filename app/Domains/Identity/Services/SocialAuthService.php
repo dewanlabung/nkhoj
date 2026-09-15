@@ -2,7 +2,7 @@
 
 namespace App\Domains\Identity\Services;
 
-use App\Models\SocialPages\SocialPages\SocialPages\SocialAccount;
+use App\Models\SocialPages\SocialAccount;
 use App\Models\UserEngagement\User;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Contracts\User as SocialiteUser;

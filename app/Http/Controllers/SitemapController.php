@@ -7,7 +7,7 @@ use App\Models\MediaContent\Event;
 use App\Models\Blog\Post;
 use App\Models\QnA\Question;
 use App\Models\MediaContent\Recipe;
-use App\Models\SocialPages\SocialPages\SocialPage;
+use App\Models\SocialPages\SocialPage;
 use App\Models\Blog\Tag;
 
 class SitemapController extends Controller

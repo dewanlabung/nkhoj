@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use App\Models\LoginHistory;
-use App\Models\SocialAccount;
+use App\Models\LoggingAnalytics\LoginHistory;
+use App\Models\UserEngagement\SocialAccount;
 
 class User extends Authenticatable
 {
@@ -157,17 +157,17 @@ class User extends Authenticatable
 
     public function nkhojNotifications()
     {
-        return $this->hasMany(Notification::class)->latest();
+        return $this->hasMany(\App\Models\Notifications\Notification::class)->latest();
     }
 
     public function questions()
     {
-        return $this->hasMany(\App\Models\Question::class);
+        return $this->hasMany(\App\Models\QnA\Question::class);
     }
 
     public function answers()
     {
-        return $this->hasMany(\App\Models\Answer::class);
+        return $this->hasMany(\App\Models\QnA\Answer::class);
     }
 
     public function recipeRatings()
@@ -262,10 +262,10 @@ class User extends Authenticatable
 
     public function subscriptions()
     {
-        return $this->hasMany(\App\Models\Subscription::class);
+        return $this->hasMany(\App\Models\Memberships\Subscription::class);
     }
 
-    public function activeSubscription(): ?\App\Models\Subscription
+    public function activeSubscription(): ?\App\Models\Memberships\Subscription
     {
         return $this->subscriptions()
             ->where('status', 'active')

@@ -9,7 +9,7 @@ use App\Models\Blog\Post;
 use App\Models\QnA\Question;
 use App\Models\MediaContent\Recipe;
 use App\Models\LoggingAnalytics\SearchLog;
-use App\Models\SocialPages\SocialPages\SocialPages\SocialPage;
+use App\Models\SocialPages\SocialPage;
 use App\Models\UserEngagement\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

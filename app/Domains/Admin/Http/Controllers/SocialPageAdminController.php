@@ -2,9 +2,9 @@
 
 namespace App\Domains\Admin\Http\Controllers;
 
-use App\Models\SocialPages\SocialPages\SocialPages\PageCategory;
-use App\Models\SocialPages\SocialPages\SocialPages\PageVerificationRequest;
-use App\Models\SocialPages\SocialPages\SocialPages\SocialPage;
+use App\Models\SocialPages\PageCategory;
+use App\Models\SocialPages\PageVerificationRequest;
+use App\Models\SocialPages\SocialPage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
