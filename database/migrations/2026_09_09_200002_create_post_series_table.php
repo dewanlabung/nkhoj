@@ -29,7 +29,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('posts', function (Blueprint $table) {
-            $table->dropForeignIdFor(\App\Models\PostSeries::class, 'series_id');
+            $table->dropForeignIdFor(\App\Models\Blog\PostSeries::class, 'series_id');
             $table->dropColumn(['series_id', 'series_order']);
         });
         Schema::dropIfExists('post_series');
