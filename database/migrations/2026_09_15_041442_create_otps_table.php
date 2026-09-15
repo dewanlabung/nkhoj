@@ -19,7 +19,7 @@ return new class extends Migration
             $table->enum('purpose', ['email_verification', 'password_reset', 'two_factor'])->default('email_verification');
             $table->unsignedTinyInteger('attempts')->default(0);
             $table->timestamp('verified_at')->nullable();
-            $table->timestamp('expires_at');
+            $table->timestamp('expires_at')->useCurrent();
             $table->timestamps();
             $table->index(['email', 'purpose']);
             $table->index('code');
