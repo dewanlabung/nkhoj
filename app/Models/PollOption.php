@@ -2,12 +2,5 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class PollOption extends Model
-{
-    protected $fillable = ['poll_id', 'text', 'votes_count'];
-
-    public function poll()  { return $this->belongsTo(Poll::class); }
-    public function votes() { return $this->hasMany(PollVote::class, 'poll_option_id'); }
-}
+/** @deprecated Use App\Domains\Blog\Models\PollOption directly. Shim kept for morph-type backward-compatibility. */
+class PollOption extends \App\Domains\Blog\Models\PollOption {}

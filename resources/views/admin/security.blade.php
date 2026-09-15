@@ -186,6 +186,70 @@ $cronToken = $s['cron_token'] ?? null;
         </div>
     </div>
 
+        {{-- Security Headers --}}
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-6"
+            x-data="{ on: {{ ($sec['security_headers_enabled'] ?? false) ? 'true' : 'false' }} }">
+            <h2 class="font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                <svg class="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                Security Headers
+            </h2>
+            <p class="text-xs text-gray-400 mb-4">Sends browser security headers on every response: X-Frame-Options (clickjacking), X-Content-Type-Options (MIME sniffing), Referrer-Policy, and Permissions-Policy.</p>
+            <form method="POST" action="/admin/security/headers">
+                @csrf
+                <input type="hidden" name="security_headers_enabled" :value="on ? '1' : '0'">
+                <label class="flex items-center gap-3 cursor-pointer" @click="on = !on">
+                    <div class="relative flex-shrink-0">
+                        <div class="w-11 h-6 rounded-full transition-colors" :class="on ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-600'"></div>
+                        <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform" :class="on ? 'translate-x-5' : ''"></div>
+                    </div>
+                    <span class="text-sm text-gray-700 dark:text-gray-300" x-text="on ? 'Enabled' : 'Disabled'"></span>
+                </label>
+                <button type="submit" class="mt-3 text-xs bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-lg px-3 py-1.5 transition-colors">Save</button>
+            </form>
+        </div>
+
+        {{-- Rate Limits --}}
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+            @php $rl = $sec['rate_limits'] ?? []; @endphp
+            <h2 class="font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                <svg class="w-4 h-4 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Rate Limits (per minute per user)
+            </h2>
+            <p class="text-xs text-gray-400 mb-4">Controls how many requests a single user can make per minute before they're throttled.</p>
+            <form method="POST" action="/admin/security/rate-limits" class="grid grid-cols-2 gap-4">
+                @csrf
+                <div>
+                    <label class="text-xs font-semibold text-gray-600 dark:text-gray-400 block mb-1">Login Attempts</label>
+                    <input type="number" name="rate_login_per_minute" min="1" max="100"
+                        value="{{ old('rate_login_per_minute', $rl['login_per_minute'] ?? 5) }}"
+                        class="w-full text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-gray-600 dark:text-gray-400 block mb-1">API Requests</label>
+                    <input type="number" name="rate_api_per_minute" min="1" max="10000"
+                        value="{{ old('rate_api_per_minute', $rl['api_per_minute'] ?? 60) }}"
+                        class="w-full text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-gray-600 dark:text-gray-400 block mb-1">Comments</label>
+                    <input type="number" name="rate_comments_per_minute" min="1" max="1000"
+                        value="{{ old('rate_comments_per_minute', $rl['comments_per_minute'] ?? 10) }}"
+                        class="w-full text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-gray-600 dark:text-gray-400 block mb-1">Posts / Uploads</label>
+                    <input type="number" name="rate_posts_per_minute" min="1" max="1000"
+                        value="{{ old('rate_posts_per_minute', $rl['posts_per_minute'] ?? 5) }}"
+                        class="w-full text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div class="col-span-2">
+                    <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-lg px-4 py-2.5 transition-colors">Save Rate Limits</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
     {{-- ═══ RIGHT COLUMN (2/5) ══════════════════════════════════ --}}
     <div class="lg:col-span-2 space-y-5">
 
@@ -282,6 +346,23 @@ $cronToken = $s['cron_token'] ?? null;
                 @endforeach
             </div>
             <p class="text-xs text-gray-400 mt-3 text-center">TOTP (Authenticator apps) — Coming soon</p>
+        </div>
+
+        {{-- Security Analysis Link --}}
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-red-100 dark:border-red-900/40 shadow-sm p-5">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                </div>
+                <div>
+                    <h2 class="font-bold text-gray-900 dark:text-white text-sm">Security Analysis</h2>
+                    <p class="text-xs text-gray-400">IP bans, threat log, attack patterns</p>
+                </div>
+            </div>
+            <a href="/admin/security/analysis"
+               class="block w-full text-center bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg px-4 py-2.5 transition-colors">
+                Open Analysis Dashboard →
+            </a>
         </div>
 
         {{-- Audit Log quick-view --}}

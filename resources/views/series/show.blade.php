@@ -7,7 +7,7 @@
     {{-- Series header --}}
     <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden mb-6">
         @if($series->cover_image)
-        <img src="{{ $series->cover_image }}" class="w-full h-48 object-cover">
+        <img src="{{ $series->cover_image }}" loading="lazy" class="w-full h-48 object-cover">
         @else
         <div class="w-full h-48 bg-gradient-to-br from-brand-400 to-indigo-500 flex items-center justify-center">
             <span class="text-6xl">📖</span>
@@ -27,7 +27,7 @@
                 </span>
             </div>
             <div class="flex items-center gap-2 mt-4 text-sm text-gray-500 dark:text-gray-400">
-                <img src="{{ $series->author->avatar ?? '/default-avatar.png' }}" class="w-6 h-6 rounded-full">
+                <img src="{{ $series->author->avatar ?? '/default-avatar.png' }}" loading="lazy" class="w-6 h-6 rounded-full">
                 <a href="/profile/{{ $series->author->username }}" class="font-medium hover:text-brand-600 transition-colors">
                     {{ $series->author->name }}
                 </a>
@@ -55,7 +55,7 @@
                 <p class="text-xs text-gray-400 mt-1">{{ $post->published_at?->format('M d, Y') }} · {{ number_format($post->view_count) }} views</p>
             </div>
             @if($post->thumbnail_url)
-            <img src="{{ $post->thumbnail_url }}" class="w-16 h-14 rounded-lg object-cover flex-shrink-0">
+            <img src="{{ $post->thumbnail_url }}" loading="lazy" class="w-16 h-14 rounded-lg object-cover flex-shrink-0">
             @endif
         </a>
         @endforeach

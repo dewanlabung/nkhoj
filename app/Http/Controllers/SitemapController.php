@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Event;
 use App\Models\Post;
+use App\Models\Question;
+use App\Models\Recipe;
+use App\Models\SocialPage;
 use App\Models\Tag;
 
 class SitemapController extends Controller
@@ -13,8 +17,12 @@ class SitemapController extends Controller
         $posts      = Post::where('status', 'published')->latest('published_at')->get(['slug', 'published_at', 'updated_at']);
         $categories = Category::all(['slug', 'updated_at']);
         $tags       = Tag::all(['slug', 'updated_at']);
+        $events     = Event::where('is_published', true)->latest()->get(['slug', 'uuid', 'updated_at']);
+        $recipes    = Recipe::where('is_published', true)->latest()->get(['slug', 'uuid', 'updated_at']);
+        $questions  = Question::where('status', 'open')->latest()->get(['slug', 'id', 'updated_at']);
+        $pages      = SocialPage::where('status', 'active')->latest()->get(['slug', 'updated_at']);
 
-        return response()->view('sitemap', compact('posts', 'categories', 'tags'))
+        return response()->view('sitemap', compact('posts', 'categories', 'tags', 'events', 'recipes', 'questions', 'pages'))
             ->header('Content-Type', 'application/xml');
     }
 

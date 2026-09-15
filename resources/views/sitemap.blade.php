@@ -32,4 +32,36 @@
         <priority>0.5</priority>
     </url>
     @endforeach
+    @foreach($events as $event)
+    <url>
+        <loc>{{ url('/events/' . ($event->slug ?? $event->uuid)) }}</loc>
+        <lastmod>{{ $event->updated_at->toAtomString() }}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    @endforeach
+    @foreach($recipes as $recipe)
+    <url>
+        <loc>{{ url('/recipes/' . ($recipe->slug ?? $recipe->uuid)) }}</loc>
+        <lastmod>{{ $recipe->updated_at->toAtomString() }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    @endforeach
+    @foreach($questions as $question)
+    <url>
+        <loc>{{ url('/questions/' . ($question->slug ?? $question->id)) }}</loc>
+        <lastmod>{{ $question->updated_at->toAtomString() }}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    @endforeach
+    @foreach($pages as $page)
+    <url>
+        <loc>{{ url('/pages/' . $page->slug) }}</loc>
+        <lastmod>{{ $page->updated_at->toAtomString() }}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    @endforeach
 </urlset>

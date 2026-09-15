@@ -2,9 +2,5 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class PollVote extends Model
-{
-    protected $fillable = ['poll_id', 'poll_option_id', 'user_id', 'session_key'];
-}
+/** @deprecated Use App\Domains\Blog\Models\PollVote directly. Shim kept for morph-type backward-compatibility. */
+class PollVote extends \App\Domains\Blog\Models\PollVote {}

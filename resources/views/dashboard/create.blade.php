@@ -365,5 +365,5 @@ function articleForm() {
     }
 }
 </script>
-@include('partials.tinymce', ['editorId' => 'body-editor', 'height' => 560])
+@include('partials.tinymce', ['editorId' => 'body-editor', 'height' => 560, 'mediaType' => 'posts'])
 @endsection

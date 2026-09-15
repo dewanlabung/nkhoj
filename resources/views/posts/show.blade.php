@@ -74,6 +74,12 @@
         </nav>
 
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            @if($post->is_sensitive ?? false)
+            <div class="bg-amber-50 border-b border-amber-200 px-6 py-3 flex items-start gap-3">
+                <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <p class="text-sm text-amber-800 font-semibold">Sensitive content — this article may include content some readers find distressing.</p>
+            </div>
+            @endif
             @if($post->thumbnail_url)
             <img src="{{ $post->thumbnail_url }}" alt="{{ $post->title }}" class="w-full h-72 object-cover">
             @endif
@@ -257,30 +263,33 @@
 
                 {{-- ═══════════════════ SHARE + BOOKMARK ═══════════════════ --}}
                 <div class="mt-6 pt-4 border-t border-gray-100 flex items-center gap-3 flex-wrap">
+                    <div x-data="{ shares: {{ $post->share_count ?? 0 }}, trackShare() { fetch('/posts/{{ $post->slug }}/share', { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content } }).then(r=>r.json()).then(d=>{ this.shares=d.share_count; }).catch(()=>{}); } }" class="flex flex-wrap items-center gap-2 w-full">
                     <span class="text-sm text-gray-500 font-medium">Share:</span>
                     <a href="https://wa.me/?text={{ urlencode($post->title . ' ' . url()->current()) }}"
-                        target="_blank" rel="noopener"
+                        target="_blank" rel="noopener" @click="trackShare()"
                         class="px-3 py-1.5 text-xs font-medium bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors">
                         WhatsApp
                     </a>
                     <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(url()->current()) }}"
-                        target="_blank"
+                        target="_blank" @click="trackShare()"
                         class="px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors">
                         Facebook
                     </a>
                     <a href="https://twitter.com/intent/tweet?text={{ urlencode($post->title) }}&url={{ urlencode(url()->current()) }}"
-                        target="_blank"
+                        target="_blank" @click="trackShare()"
                         class="px-3 py-1.5 text-xs font-medium bg-sky-50 text-sky-600 rounded-lg hover:bg-sky-100 transition-colors">
                         Twitter/X
                     </a>
-                    <button onclick="navigator.clipboard.writeText(window.location.href).then(()=>this.textContent='Copied!')"
+                    <button @click="navigator.clipboard.writeText(window.location.href).then(()=>{ $el.textContent='Copied!'; trackShare(); setTimeout(()=>$el.textContent='Copy Link',2000); })"
                         class="px-3 py-1.5 text-xs font-medium bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors">
                         Copy Link
                     </button>
+                    <span x-show="shares > 0" class="text-xs text-gray-400 ml-1" x-text="shares + ' shares'"></span>
+                    </div>
 
                     @auth
                     {{-- Bookmark button --}}
-                    <div class="ml-auto"
+                    <div class="ml-auto flex items-center gap-2 relative"
                         x-data="{ saved: {{ $isBookmarked ? 'true' : 'false' }}, loading: false }"
                         x-cloak>
                         <button
@@ -296,6 +305,42 @@
                             class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-50">
                             <span x-text="saved ? '🔖 सेभ गरियो' : '🔖 सेभ गर्नुहोस्'"></span>
                         </button>
+                        {{-- Report button --}}
+                        <div x-data="{ open: false, done: false, reason: '', sending: false }">
+                            <button @click="open = !open" title="Report this article"
+                                class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6H10.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/></svg>
+                                Report
+                            </button>
+                            <div x-show="open" x-cloak @click.outside="open = false"
+                                class="absolute z-20 right-0 mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl p-4">
+                                <template x-if="done">
+                                    <p class="text-sm text-green-600 text-center py-2">✓ Report submitted. Thank you.</p>
+                                </template>
+                                <template x-if="!done">
+                                    <div>
+                                        <p class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">Why are you reporting this?</p>
+                                        <select x-model="reason" class="w-full text-xs border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 mb-3 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                            <option value="">Select a reason…</option>
+                                            <option value="spam">Spam or misleading</option>
+                                            <option value="misinformation">Misinformation</option>
+                                            <option value="hate_speech">Hate speech / harassment</option>
+                                            <option value="violence">Violence / dangerous content</option>
+                                            <option value="copyright">Copyright violation</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                        <button :disabled="!reason || sending" @click="
+                                            sending = true;
+                                            fetch('/report', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content }, body: JSON.stringify({ type: 'post', id: {{ $post->id }}, reason }) })
+                                            .then(r => r.json()).then(() => { done = true; sending = false; }).catch(() => { sending = false; });
+                                        "
+                                        class="w-full text-xs bg-red-600 text-white rounded-lg py-1.5 font-semibold disabled:opacity-50 hover:bg-red-700 transition-colors">
+                                            Submit Report
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
                     </div>
                     @endauth
                 </div>
@@ -407,23 +452,47 @@
                             </div>
                         </div>
 
-                        {{-- Nested replies --}}
+                        {{-- Nested replies with load-more --}}
                         @if($comment->replies->count())
-                        <div class="mt-3 ml-4 space-y-3">
-                            @foreach($comment->replies as $reply)
+                        @php $allReplies = $comment->replies; $firstReplies = $allReplies->take(3); $moreReplies = $allReplies->skip(3); @endphp
+                        <div class="mt-3 ml-4 space-y-3" x-data="{ showAll: false }">
+                            @foreach($firstReplies as $reply)
                             <div class="flex gap-3">
                                 <div class="w-7 h-7 rounded-full bg-indigo-300 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
                                     {{ strtoupper(substr($reply->displayName(), 0, 1)) }}
                                 </div>
-                                <div class="flex-1 bg-indigo-50 rounded-xl px-4 py-2">
+                                <div class="flex-1 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl px-4 py-2">
                                     <div class="flex items-center justify-between mb-0.5">
-                                        <span class="text-xs font-semibold text-gray-800">{{ $reply->displayName() }}</span>
+                                        <span class="text-xs font-semibold text-gray-800 dark:text-gray-200">{{ $reply->displayName() }}</span>
                                         <span class="text-xs text-gray-400">{{ $reply->created_at->diffForHumans() }}</span>
                                     </div>
-                                    <p class="text-sm text-gray-700 font-nepali">{{ $reply->body }}</p>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300 font-nepali">{{ $reply->body }}</p>
                                 </div>
                             </div>
                             @endforeach
+                            @if($moreReplies->count())
+                            <template x-if="showAll">
+                                <div class="space-y-3">
+                                    @foreach($moreReplies as $reply)
+                                    <div class="flex gap-3">
+                                        <div class="w-7 h-7 rounded-full bg-indigo-300 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                                            {{ strtoupper(substr($reply->displayName(), 0, 1)) }}
+                                        </div>
+                                        <div class="flex-1 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl px-4 py-2">
+                                            <div class="flex items-center justify-between mb-0.5">
+                                                <span class="text-xs font-semibold text-gray-800 dark:text-gray-200">{{ $reply->displayName() }}</span>
+                                                <span class="text-xs text-gray-400">{{ $reply->created_at->diffForHumans() }}</span>
+                                            </div>
+                                            <p class="text-sm text-gray-700 dark:text-gray-300 font-nepali">{{ $reply->body }}</p>
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                </div>
+                            </template>
+                            <button @click="showAll = !showAll" class="text-xs text-brand-600 hover:text-brand-700 font-medium mt-1">
+                                <span x-text="showAll ? 'Hide replies' : '+ {{ $moreReplies->count() }} more {{ Str::plural("reply", $moreReplies->count()) }}'"></span>
+                            </button>
+                            @endif
                         </div>
                         @endif
                     </div>
@@ -526,6 +595,30 @@
                     <div>
                         <p class="text-sm font-medium text-gray-800 group-hover:text-brand-600 line-clamp-2 transition-colors font-nepali">{{ $rel->title }}</p>
                         <p class="text-xs text-gray-400 mt-0.5">{{ $rel->published_at->diffForHumans() }}</p>
+                    </div>
+                </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        {{-- Tag-based recommendations --}}
+        @if(isset($tagRecommended) && $tagRecommended->count())
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+            <h3 class="font-bold text-gray-900 mb-4 text-sm">तपाईंलाई मन पर्न सक्छ</h3>
+            <div class="space-y-3">
+                @foreach($tagRecommended as $rec)
+                <a href="/posts/{{ $rec->slug }}" class="flex gap-3 group">
+                    @if($rec->thumbnail_url)
+                    <img src="{{ $rec->thumbnail_url }}" loading="lazy" alt="" class="w-14 h-10 object-cover rounded-lg flex-shrink-0">
+                    @else
+                    <div class="w-14 h-10 rounded-lg bg-indigo-50 flex-shrink-0 flex items-center justify-center text-indigo-400 font-bold text-xs">
+                        {{ strtoupper(substr($rec->title, 0, 1)) }}
+                    </div>
+                    @endif
+                    <div>
+                        <p class="text-sm font-medium text-gray-800 group-hover:text-brand-600 line-clamp-2 transition-colors font-nepali leading-snug">{{ $rec->title }}</p>
+                        <p class="text-xs text-gray-400 mt-0.5">{{ $rec->category?->name_ne ?? $rec->category?->name_en }}</p>
                     </div>
                 </a>
                 @endforeach

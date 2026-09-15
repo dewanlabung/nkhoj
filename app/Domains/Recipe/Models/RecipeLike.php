@@ -1,0 +1,14 @@
+<?php
+
+namespace App\Domains\Recipe\Models;
+
+use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
+
+class RecipeLike extends Model
+{
+    protected $fillable = ['recipe_id', 'user_id'];
+
+    public function recipe() { return $this->belongsTo(Recipe::class); }
+    public function user()   { return $this->belongsTo(User::class); }
+}

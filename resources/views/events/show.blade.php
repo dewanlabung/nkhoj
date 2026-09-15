@@ -1,6 +1,49 @@
 @extends('layouts.app')
 @section('title', $event->title . ' – Nkhoj Events')
 
+@push('head')
+<meta property="og:title" content="{{ $event->title }}">
+<meta property="og:type" content="event">
+<meta property="og:url" content="{{ url('/events/' . ($event->slug ?? $event->uuid)) }}">
+@if($event->thumbnail_url)<meta property="og:image" content="{{ $event->thumbnail_url }}">@endif
+@if($event->description)<meta property="og:description" content="{{ Str::limit(strip_tags($event->description), 160) }}">@endif
+<meta property="og:site_name" content="Nkhoj">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ $event->title }}">
+@if($event->description)<meta name="twitter:description" content="{{ Str::limit(strip_tags($event->description), 160) }}">@endif
+@if($event->thumbnail_url)<meta name="twitter:image" content="{{ $event->thumbnail_url }}">@endif
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "name": "{{ addslashes($event->title) }}",
+    "startDate": "{{ $event->starts_at->toIso8601String() }}",
+    @if($event->ends_at)"endDate": "{{ $event->ends_at->toIso8601String() }}",@endif
+    "eventStatus": "https://schema.org/EventScheduled",
+    "eventAttendanceMode": "{{ ($event->event_type ?? '') === 'online' ? 'https://schema.org/OnlineEventAttendanceMode' : 'https://schema.org/OfflineEventAttendanceMode' }}",
+    @if($event->venue || $event->location)
+    "location": {
+        "@type": "Place",
+        "name": "{{ addslashes($event->venue ?? $event->location) }}"
+        @if($event->location), "address": "{{ addslashes($event->location) }}"@endif
+    },
+    @endif
+    @if($event->thumbnail_url)"image": "{{ $event->thumbnail_url }}",@endif
+    @if($event->description)"description": "{{ addslashes(strip_tags(Str::limit($event->description, 200))) }}",@endif
+    @if($event->organizer)"organizer": { "@type": "Organization", "name": "{{ addslashes($event->organizer) }}" },@endif
+    @if(!$event->is_free)
+    "offers": {
+        "@type": "Offer",
+        "price": "{{ $event->ticket_price }}",
+        "priceCurrency": "NPR",
+        "availability": "https://schema.org/InStock"
+    },
+    @endif
+    "url": "{{ url('/events/' . ($event->slug ?? $event->uuid)) }}"
+}
+</script>
+@endpush
+
 @section('content')
 <div class="max-w-4xl mx-auto">
     <nav class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-6">

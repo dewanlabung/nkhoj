@@ -48,6 +48,11 @@
                         My Pages
                     </a>
                 @endauth
+                <button id="nearby-btn" onclick="findNearby()"
+                    class="shrink-0 px-5 py-4 text-sm font-semibold border-b-2 transition whitespace-nowrap
+                           {{ request('tab') === 'nearby' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900' }}">
+                    📍 Nearby
+                </button>
             </div>
             <a href="{{ auth()->check() ? '/pages/create' : '/pages/start' }}"
                class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-sm transition flex items-center gap-1.5 ml-4">
@@ -155,6 +160,27 @@
                         </div>
                     @endif
 
+                {{-- TAB: Nearby --}}
+                @elseif($tab === 'nearby')
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="font-bold text-gray-900 text-base">📍 Pages Near You</h2>
+                        <button onclick="findNearby()" class="text-sm text-blue-600 hover:underline font-semibold">Refresh location</button>
+                    </div>
+                    @if($pages->count())
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                            @foreach($pages as $page)
+                                @include('social-pages._card', ['page' => $page, 'showFollow' => true])
+                            @endforeach
+                        </div>
+                        <div class="mt-6">{{ $pages->links() }}</div>
+                    @else
+                        <div class="bg-white rounded-2xl p-12 text-center shadow-sm">
+                            <p class="text-4xl mb-4">📍</p>
+                            <p class="text-gray-500 font-medium mb-2">No nearby pages found</p>
+                            <p class="text-gray-400 text-sm">Try creating a page for your local business!</p>
+                        </div>
+                    @endif
+
                 {{-- TAB: Discover (default) --}}
                 @else
                     <div class="flex items-center justify-between mb-4">
@@ -191,4 +217,26 @@
         </div>
     </div>
 </div>
+@push('scripts')
+<script>
+function findNearby() {
+    const btn = document.getElementById('nearby-btn');
+    if (btn) btn.textContent = '⏳ Locating...';
+    if (!navigator.geolocation) {
+        alert('Geolocation is not supported by your browser.');
+        if (btn) btn.textContent = '📍 Nearby';
+        return;
+    }
+    navigator.geolocation.getCurrentPosition(function(pos) {
+        const lat = pos.coords.latitude.toFixed(6);
+        const lng = pos.coords.longitude.toFixed(6);
+        window.location.href = '/pages?tab=nearby&near=' + lat + ',' + lng;
+    }, function() {
+        alert('Unable to get your location. Please allow location access and try again.');
+        if (btn) btn.textContent = '📍 Nearby';
+    });
+}
+</script>
+@endpush
+
 @endsection

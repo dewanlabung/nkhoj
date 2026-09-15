@@ -26,4 +26,11 @@ return [
         'endpoint' => env('MAILGUN_ENDPOINT', 'api.mailgun.net'),
         'scheme'   => 'https',
     ],
+
+    'fcm' => [
+        // Legacy key removed (FCM legacy HTTP API shut down June 2024).
+        // Use FCM HTTP v1 with a service account JSON file.
+        'project_id'           => env('FIREBASE_PROJECT_ID'),
+        'service_account_path' => env('FIREBASE_SERVICE_ACCOUNT_PATH'),
+    ],
 ];

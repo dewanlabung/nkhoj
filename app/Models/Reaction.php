@@ -2,21 +2,5 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class Reaction extends Model
-{
-    public $timestamps = false;
-
-    protected $fillable = ['post_id', 'user_id', 'session_key', 'emoji'];
-
-    protected function casts(): array
-    {
-        return ['created_at' => 'datetime'];
-    }
-
-    public function post()
-    {
-        return $this->belongsTo(Post::class);
-    }
-}
+/** @deprecated Use App\Domains\Blog\Models\Reaction directly. Shim kept for morph-type backward-compatibility. */
+class Reaction extends \App\Domains\Blog\Models\Reaction {}
