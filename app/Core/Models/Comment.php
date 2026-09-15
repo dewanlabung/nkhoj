@@ -184,11 +184,4 @@ class Comment extends BaseModel
         ];
     }
 
-    /**
-     * Get model type static attribute
-     */
-    public static function getModelTypeAttribute(): string
-    {
-        return self::MODEL_TYPE;
-    }
 }
