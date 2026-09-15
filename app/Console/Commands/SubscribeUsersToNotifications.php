@@ -35,7 +35,7 @@ class SubscribeUsersToNotifications extends Command
 
         User::query()->each(function (User $user) use ($bar) {
             try {
-                SubscribeUserToNotifications::execute($user);
+                app(SubscribeUserToNotifications::class)->execute($user);
                 $bar->advance();
             } catch (\Exception $e) {
                 $bar->advance();
