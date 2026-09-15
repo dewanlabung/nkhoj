@@ -2,7 +2,7 @@
 
 namespace App\Domains\Recipe\Models;
 
-use App\Models\User;
+use App\Models\UserEngagement\User;
 use Illuminate\Database\Eloquent\Model;
 
 class RecipeRating extends Model
