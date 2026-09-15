@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Account;
 
 use App\Http\Controllers\Controller;
-use App\Models\ApiAuditLog;
 use Illuminate\Http\Request;
 
 class TokenController extends Controller

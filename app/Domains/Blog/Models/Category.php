@@ -2,7 +2,7 @@
 
 namespace App\Domains\Blog\Models;
 
-use App\Models\Question;
+use App\Models\QnA\Question;
 use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
@@ -21,7 +21,7 @@ class Category extends Model
 
     public function questions()
     {
-        return $this->hasMany(Question::class);
+        return $this->hasMany(\App\Models\QnA\Question::class);
     }
 
     public function parent()

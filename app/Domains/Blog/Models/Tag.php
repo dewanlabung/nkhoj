@@ -2,7 +2,7 @@
 
 namespace App\Domains\Blog\Models;
 
-use App\Models\Question;
+use App\Models\QnA\Question;
 use Illuminate\Database\Eloquent\Model;
 
 class Tag extends Model
@@ -23,6 +23,6 @@ class Tag extends Model
 
     public function questions()
     {
-        return $this->belongsToMany(Question::class, 'question_tag');
+        return $this->belongsToMany(\App\Models\QnA\Question::class, 'question_tag');
     }
 }

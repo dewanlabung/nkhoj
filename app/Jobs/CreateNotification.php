@@ -3,8 +3,8 @@
 namespace App\Jobs;
 
 use App\Models\UserEngagement\DeviceToken;
-use App\Models\Notifications\Notifications\Notification;
-use App\Models\Notifications\Notifications\NotificationPreference;
+use App\Models\Notifications\Notification;
+use App\Models\Notifications\NotificationPreference;
 use App\Models\UserEngagement\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

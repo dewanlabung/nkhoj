@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Listeners\OutgoingEmailLogSubscriber;
 use App\Services\Mail\GmailApiMailTransport;
 use App\Services\Mail\GmailClient;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
@@ -17,6 +18,14 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Relation::morphMap([
+            'App\Models\Question'          => \App\Models\QnA\Question::class,
+            'App\Models\Category'          => \App\Models\Blog\Category::class,
+            'App\Models\Tag'               => \App\Models\Blog\Tag::class,
+            'App\Models\Post'              => \App\Models\Blog\Post::class,
+            'App\Models\Comment'           => \App\Models\Blog\Comment::class,
+        ]);
+
         View::addNamespace('mail', resource_path('views/emails'));
         Event::subscribe(OutgoingEmailLogSubscriber::class);
 
