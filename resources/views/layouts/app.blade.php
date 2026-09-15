@@ -354,6 +354,8 @@ $tabMe      = request()->is('profile*') || request()->is('dashboard*') || reques
 
 </nav>
 
+@include('components.session-warning')
+
 @stack('scripts')
 <script>
 if ('serviceWorker' in navigator) {
