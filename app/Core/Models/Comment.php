@@ -64,11 +64,27 @@ class Comment extends BaseModel
     }
 
     /**
+     * Scope: Top-level comments (alias for rootOnly)
+     */
+    public function scopeTopLevel(Builder $builder): Builder
+    {
+        return $builder->whereNull('parent_id');
+    }
+
+    /**
      * Scope: Child comments only (has parent)
      */
     public function scopeChildrenOnly(Builder $builder): Builder
     {
         return $builder->whereNotNull('parent_id');
+    }
+
+    /**
+     * Scope: Only approved (non-deleted) comments
+     */
+    public function scopeApproved(Builder $builder): Builder
+    {
+        return $builder->where('deleted', false);
     }
 
     /**
