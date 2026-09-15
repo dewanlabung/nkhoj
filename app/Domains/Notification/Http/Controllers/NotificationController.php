@@ -4,7 +4,7 @@ namespace App\Domains\Notification\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\Notifications\Notifications\Notifications\Notification;
+use App\Models\Notifications\Notification;
 
 class NotificationController extends Controller
 {

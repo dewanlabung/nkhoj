@@ -2,7 +2,7 @@
 
 namespace App\Domains\Blog\Commands;
 
-use App\Models\Notifications\Notifications\Notifications\Notification;
+use App\Models\Notifications\Notification;
 use App\Models\Blog\Post;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;

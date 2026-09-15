@@ -28,7 +28,7 @@ use App\Models\SocialPages\PageViewLog;
 use App\Models\SocialPages\SocialPage;
 use App\Models\UserEngagement\User;
 use App\Jobs\CreateNotification;
-use App\Models\Notifications\Notifications\Notification;
+use App\Models\Notifications\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
