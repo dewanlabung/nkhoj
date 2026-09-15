@@ -21,7 +21,7 @@ class Category extends Model
 
     public function questions()
     {
-        return $this->hasMany(Question::class);
+        return $this->hasMany(\App\Models\QnA\Question::class);
     }
 
     public function parent()
