@@ -29,6 +29,10 @@ class NotificationPreferenceController extends Controller
 
     public function update(Request $request)
     {
+        if (!auth()->check()) {
+            return redirect('/login')->with('error', 'Please log in first.');
+        }
+
         $user  = auth()->user();
         $types = ['comment', 'follow', 'new_post', 'like', 'mention'];
 
@@ -37,16 +41,16 @@ class NotificationPreferenceController extends Controller
                 NotificationPreference::updateOrCreate(
                     ['user_id' => $user->id, 'type' => $type],
                     [
-                        'in_app' => $request->boolean("in_app_{$type}"),
-                        'email'  => $request->boolean("email_{$type}"),
-                        'push'   => $request->boolean("push_{$type}"),
+                        'in_app' => $request->has("in_app_{$type}") && $request->input("in_app_{$type}") == '1',
+                        'email'  => $request->has("email_{$type}") && $request->input("email_{$type}") == '1',
+                        'push'   => $request->has("push_{$type}") && $request->input("push_{$type}") == '1',
                     ]
                 );
             }
-        } catch (\Throwable) {
-            return back()->with('error', 'Could not save — run migrations first.');
+            return back()->with('success', 'Notification preferences saved.');
+        } catch (\Throwable $e) {
+            \Log::error('Notification preference save failed: ' . $e->getMessage());
+            return back()->with('error', 'Could not save preferences. Please try again.');
         }
-
-        return back()->with('success', 'Notification preferences saved.');
     }
 }
