@@ -217,14 +217,15 @@
                     </button>
                     {{-- Dropdown panel --}}
                     <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
-                         class="absolute right-0 top-11 w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
-                        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+                         class="absolute right-0 top-11 w-[min(20rem,calc(100vw-1rem))] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl z-50 flex flex-col"
+                         style="max-height: min(28rem, calc(100dvh - 5rem));">
+                        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex-shrink-0">
                             <span class="text-sm font-bold text-gray-900 dark:text-white">Notifications</span>
                             <a href="/notifications" class="text-xs text-brand-500 hover:underline font-medium">View all</a>
                         </div>
-                        <div x-show="loading" class="py-8 text-center text-sm text-gray-400">Loading…</div>
-                        <div x-show="!loading && items.length === 0" class="py-8 text-center text-sm text-gray-400">No new notifications</div>
-                        <div x-show="!loading && items.length > 0" class="divide-y divide-gray-50 dark:divide-gray-700 max-h-72 overflow-y-auto">
+                        <div x-show="loading" class="py-8 text-center text-sm text-gray-400 flex-shrink-0">Loading…</div>
+                        <div x-show="!loading && items.length === 0" class="py-8 text-center text-sm text-gray-400 flex-shrink-0">No new notifications</div>
+                        <div x-show="!loading && items.length > 0" class="divide-y divide-gray-50 dark:divide-gray-700 overflow-y-auto flex-1 overscroll-contain">
                             <template x-for="n in items" :key="n.id">
                                 <a :href="n.url" class="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" :class="!n.read ? 'bg-brand-50/40 dark:bg-brand-900/10' : ''">
                                     <span class="text-lg flex-shrink-0" x-text="n.icon"></span>
