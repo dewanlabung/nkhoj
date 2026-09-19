@@ -9,7 +9,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\LoggingAnalytics\LoginHistory;
-use App\Models\UserEngagement\SocialAccount;
+use App\Models\SocialPages\SocialAccount;
 
 class User extends Authenticatable
 {
