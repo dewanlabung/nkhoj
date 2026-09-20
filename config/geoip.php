@@ -36,7 +36,7 @@ return [
     |
     */
 
-    'service' => env('GEOIP_SERVICE', 'maxmind_database'),
+    'service' => env('GEOIP_SERVICE', 'ip_api'),
 
     /*
     |--------------------------------------------------------------------------
@@ -48,6 +48,10 @@ return [
     */
 
     'services' => [
+
+        'ip_api' => [
+            'class' => \Torann\GeoIP\Services\IPApi::class,
+        ],
 
         'maxmind_database' => [
             'class' => \Torann\GeoIP\Services\MaxMindDatabase::class,
