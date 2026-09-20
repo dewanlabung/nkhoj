@@ -71,12 +71,17 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
 
     // Account recovery (public — no auth)
-    Route::get('/forgot-username',  [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'showForgotUsername']);
-    Route::post('/forgot-username', [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'sendUsername'])->middleware('throttle:5,10');
-    Route::get('/forgot-password',  [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'showForgotPassword']);
-    Route::post('/forgot-password', [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'sendPasswordReset'])->middleware('throttle:5,10');
-    Route::get('/reset-password',   [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'showResetPassword']);
-    Route::post('/reset-password',  [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'resetPassword'])->middleware('throttle:10,10');
+    Route::get('/forgot-username',          [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'showForgotUsername']);
+    Route::post('/forgot-username',         [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'sendUsername'])->middleware('throttle:5,10');
+    Route::get('/forgot-password',          [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'showForgotPassword']);
+    Route::post('/forgot-password',         [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'findAccount'])->middleware('throttle:10,5');
+    Route::get('/forgot-password/choose',   [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'showChooseMethod']);
+    Route::post('/forgot-password/choose',  [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'chooseMethod'])->middleware('throttle:5,10');
+    Route::get('/forgot-password/verify',   [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'showVerify']);
+    Route::post('/forgot-password/verify',  [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'verify'])->middleware('throttle:10,10');
+    Route::post('/forgot-password/resend',  [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'resendOtp'])->middleware('throttle:3,10');
+    Route::get('/reset-password',           [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'showResetPassword']);
+    Route::post('/reset-password',          [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'resetPassword'])->middleware('throttle:10,10');
 
     // OTP Email Verification
     Route::post('/otp/send', [OtpController::class, 'sendOtp'])->middleware('throttle:5,10');
