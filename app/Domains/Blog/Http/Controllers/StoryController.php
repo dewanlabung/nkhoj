@@ -4,6 +4,7 @@ namespace App\Domains\Blog\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 
+use App\Domains\Blog\Models\Post;
 use App\Models\MediaContent\Story;
 use App\Models\MediaContent\StoryHighlight;
 use App\Traits\SavesOptimizedThumbnail;
@@ -27,6 +28,27 @@ class StoryController extends Controller
 
     public function store(Request $request)
     {
+        // Blog-post-linked story mode: pull featured image from existing post
+        if ($request->filled('post_id')) {
+            $request->validate([
+                'post_id' => 'required|exists:posts,id',
+                'caption' => 'nullable|string|max:500',
+            ]);
+
+            $post = Post::findOrFail($request->post_id);
+
+            Story::create([
+                'user_id'    => auth()->id(),
+                'post_id'    => $post->id,
+                'media_url'  => $post->thumbnail_url ?? '',
+                'media_type' => 'image',
+                'caption'    => $request->caption ?? $post->title,
+                'expires_at' => now()->addHours(24),
+            ]);
+
+            return back()->with('success', 'Story from blog post created!');
+        }
+
         $request->validate([
             'media'   => 'required|file|mimes:jpeg,jpg,png,gif,webp,mp4,mov,webm|max:51200',
             'caption' => 'nullable|string|max:500',
@@ -57,6 +79,14 @@ class StoryController extends Controller
     public function show(Story $story)
     {
         abort_if($story->isExpired(), 404);
+
+        if ($story->post_id) {
+            $story->load('post');
+            if ($story->post) {
+                return redirect('/posts/' . $story->post->slug);
+            }
+        }
+
         return view('stories.show', compact('story'));
     }
 

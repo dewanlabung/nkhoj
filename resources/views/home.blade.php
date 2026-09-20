@@ -38,7 +38,7 @@
 
 {{-- ══ STORIES CAROUSEL (Facebook-style) ══ --}}
 @php
-$activeStories = \App\Models\MediaContent\Story::with('user')
+$activeStories = \App\Models\MediaContent\Story::with(['user', 'post'])
     ->active()
     ->latest()
     ->get()
@@ -88,10 +88,15 @@ $storyHighlights = \App\Models\MediaContent\StoryHighlight::with(['stories' => f
 
         {{-- User Stories --}}
         @foreach($activeStories->take(6) as $userId => $userStories)
-        @php $user = $userStories->first()->user; @endphp
+        @php
+            $user = $userStories->first()->user;
+            $firstStory = $userStories->first();
+            $storyLink = ($firstStory->post_id && $firstStory->post)
+                ? '/posts/' . $firstStory->post->slug
+                : '/stories/' . $firstStory->id;
+        @endphp
         <div class="flex-shrink-0 w-24">
-            <a href="/stories/{{ $userStories->first()->id }}" class="group relative block rounded-xl overflow-hidden border-2 border-gray-200 dark:border-gray-700 hover:border-brand-500 transition-colors" style="aspect-ratio:9/16;">
-                @php $firstStory = $userStories->first(); @endphp
+            <a href="{{ $storyLink }}" class="group relative block rounded-xl overflow-hidden border-2 border-gray-200 dark:border-gray-700 hover:border-brand-500 transition-colors" style="aspect-ratio:9/16;">
                 @if($firstStory->media_type === 'video')
                 <video src="{{ $firstStory->media_url }}" class="w-full h-full object-cover" muted></video>
                 <div class="absolute top-2 right-2 bg-white/90 rounded-full p-1">
@@ -101,11 +106,14 @@ $storyHighlights = \App\Models\MediaContent\StoryHighlight::with(['stories' => f
                 <img src="{{ $firstStory->media_url }}" alt="Story" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
                 @endif
                 <div class="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors"></div>
+                @if($firstStory->post_id)
+                <div class="absolute top-1.5 left-1.5 bg-brand-500 rounded-full px-1.5 py-0.5 text-[9px] font-bold text-white leading-none">📰</div>
+                @endif
                 <div class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent">
                     <p class="text-white text-xs font-semibold truncate">{{ $user->name }}</p>
                 </div>
                 @if($userStories->count() > 1)
-                <div class="absolute top-2 left-2 bg-white/90 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold text-gray-900">{{ $userStories->count() }}</div>
+                <div class="absolute top-2 right-2 bg-white/90 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold text-gray-900">{{ $userStories->count() }}</div>
                 @endif
             </a>
         </div>

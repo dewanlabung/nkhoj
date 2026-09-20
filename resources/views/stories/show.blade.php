@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', $story->user->name . ''s Story — नखोज')
+@section('title', $story->user->name . "'s Story — नखोज")
 @section('content')
 <div class="max-w-sm mx-auto relative bg-black rounded-2xl overflow-hidden" style="height: 85vh; max-height: 720px;"
      x-data="{paused: false, showShare: false}">
