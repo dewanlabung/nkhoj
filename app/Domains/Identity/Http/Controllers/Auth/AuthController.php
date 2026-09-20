@@ -114,7 +114,8 @@ class AuthController extends Controller
         $user = $this->registration->register($data, $requireConfirm);
 
         if ($requireConfirm) {
-            return redirect('/login')->with('success', 'Account created. Please check your email to verify your address before logging in.');
+            session(['pending_verification_user_id' => $user->id]);
+            return redirect('/verify-email');
         }
 
         Auth::login($user);

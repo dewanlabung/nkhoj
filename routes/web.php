@@ -87,7 +87,17 @@ Route::middleware('guest')->group(function () {
     Route::post('/otp/send', [OtpController::class, 'sendOtp'])->middleware('throttle:5,10');
     Route::post('/otp/verify', [OtpController::class, 'verifyOtp'])->middleware('throttle:10,10');
     Route::post('/otp/resend', [OtpController::class, 'resendOtp'])->middleware('throttle:5,10');
+
+    // Post-registration email verification (guest or unverified)
+    Route::get('/verify-email',         [\App\Http\Controllers\Auth\EmailVerificationController::class, 'show']);
+    Route::post('/verify-email/otp',    [\App\Http\Controllers\Auth\EmailVerificationController::class, 'verifyOtp'])->middleware('throttle:10,10');
+    Route::post('/verify-email/resend', [\App\Http\Controllers\Auth\EmailVerificationController::class, 'resend'])->middleware('throttle:3,10');
 });
+// Signed email verification link (no guest/auth restriction — link arrives in email)
+Route::get('/verify-email/{id}/{hash}', [\App\Http\Controllers\Auth\EmailVerificationController::class, 'verifyLink'])
+    ->middleware('signed')
+    ->name('verify-email.link');
+
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth');
 
 // Session management
@@ -480,6 +490,13 @@ Route::middleware(['auth'])->prefix('account')->group(function () {
     Route::get('/export/download',     [\App\Http\Controllers\Account\DataPrivacyController::class, 'download']);
     Route::post('/data-privacy/delete',[\App\Http\Controllers\Account\DataPrivacyController::class, 'requestDeletion']);
     Route::post('/data-privacy/cancel-deletion', [\App\Http\Controllers\Account\DataPrivacyController::class, 'cancelDeletion']);
+
+    // Login history
+    Route::get('/login-history',         [\App\Http\Controllers\AccountController::class, 'loginHistory']);
+
+    // Linked social accounts
+    Route::get('/linked-apps',           [\App\Http\Controllers\AccountController::class, 'linkedApps']);
+    Route::delete('/linked-apps/{id}',   [\App\Http\Controllers\AccountController::class, 'disconnectSocialAccount']);
 
     // Account recovery settings
     Route::get('/recovery',              [\App\Http\Controllers\Auth\AccountRecoveryController::class, 'showRecoverySettings']);

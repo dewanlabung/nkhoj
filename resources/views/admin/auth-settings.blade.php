@@ -58,19 +58,45 @@ $auth = $s['auth'] ?? [];
                 </div>
 
                 {{-- Require email confirmation --}}
-                <div class="flex items-center justify-between border-t border-gray-50 dark:border-gray-700 pt-4"
+                <div class="border-t border-gray-50 dark:border-gray-700 pt-4"
                      x-data="{ on: {{ ($auth['require_email_confirmation'] ?? false) ? 'true' : 'false' }} }">
-                    <div>
-                        <p class="text-sm font-semibold text-gray-700 dark:text-gray-200">Require email confirmation</p>
-                        <p class="text-xs text-gray-400 mt-0.5">Require newly registered users to validate their email address before being able to login.</p>
-                    </div>
-                    <div class="flex-shrink-0 ml-4">
-                        <input type="hidden" name="require_email_confirmation" value="0">
-                        <div class="relative w-12 h-6 cursor-pointer" @click="on = !on">
-                            <input type="checkbox" name="require_email_confirmation" value="1" class="sr-only" :checked="on" @click.stop>
-                            <div class="w-12 h-6 rounded-full transition-colors" :class="on ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-600'"></div>
-                            <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform" :class="on ? 'translate-x-6' : ''"></div>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-700 dark:text-gray-200">Require email confirmation</p>
+                            <p class="text-xs text-gray-400 mt-0.5">Require newly registered users to validate their email address before being able to login.</p>
                         </div>
+                        <div class="flex-shrink-0 ml-4">
+                            <input type="hidden" name="require_email_confirmation" value="0">
+                            <div class="relative w-12 h-6 cursor-pointer" @click="on = !on">
+                                <input type="checkbox" name="require_email_confirmation" value="1" class="sr-only" :checked="on" @click.stop>
+                                <div class="w-12 h-6 rounded-full transition-colors" :class="on ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-600'"></div>
+                                <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform" :class="on ? 'translate-x-6' : ''"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Verification method (shown when require_email_confirmation is on) --}}
+                    <div x-show="on" x-cloak class="mt-4 pl-2 border-l-2 border-brand-200 dark:border-brand-700 space-y-2">
+                        <p class="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-2">Verification method</p>
+                        @php $evMethod = $auth['email_verification_method'] ?? 'both'; @endphp
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="radio" name="email_verification_method" value="both"
+                                   {{ $evMethod === 'both' ? 'checked' : '' }}
+                                   class="accent-brand-600">
+                            <span class="text-sm text-gray-700 dark:text-gray-300">OTP code <span class="text-gray-400">+</span> verification link <span class="text-xs text-gray-400">(recommended)</span></span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="radio" name="email_verification_method" value="otp_only"
+                                   {{ $evMethod === 'otp_only' ? 'checked' : '' }}
+                                   class="accent-brand-600">
+                            <span class="text-sm text-gray-700 dark:text-gray-300">OTP code only</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="radio" name="email_verification_method" value="link_only"
+                                   {{ $evMethod === 'link_only' ? 'checked' : '' }}
+                                   class="accent-brand-600">
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Verification link only</span>
+                        </label>
                     </div>
                 </div>
 
