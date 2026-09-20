@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\CreateNotification;
 use App\Models\Blog\Comment;
 use App\Models\Blog\CommentReaction;
 use Illuminate\Http\Request;
@@ -25,6 +26,8 @@ class CommentReactionController extends Controller
             ->when(!$userId, fn($q) => $q->where('session_key', $session))
             ->first();
 
+        $isNew = false;
+
         if ($existing) {
             if ($existing->emoji === $emoji) {
                 $existing->delete();
@@ -38,6 +41,23 @@ class CommentReactionController extends Controller
                 'session_key' => $session,
                 'emoji'       => $emoji,
             ]);
+            $isNew = true;
+        }
+
+        // Notify the post author when a new reaction is added (not for their own post)
+        if ($isNew && $userId) {
+            $post = $comment->post()->with('author')->first();
+            $authorId = $post?->author_id;
+            if ($authorId && $authorId !== $userId) {
+                try {
+                    CreateNotification::dispatch($authorId, 'reaction', [
+                        'reactor'    => auth()->user()->name,
+                        'emoji'      => $emoji,
+                        'post_title' => $post->title,
+                        'post_slug'  => $post->slug,
+                    ]);
+                } catch (\Throwable) {}
+            }
         }
 
         return response()->json([
