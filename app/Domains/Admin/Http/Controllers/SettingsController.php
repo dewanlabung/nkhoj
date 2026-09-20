@@ -129,8 +129,9 @@ class SettingsController extends BaseAdminController
     {
         $this->requireAdmin();
         $s = $this->settings->get();
-        $s['auth']['disable_registration']      = $request->boolean('disable_registration');
-        $s['auth']['require_email_confirmation'] = $request->boolean('require_email_confirmation');
+        $s['auth']['disable_registration']        = $request->boolean('disable_registration');
+        $s['auth']['require_email_confirmation']  = $request->boolean('require_email_confirmation');
+        $s['auth']['email_verification_method']   = $request->input('email_verification_method', 'both');
         $s['auth']['social_login_require_account'] = $request->boolean('social_login_require_account');
         $s['auth']['single_device_login']        = $request->boolean('single_device_login');
         $s['auth']['domain_blacklist']            = $request->input('domain_blacklist', '');

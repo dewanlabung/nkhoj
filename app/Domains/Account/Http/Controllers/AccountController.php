@@ -82,6 +82,30 @@ class AccountController extends Controller
         return view('account.privacy', ['user' => auth()->user()]);
     }
 
+    public function loginHistory()
+    {
+        $histories = auth()->user()->loginHistories()->latest()->limit(50)->get();
+        return view('account.login-history', compact('histories'));
+    }
+
+    public function linkedApps()
+    {
+        $socialAccounts = auth()->user()->socialAccounts()->get();
+        return view('account.linked-apps', compact('socialAccounts'));
+    }
+
+    public function disconnectSocialAccount(int $id)
+    {
+        $account = auth()->user()->socialAccounts()->findOrFail($id);
+
+        if (auth()->user()->socialAccounts()->count() <= 1 && !auth()->user()->password) {
+            return back()->with('error', 'Cannot disconnect — you have no password set. Add a password first.');
+        }
+
+        $account->delete();
+        return back()->with('success', ucfirst($account->provider) . ' account disconnected.');
+    }
+
     public function deleteAccount(Request $request)
     {
         return redirect('/account/data-privacy');
