@@ -51,6 +51,7 @@ Route::get('/contact',  [ContactController::class, 'show'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store']);
 
 // Newsletter subscribe (public)
+Route::get('/newsletter/subscribe',             fn() => view('newsletter.subscribe'))->name('newsletter.subscribe');
 Route::post('/newsletter/subscribe',            [ContactController::class, 'subscribe']);
 Route::get('/newsletter/unsubscribe/{token}',   [ContactController::class, 'unsubscribe']);
 
@@ -250,6 +251,11 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('/newsletter/send',          [AdminContent::class, 'sendNewsletter']);
     Route::get('/newsletter/export',         [AdminContent::class, 'exportSubscribers']);
     Route::delete('/newsletter/{id}',        [AdminContent::class, 'deleteSubscriber']);
+    Route::get('/newsletter/templates/create', [AdminContent::class, 'createTemplate']);
+    Route::get('/newsletter/templates/{id}/edit', [AdminContent::class, 'editTemplate']);
+    Route::post('/newsletter/templates',     [AdminContent::class, 'storeTemplate']);
+    Route::put('/newsletter/templates/{id}', [AdminContent::class, 'updateTemplate']);
+    Route::delete('/newsletter/templates/{id}', [AdminContent::class, 'deleteTemplate']);
 
     // Content Settings
     Route::get('/content-settings',          [AdminSettings::class, 'contentSettings']);
@@ -721,6 +727,8 @@ Route::middleware('auth')->group(function () {
 Route::get('/stories',                                      [\App\Http\Controllers\StoryController::class, 'index']);
 Route::get('/stories/{story}',                              [\App\Http\Controllers\StoryController::class, 'show']);
 Route::middleware('auth')->group(function () {
+    Route::get('/stories/create',                           fn() => view('stories.create'));
+    Route::get('/stories/highlights',                       [\App\Http\Controllers\StoryController::class, 'highlightsIndex']);
     Route::post('/stories',                                 [\App\Http\Controllers\StoryController::class, 'store'])->middleware('throttle:20,1');
     Route::delete('/stories/{story}',                       [\App\Http\Controllers\StoryController::class, 'destroy']);
     Route::post('/highlights',                              [\App\Http\Controllers\StoryController::class, 'storeHighlight']);

@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 
 use App\Models\Core\ContactMessage;
 use App\Models\Core\NewsletterSubscriber;
+use App\Mail\NewsletterWelcomeMail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class ContactController extends Controller
@@ -37,15 +39,24 @@ class ContactController extends Controller
             'name'  => 'nullable|string|max:100',
         ]);
 
-        NewsletterSubscriber::firstOrCreate(
+        $subscriber = NewsletterSubscriber::firstOrCreate(
             ['email' => $data['email']],
             ['name' => $data['name'] ?? null, 'token' => Str::random(64), 'is_active' => true]
         );
 
+        // Send welcome email
+        if ($subscriber->wasRecentlyCreated) {
+            try {
+                Mail::send(new NewsletterWelcomeMail($subscriber));
+            } catch (\Exception $e) {
+                // Silently fail if mail is not configured
+            }
+        }
+
         if ($request->expectsJson()) {
             return response()->json(['message' => 'Subscribed!']);
         }
-        return back()->with('success', 'Subscribed to newsletter!');
+        return back()->with('success', 'Subscribed to newsletter! Check your email for confirmation.');
     }
 
     public function unsubscribe(string $token)

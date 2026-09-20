@@ -101,4 +101,19 @@ class StoryController extends Controller
         $highlight->delete();
         return back();
     }
+
+    public function highlightsIndex()
+    {
+        $highlights = StoryHighlight::with(['stories' => fn($q) => $q->active()])
+            ->where('user_id', auth()->id())
+            ->latest()
+            ->get();
+
+        $availableStories = Story::where('user_id', auth()->id())
+            ->active()
+            ->latest()
+            ->get();
+
+        return view('stories.highlights', compact('highlights', 'availableStories'));
+    }
 }

@@ -2,7 +2,7 @@
 @section('title', $story->user->name . ''s Story — नखोज')
 @section('content')
 <div class="max-w-sm mx-auto relative bg-black rounded-2xl overflow-hidden" style="height: 85vh; max-height: 720px;"
-     x-data="{paused: false}">
+     x-data="{paused: false, showShare: false}">
 
     @if($story->media_type === 'video')
     <video src="{{ $story->media_url }}" class="w-full h-full object-cover" autoplay playsinline loop
@@ -24,6 +24,29 @@
         <div class="flex-1">
             <p class="text-white text-sm font-bold">{{ $story->user->name }}</p>
             <p class="text-white/70 text-xs">{{ $story->created_at->diffForHumans() }}</p>
+        </div>
+        <div class="relative">
+            <button @click="showShare = !showShare" class="text-white/70 hover:text-white text-xl">📤</button>
+
+            {{-- Share Menu --}}
+            <div x-show="showShare" @click.outside="showShare = false" class="absolute right-0 top-8 bg-gray-900 border border-gray-700 rounded-lg shadow-lg py-2 min-w-max z-10">
+                <button @click="navigator.share ? navigator.share({title: '{{ $story->user->name }}\'s Story', url: window.location.href}) : alert('Share not supported')"
+                    class="block w-full text-left px-4 py-2 text-white text-sm hover:bg-gray-800 transition-colors">
+                    🔗 Share Story
+                </button>
+                <button @click="navigator.clipboard.writeText(window.location.href); alert('Link copied!'); showShare = false"
+                    class="block w-full text-left px-4 py-2 text-white text-sm hover:bg-gray-800 transition-colors">
+                    📋 Copy Link
+                </button>
+                <button @click="window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(window.location.href), '_blank')"
+                    class="block w-full text-left px-4 py-2 text-white text-sm hover:bg-gray-800 transition-colors">
+                    f Share on Facebook
+                </button>
+                <button @click="window.open('https://twitter.com/intent/tweet?url=' + encodeURIComponent(window.location.href) + '&text=' + encodeURIComponent('Check out ' + '{{ $story->user->name }}' + '\'s story'), '_blank')"
+                    class="block w-full text-left px-4 py-2 text-white text-sm hover:bg-gray-800 transition-colors">
+                    𝕏 Share on X
+                </button>
+            </div>
         </div>
         <a href="/stories" class="text-white/70 hover:text-white text-xl">✕</a>
     </div>
