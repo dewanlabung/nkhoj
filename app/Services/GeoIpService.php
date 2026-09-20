@@ -14,7 +14,7 @@ class GeoIpService
             return ['city' => null, 'country' => null];
         }
 
-        return Cache::remember("geoip:{$ip}", now()->addHours(24), function () use ($ip) {
+        return Cache::remember("geoip2:{$ip}", now()->addHours(24), function () use ($ip) {
             try {
                 $r = Http::timeout(4)->get("https://ipapi.co/{$ip}/json/");
                 if ($r->ok() && !$r->json('error')) {

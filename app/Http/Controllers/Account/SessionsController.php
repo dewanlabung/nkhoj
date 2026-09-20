@@ -17,12 +17,7 @@ class SessionsController extends Controller
         } catch (\Throwable) {
             $sessions = collect();
         }
-        try {
-            $loginHistories = auth()->user()->loginHistories()->latest()->limit(30)->get();
-        } catch (\Throwable) {
-            $loginHistories = collect();
-        }
-        return view('account.sessions', compact('sessions', 'currentSid', 'loginHistories'));
+        return view('account.sessions', compact('sessions', 'currentSid'));
     }
 
     public function destroy(Request $request, int $id)
