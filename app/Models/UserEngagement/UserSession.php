@@ -68,4 +68,22 @@ class UserSession extends Model
         }
         return 'desktop';
     }
+
+    public function parsedBrowser(): string
+    {
+        $ua = $this->user_agent ?? '';
+        foreach (['Edg' => 'Edge', 'Chrome' => 'Chrome', 'Firefox' => 'Firefox', 'Safari' => 'Safari', 'Opera' => 'Opera'] as $key => $name) {
+            if (str_contains($ua, $key)) return $name;
+        }
+        return 'Browser';
+    }
+
+    public function parsedPlatform(): string
+    {
+        $ua = $this->user_agent ?? '';
+        foreach (['Windows' => 'Windows', 'Android' => 'Android', 'iPhone' => 'iOS', 'iPad' => 'iPadOS', 'Mac' => 'macOS', 'Linux' => 'Linux'] as $key => $name) {
+            if (str_contains($ua, $key)) return $name;
+        }
+        return 'Unknown';
+    }
 }
