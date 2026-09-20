@@ -9,6 +9,7 @@ use App\Models\Blog\Category;
 use App\Models\Blog\Comment;
 use App\Models\Blog\Post;
 use App\Models\Blog\Tag;
+use App\Models\MediaContent\Story;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -211,6 +212,18 @@ class DashboardController extends Controller
             $this->notifyFollowersOfNewPost($post);
         }
 
+        // Create a story from this post if toggled on
+        if ($request->boolean('add_to_stories') && $post->status === 'published') {
+            Story::create([
+                'user_id'    => auth()->id(),
+                'post_id'    => $post->id,
+                'media_url'  => $post->thumbnail_url ?? '',
+                'media_type' => 'image',
+                'caption'    => $post->title,
+                'expires_at' => now()->addHours(24),
+            ]);
+        }
+
         $label = $isEvent ? 'Event' : 'Article';
         return redirect('/dashboard')->with('success', "{$label} saved!");
     }
@@ -311,6 +324,18 @@ class DashboardController extends Controller
 
         if ($post->wasChanged('status') && $post->status === 'published') {
             $this->notifyFollowersOfNewPost($post);
+        }
+
+        // Create a story from this post if toggled on
+        if ($request->boolean('add_to_stories') && $post->status === 'published') {
+            Story::create([
+                'user_id'    => auth()->id(),
+                'post_id'    => $post->id,
+                'media_url'  => $post->thumbnail_url ?? '',
+                'media_type' => 'image',
+                'caption'    => $post->title,
+                'expires_at' => now()->addHours(24),
+            ]);
         }
 
         return redirect('/dashboard')->with('success', 'Article updated!');

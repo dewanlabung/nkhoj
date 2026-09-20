@@ -27,10 +27,12 @@
     @php $first = $userStories->first(); @endphp
     <a href="/stories/{{ $first->id }}" class="flex-shrink-0 flex flex-col items-center gap-1 w-20">
         <div class="w-16 h-16 rounded-full ring-2 ring-brand-400 ring-offset-2 overflow-hidden bg-gray-200 dark:bg-gray-700">
-            @if($first->media_type === 'image')
+            @if($first->media_url && $first->media_type === 'image')
             <img src="{{ $first->media_url }}" alt="" class="w-full h-full object-cover">
-            @else
+            @elseif($first->media_url && $first->media_type === 'video')
             <div class="w-full h-full flex items-center justify-center text-2xl bg-gray-900">🎥</div>
+            @else
+            <div class="w-full h-full bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg">📰</div>
             @endif
         </div>
         <span class="text-xs text-gray-600 dark:text-gray-400 truncate w-full text-center">{{ $first->user->name }}</span>
@@ -44,11 +46,24 @@
 {{-- Full story viewer --}}
 <div class="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
     @foreach($stories->flatten() as $story)
-    <a href="/stories/{{ $story->id }}" class="relative aspect-[9/16] rounded-2xl overflow-hidden bg-black group">
-        @if($story->media_type === 'image')
-        <img src="{{ $story->media_url }}" alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+    @php
+        $storyHref = ($story->post_id && $story->post) ? '/posts/' . $story->post->slug : '/stories/' . $story->id;
+    @endphp
+    <a href="{{ $storyHref }}" class="relative aspect-[9/16] rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 group">
+        @if($story->media_url)
+            @if($story->media_type === 'image')
+            <img src="{{ $story->media_url }}" alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            @else
+            <video src="{{ $story->media_url }}" class="w-full h-full object-cover" muted playsinline></video>
+            @endif
         @else
-        <video src="{{ $story->media_url }}" class="w-full h-full object-cover" muted playsinline></video>
+        {{-- No thumbnail: show post title card --}}
+        <div class="w-full h-full bg-gradient-to-br from-brand-500 to-indigo-700 flex items-end p-3">
+            <p class="text-white text-xs font-bold line-clamp-4 font-nepali">{{ $story->caption ?: $story->post?->title }}</p>
+        </div>
+        @endif
+        @if($story->post_id)
+        <div class="absolute top-2 left-2 bg-brand-500 rounded-full px-1.5 py-0.5 text-[9px] font-bold text-white">📰</div>
         @endif
         <div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent">
             <p class="text-white text-xs font-semibold truncate">{{ $story->user->name }}</p>

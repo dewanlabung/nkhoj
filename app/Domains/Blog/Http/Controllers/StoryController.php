@@ -17,7 +17,7 @@ class StoryController extends Controller
     public function index()
     {
         // Stories grouped by user, most recent first, active only
-        $stories = Story::with('user')
+        $stories = Story::with(['user', 'post'])
             ->active()
             ->latest()
             ->get()

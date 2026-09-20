@@ -308,6 +308,20 @@
                                     <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform" :class="on ? 'translate-x-4' : ''"></div>
                                 </div>
                             </div>
+
+                            {{-- Add to Stories toggle --}}
+                            <div class="flex items-center justify-between py-1 border-t border-gray-50 dark:border-gray-700 mt-2 pt-2"
+                                x-data="{ on: false }">
+                                <div>
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">Add to Stories</span>
+                                    <p class="text-xs text-gray-400">Post as a 24h story on homepage</p>
+                                </div>
+                                <div class="relative flex-shrink-0 cursor-pointer" @click="on = !on">
+                                    <input type="hidden" name="add_to_stories" :value="on ? '1' : '0'">
+                                    <div class="w-9 h-5 rounded-full transition-colors" :class="on ? 'bg-brand-500' : 'bg-gray-200 dark:bg-gray-600'"></div>
+                                    <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform" :class="on ? 'translate-x-4' : ''"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
