@@ -725,7 +725,7 @@ Route::middleware('auth')->group(function () {
 
 // ─── Stories & Highlights ─────────────────────────────────────────────────────
 Route::get('/stories',                                      [\App\Http\Controllers\StoryController::class, 'index']);
-Route::get('/stories/{story}',                              [\App\Http\Controllers\StoryController::class, 'show']);
+// Static segments must come before {story} wildcard to avoid 404
 Route::middleware('auth')->group(function () {
     Route::get('/stories/create', function () {
         $myPosts = \App\Domains\Blog\Models\Post::where('author_id', auth()->id())
@@ -743,6 +743,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/highlights/{highlight}/add',              [\App\Http\Controllers\StoryController::class, 'addToHighlight']);
     Route::delete('/highlights/{highlight}',                [\App\Http\Controllers\StoryController::class, 'destroyHighlight']);
 });
+// Wildcard after static segments so /stories/create and /stories/highlights are not swallowed
+Route::get('/stories/{story}',                              [\App\Http\Controllers\StoryController::class, 'show']);
 
 // ─── Trending Topics ──────────────────────────────────────────────────────────
 Route::get('/trending',                                     [\App\Http\Controllers\TrendingController::class, 'index']);
