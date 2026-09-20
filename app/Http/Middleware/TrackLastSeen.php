@@ -12,7 +12,17 @@ class TrackLastSeen
     {
         if (auth()->check()) {
             $user = auth()->user();
-            if (!$user->last_seen_at || now()->diffInMinutes($user->last_seen_at) > 5) {
+            $due = !$user->last_seen_at || now()->diffInMinutes($user->last_seen_at) > 5;
+
+            // Also refresh when the current session has no geo data yet
+            if (!$due) {
+                try {
+                    $sid = session()->getId();
+                    $due = $sid && UserSession::where('session_id', $sid)->whereNull('city')->whereNull('country')->exists();
+                } catch (\Throwable) {}
+            }
+
+            if ($due) {
                 $user->timestamps = false;
                 $user->update(['last_seen_at' => now()]);
                 $user->timestamps = true;

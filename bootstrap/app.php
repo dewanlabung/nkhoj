@@ -12,6 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->trustProxies(at: '*');
         $middleware->alias([
             'verified'      => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
             'optional.auth' => \App\Http\Middleware\OptionalAuthenticate::class,
