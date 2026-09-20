@@ -728,6 +728,7 @@ Route::get('/stories',                                      [\App\Http\Controlle
 Route::get('/stories/{story}',                              [\App\Http\Controllers\StoryController::class, 'show']);
 Route::middleware('auth')->group(function () {
     Route::get('/stories/create',                           fn() => view('stories.create'));
+    Route::get('/stories/highlights',                       [\App\Http\Controllers\StoryController::class, 'highlightsIndex']);
     Route::post('/stories',                                 [\App\Http\Controllers\StoryController::class, 'store'])->middleware('throttle:20,1');
     Route::delete('/stories/{story}',                       [\App\Http\Controllers\StoryController::class, 'destroy']);
     Route::post('/highlights',                              [\App\Http\Controllers\StoryController::class, 'storeHighlight']);
