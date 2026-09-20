@@ -51,6 +51,7 @@ Route::get('/contact',  [ContactController::class, 'show'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store']);
 
 // Newsletter subscribe (public)
+Route::get('/newsletter/subscribe',             fn() => view('newsletter.subscribe'))->name('newsletter.subscribe');
 Route::post('/newsletter/subscribe',            [ContactController::class, 'subscribe']);
 Route::get('/newsletter/unsubscribe/{token}',   [ContactController::class, 'unsubscribe']);
 
@@ -721,6 +722,7 @@ Route::middleware('auth')->group(function () {
 Route::get('/stories',                                      [\App\Http\Controllers\StoryController::class, 'index']);
 Route::get('/stories/{story}',                              [\App\Http\Controllers\StoryController::class, 'show']);
 Route::middleware('auth')->group(function () {
+    Route::get('/stories/create',                           fn() => view('stories.create'));
     Route::post('/stories',                                 [\App\Http\Controllers\StoryController::class, 'store'])->middleware('throttle:20,1');
     Route::delete('/stories/{story}',                       [\App\Http\Controllers\StoryController::class, 'destroy']);
     Route::post('/highlights',                              [\App\Http\Controllers\StoryController::class, 'storeHighlight']);
