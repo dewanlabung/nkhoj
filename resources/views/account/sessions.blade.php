@@ -104,7 +104,7 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-sm text-gray-800 dark:text-gray-200 truncate">
-                        {{ $h->platform !== 'Unknown' ? $h->platform . ' · ' : '' }}{{ $h->browser !== 'Unknown' ? $h->browser : 'Browser' }}
+                        {{ $h->parsedPlatform() !== 'Unknown' ? $h->parsedPlatform() . ' · ' : '' }}{{ $h->parsedBrowser() }}
                         @if($h->provider && $h->provider !== 'email')
                         <span class="text-xs text-blue-500 ml-1">via {{ ucfirst($h->provider) }}</span>
                         @endif
