@@ -16,11 +16,11 @@ class GeoIpService
 
         return Cache::remember("geoip:{$ip}", now()->addHours(24), function () use ($ip) {
             try {
-                $r = Http::timeout(3)->get("http://ip-api.com/json/{$ip}?fields=status,city,countryCode");
-                if ($r->ok() && $r->json('status') === 'success') {
+                $r = Http::timeout(4)->get("https://ipapi.co/{$ip}/json/");
+                if ($r->ok() && !$r->json('error')) {
                     return [
-                        'city'    => $r->json('city')        ?: null,
-                        'country' => $r->json('countryCode') ?: null,
+                        'city'    => $r->json('city')         ?: null,
+                        'country' => $r->json('country_code') ?: null,
                     ];
                 }
             } catch (\Throwable) {}
