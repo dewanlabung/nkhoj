@@ -29,8 +29,10 @@ class AccountRecoveryService
     {
         if (!Schema::hasColumn('users', 'recovery_token')) return;
 
+        $hasRecoveryCol = Schema::hasColumn('users', 'recovery_email');
+
         $query = User::where('email', $login)->orWhere('username', $login);
-        if (Schema::hasColumn('users', 'recovery_email')) {
+        if ($hasRecoveryCol) {
             $query->orWhere('recovery_email', $login);
         }
         $user = $query->first();
@@ -43,11 +45,22 @@ class AccountRecoveryService
             'recovery_token_expires_at' => now()->addHour(),
         ]);
 
+        // If the user logged in via their verified recovery email, send the
+        // reset link there — primary email may be inaccessible in this scenario.
+        $sendTo = $user->email;
+        if ($hasRecoveryCol
+            && $user->recovery_email
+            && $user->recovery_email_verified_at
+            && strtolower($login) === strtolower($user->recovery_email)
+        ) {
+            $sendTo = $user->recovery_email;
+        }
+
         $resetUrl = url('/reset-password?token=' . $token . '&email=' . urlencode($user->email));
 
         Mail::raw(
             "Hi {$user->name},\n\nClick the link below to reset your password (expires in 1 hour):\n\n{$resetUrl}\n\nIf you didn't request this, ignore this email.\n\n— " . config('app.name'),
-            fn($m) => $m->to($user->email)->subject('Reset your ' . config('app.name') . ' password')
+            fn($m) => $m->to($sendTo)->subject('Reset your ' . config('app.name') . ' password')
         );
     }
 
