@@ -251,6 +251,11 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('/newsletter/send',          [AdminContent::class, 'sendNewsletter']);
     Route::get('/newsletter/export',         [AdminContent::class, 'exportSubscribers']);
     Route::delete('/newsletter/{id}',        [AdminContent::class, 'deleteSubscriber']);
+    Route::get('/newsletter/templates/create', [AdminContent::class, 'createTemplate']);
+    Route::get('/newsletter/templates/{id}/edit', [AdminContent::class, 'editTemplate']);
+    Route::post('/newsletter/templates',     [AdminContent::class, 'storeTemplate']);
+    Route::put('/newsletter/templates/{id}', [AdminContent::class, 'updateTemplate']);
+    Route::delete('/newsletter/templates/{id}', [AdminContent::class, 'deleteTemplate']);
 
     // Content Settings
     Route::get('/content-settings',          [AdminSettings::class, 'contentSettings']);

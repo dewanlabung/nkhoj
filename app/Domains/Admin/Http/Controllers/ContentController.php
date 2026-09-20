@@ -8,6 +8,7 @@ use App\Models\Blog\Category;
 use App\Models\Blog\Comment;
 use App\Models\Core\ContactMessage;
 use App\Models\Core\NewsletterSubscriber;
+use App\Models\Core\NewsletterTemplate;
 use App\Models\MediaContent\Poll;
 use App\Models\Blog\Post;
 use App\Models\QnA\Question;
@@ -296,13 +297,16 @@ class ContentController extends BaseAdminController
 
     // ── Newsletter ─────────────────────────────────────────────
 
-    public function newsletter()
+    public function newsletter(Request $request)
     {
         $this->requireAdmin();
+        $tab = $request->query('tab', 'subscribers');
         return view('admin.newsletter', [
             'subscribers'       => NewsletterSubscriber::latest()->paginate(30),
             'totalSubscribers'  => NewsletterSubscriber::count(),
             'activeSubscribers' => NewsletterSubscriber::where('is_active', true)->count(),
+            'templates'         => NewsletterTemplate::latest()->get(),
+            'tab'               => $tab,
         ]);
     }
 
@@ -330,6 +334,65 @@ class ContentController extends BaseAdminController
             $csv .= "\"{$s->email}\",\"{$s->name}\",\"{$s->created_at->format('Y-m-d')}\"\n";
         }
         return response($csv, 200, ['Content-Type' => 'text/csv', 'Content-Disposition' => 'attachment; filename="subscribers.csv"']);
+    }
+
+    public function storeTemplate(Request $request)
+    {
+        $this->requireAdmin();
+        $data = $request->validate([
+            'name' => 'required|string|max:150',
+            'subject' => 'required|string|max:255',
+            'html_content' => 'required|string',
+            'text_content' => 'nullable|string',
+            'is_default' => 'nullable|boolean',
+        ]);
+
+        if ($request->boolean('is_default')) {
+            NewsletterTemplate::update(['is_default' => false]);
+        }
+
+        NewsletterTemplate::create($data);
+        return back()->with('success', 'Template created.');
+    }
+
+    public function updateTemplate(Request $request, int $id)
+    {
+        $this->requireAdmin();
+        $data = $request->validate([
+            'name' => 'required|string|max:150',
+            'subject' => 'required|string|max:255',
+            'html_content' => 'required|string',
+            'text_content' => 'nullable|string',
+            'is_default' => 'nullable|boolean',
+        ]);
+
+        $template = NewsletterTemplate::findOrFail($id);
+        if ($request->boolean('is_default')) {
+            NewsletterTemplate::where('id', '!=', $id)->update(['is_default' => false]);
+        }
+
+        $template->update($data);
+        return back()->with('success', 'Template updated.');
+    }
+
+    public function deleteTemplate(int $id)
+    {
+        $this->requireAdmin();
+        NewsletterTemplate::findOrFail($id)->delete();
+        return back()->with('success', 'Template deleted.');
+    }
+
+    public function createTemplate()
+    {
+        $this->requireAdmin();
+        return view('admin.newsletter-templates');
+    }
+
+    public function editTemplate(int $id)
+    {
+        $this->requireAdmin();
+        $template = NewsletterTemplate::findOrFail($id);
+        return view('admin.newsletter-templates', compact('template'));
     }
 
     // ── Questions ──────────────────────────────────────────────
