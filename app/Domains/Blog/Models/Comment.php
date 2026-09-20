@@ -27,6 +27,11 @@ class Comment extends Model
         return $this->hasMany(Comment::class, 'parent_id')->with('author')->approved();
     }
 
+    public function children(): HasMany
+    {
+        return $this->replies();
+    }
+
     public function scopeApproved($query)
     {
         return $query->where('is_approved', true);
