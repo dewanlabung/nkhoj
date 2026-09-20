@@ -727,7 +727,15 @@ Route::middleware('auth')->group(function () {
 Route::get('/stories',                                      [\App\Http\Controllers\StoryController::class, 'index']);
 Route::get('/stories/{story}',                              [\App\Http\Controllers\StoryController::class, 'show']);
 Route::middleware('auth')->group(function () {
-    Route::get('/stories/create',                           fn() => view('stories.create'));
+    Route::get('/stories/create', function () {
+        $myPosts = \App\Domains\Blog\Models\Post::where('author_id', auth()->id())
+            ->whereNotNull('published_at')
+            ->latest('published_at')
+            ->select(['id', 'title', 'slug', 'thumbnail_url', 'published_at'])
+            ->limit(30)
+            ->get();
+        return view('stories.create', compact('myPosts'));
+    });
     Route::get('/stories/highlights',                       [\App\Http\Controllers\StoryController::class, 'highlightsIndex']);
     Route::post('/stories',                                 [\App\Http\Controllers\StoryController::class, 'store'])->middleware('throttle:20,1');
     Route::delete('/stories/{story}',                       [\App\Http\Controllers\StoryController::class, 'destroy']);
