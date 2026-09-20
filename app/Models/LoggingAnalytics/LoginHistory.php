@@ -2,6 +2,7 @@
 
 namespace App\Models\LoggingAnalytics;
 
+use App\Services\GeoIpService;
 use Illuminate\Database\Eloquent\Model;
 
 class LoginHistory extends Model
@@ -50,23 +51,28 @@ class LoginHistory extends Model
         $platform = 'Unknown';
         foreach ([
             'Windows' => 'Windows',
+            'Android' => 'Android',
+            'iPhone'  => 'iOS',
+            'iPad'    => 'iPadOS',
             'Mac'     => 'macOS',
             'Linux'   => 'Linux',
-            'Android' => 'Android',
-            'iOS'     => 'iOS',
-            'iPhone'  => 'iOS',
         ] as $key => $name) {
             if (str_contains($ua, $key)) { $platform = $name; break; }
         }
 
+        $ip  = request()->ip();
+        $geo = GeoIpService::lookup($ip);
+
         static::create([
             'user_id'     => $userId,
             'provider'    => $provider,
-            'ip_address'  => request()->ip(),
+            'ip_address'  => $ip,
             'user_agent'  => substr($ua, 0, 500),
             'device_type' => $deviceType,
             'browser'     => $browser,
             'platform'    => $platform,
+            'city'        => $geo['city'],
+            'country'     => $geo['country'],
             'success'     => $success,
             'created_at'  => now(),
         ]);

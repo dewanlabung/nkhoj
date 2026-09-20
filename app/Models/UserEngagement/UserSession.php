@@ -2,6 +2,7 @@
 
 namespace App\Models\UserEngagement;
 
+use App\Services\GeoIpService;
 use Illuminate\Database\Eloquent\Model;
 
 class UserSession extends Model
@@ -45,13 +46,18 @@ class UserSession extends Model
         $sid = session()->getId();
         if (!$sid) return;
 
+        $ip  = $request->ip();
+        $geo = GeoIpService::lookup($ip);
+
         static::updateOrCreate(
             ['session_id' => $sid],
             [
                 'user_id'        => $userId,
-                'ip'             => $request->ip(),
+                'ip'             => $ip,
                 'user_agent'     => substr($request->userAgent() ?? '', 0, 500),
                 'device_type'    => self::detectDevice($request->userAgent() ?? ''),
+                'city'           => $geo['city'],
+                'country'        => $geo['country'],
                 'last_active_at' => now(),
             ]
         );
