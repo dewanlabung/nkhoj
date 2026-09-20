@@ -50,9 +50,7 @@ class AccountController extends Controller
     public function security()
     {
         $user = auth()->user();
-        $loginHistories = $user->loginHistories()->limit(20)->get();
-        $socialAccounts = $user->socialAccounts()->get();
-        return view('account.security', compact('user', 'loginHistories', 'socialAccounts'));
+        return view('account.security', compact('user'));
     }
 
     public function changePassword(Request $request)

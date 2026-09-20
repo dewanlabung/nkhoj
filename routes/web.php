@@ -491,8 +491,8 @@ Route::middleware(['auth'])->prefix('account')->group(function () {
     Route::post('/data-privacy/delete',[\App\Http\Controllers\Account\DataPrivacyController::class, 'requestDeletion']);
     Route::post('/data-privacy/cancel-deletion', [\App\Http\Controllers\Account\DataPrivacyController::class, 'cancelDeletion']);
 
-    // Login history
-    Route::get('/login-history',         [\App\Http\Controllers\AccountController::class, 'loginHistory']);
+    // Login history — merged into sessions page
+    Route::redirect('/login-history', '/account/sessions', 301);
 
     // Linked social accounts
     Route::get('/linked-apps',           [\App\Http\Controllers\AccountController::class, 'linkedApps']);

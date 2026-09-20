@@ -13,11 +13,16 @@ class SessionsController extends Controller
     {
         $currentSid = session()->getId();
         try {
-            $sessions = auth()->user()->userSessions()->get();
+            $sessions = auth()->user()->userSessions()->orderByDesc('last_active_at')->get();
         } catch (\Throwable) {
             $sessions = collect();
         }
-        return view('account.sessions', compact('sessions', 'currentSid'));
+        try {
+            $loginHistories = auth()->user()->loginHistories()->latest()->limit(30)->get();
+        } catch (\Throwable) {
+            $loginHistories = collect();
+        }
+        return view('account.sessions', compact('sessions', 'currentSid', 'loginHistories'));
     }
 
     public function destroy(Request $request, int $id)
