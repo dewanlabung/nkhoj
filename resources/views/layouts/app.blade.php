@@ -116,8 +116,30 @@
             700 => __hslToHex($__h, min(100,$__s+8), max(5,$__l-18)),
             900 => __hslToHex($__h, min(100,$__s+10),max(5,$__l-32)),
         ];
-        $__customCss = $__s['appearance']['custom_css'] ?? '';
+        $__customCss    = $__s['appearance']['custom_css'] ?? '';
+        $__beRadius     = $__s['appearance']['border_radius'] ?? '0.75rem';
+        $__beFontScale  = $__s['appearance']['font_scale']    ?? '1';
     @endphp
+    <style>
+        :root {
+            --be-radius: {{ $__beRadius }};
+            --be-font-scale: {{ $__beFontScale }};
+            --be-primary: {{ $__brandHex }};
+            --be-primary-50:  {{ $__brand[50] }};
+            --be-primary-100: {{ $__brand[100] }};
+            --be-primary-500: {{ $__brand[500] }};
+            --be-primary-600: {{ $__brand[600] }};
+            --be-primary-700: {{ $__brand[700] }};
+        }
+        /* apply --be-radius to all Tailwind rounded-* classes */
+        .rounded-xl { border-radius: var(--be-radius) !important; }
+        .rounded-lg { border-radius: calc(var(--be-radius) * 0.8) !important; }
+        .rounded-md { border-radius: calc(var(--be-radius) * 0.6) !important; }
+        .rounded-2xl { border-radius: calc(var(--be-radius) * 1.5) !important; }
+        .rounded-full { border-radius: 9999px !important; }
+        /* apply --be-font-scale to body text */
+        body { font-size: calc(14px * var(--be-font-scale)); }
+    </style>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {

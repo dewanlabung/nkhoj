@@ -108,13 +108,19 @@ class SettingsController extends BaseAdminController
     public function updateAppearance(Request $request)
     {
         $this->requireAdmin();
+        $validRadii  = ['0', '0.25rem', '0.375rem', '0.5rem', '0.75rem', '1rem', '1.5rem', '9999px'];
+        $validScales = ['0.9', '0.95', '1', '1.05', '1.1', '1.15'];
         $request->validate([
-            'brand_color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
-            'custom_css'  => 'nullable|string|max:65535',
+            'brand_color'   => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'border_radius' => ['nullable', 'in:' . implode(',', $validRadii)],
+            'font_scale'    => ['nullable', 'in:' . implode(',', $validScales)],
+            'custom_css'    => 'nullable|string|max:65535',
         ]);
         $s = $this->settings->get();
-        $s['appearance']['brand_color'] = $request->input('brand_color', '#6366f1');
-        $s['appearance']['custom_css']  = $request->input('custom_css', '');
+        $s['appearance']['brand_color']   = $request->input('brand_color', '#6366f1');
+        $s['appearance']['border_radius'] = $request->input('border_radius', '0.75rem');
+        $s['appearance']['font_scale']    = $request->input('font_scale', '1');
+        $s['appearance']['custom_css']    = $request->input('custom_css', '');
         $this->settings->save($s);
         return back()->with('success', 'Appearance saved.');
     }
