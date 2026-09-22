@@ -31,6 +31,7 @@
                 <li>git fetch origin master</li>
                 <li>git reset --hard origin/master</li>
                 <li>composer install (no-dev)</li>
+                <li>npm run build</li>
                 <li>php artisan migrate --force</li>
                 <li>php artisan cache:clear</li>
                 <li>php artisan config:clear</li>

@@ -696,10 +696,12 @@ class SettingsController extends BaseAdminController
         $success = true;
 
         $composerBin = trim(shell_exec('which composer 2>/dev/null') ?: 'composer');
+        $npmBin      = trim(shell_exec('which npm 2>/dev/null') ?: 'npm');
         $commands = [
             'git fetch origin master',
             'git reset --hard origin/master',
             'HOME=/tmp ' . $composerBin . ' install --no-dev --optimize-autoloader --no-interaction',
+            $npmBin . ' run build',
             PHP_BINARY . ' artisan migrate --force',
             PHP_BINARY . ' artisan cache:clear',
             PHP_BINARY . ' artisan config:clear',
@@ -741,10 +743,12 @@ class SettingsController extends BaseAdminController
         }
 
         $composerBin = trim(shell_exec('which composer 2>/dev/null') ?: 'composer');
+        $npmBin      = trim(shell_exec('which npm 2>/dev/null') ?: 'npm');
         $commands = [
             'git fetch origin master',
             'git reset --hard origin/master',
             'HOME=/tmp ' . $composerBin . ' install --optimize-autoloader --no-interaction',
+            $npmBin . ' run build',
             PHP_BINARY . ' artisan migrate --force',
             PHP_BINARY . ' artisan cache:clear',
             PHP_BINARY . ' artisan config:clear',
