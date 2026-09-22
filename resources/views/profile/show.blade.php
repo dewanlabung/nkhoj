@@ -35,6 +35,17 @@ $socialDefs = [
         {{-- Avatar --}}
         <div class="absolute -bottom-12 left-6">
             <div class="relative">
+                @if($activeStories->count())
+                <a href="/stories/{{ $activeStories->first()->id }}" class="block w-24 h-24 rounded-full p-0.5 bg-gradient-to-tr from-brand-500 via-pink-500 to-yellow-400 shadow-xl">
+                    <div class="w-full h-full rounded-full border-2 border-white dark:border-gray-900 overflow-hidden bg-brand-500 flex items-center justify-center">
+                        @if($user->avatar_url)
+                        <img src="{{ $user->avatar_url }}" class="w-full h-full object-cover">
+                        @else
+                        <span class="text-white text-3xl font-black">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                        @endif
+                    </div>
+                </a>
+                @else
                 <div class="w-24 h-24 rounded-full border-4 border-white dark:border-gray-900 shadow-xl overflow-hidden bg-brand-500 flex items-center justify-center">
                     @if($user->avatar_url)
                     <img src="{{ $user->avatar_url }}" class="w-full h-full object-cover">
@@ -42,6 +53,7 @@ $socialDefs = [
                     <span class="text-white text-3xl font-black">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
                     @endif
                 </div>
+                @endif
                 @if($user->last_seen_at && now()->diffInMinutes($user->last_seen_at) < 15)
                 <span class="absolute bottom-1 right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></span>
                 @endif
@@ -89,6 +101,68 @@ $socialDefs = [
             @endif
         </div>
     </div>
+
+    {{-- ═══ ACTIVE STORIES STRIP ══════════════════════════════ --}}
+    @if($activeStories->count())
+    <div class="px-6 py-3 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
+        <div class="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-hide">
+            @foreach($activeStories as $story)
+            @php $href = ($story->post_id && $story->post) ? '/posts/' . $story->post->slug : '/stories/' . $story->id; @endphp
+            <a href="{{ $href }}" class="flex-shrink-0 flex flex-col items-center gap-1 w-16">
+                <div class="w-14 h-14 rounded-full ring-2 ring-brand-400 ring-offset-1 overflow-hidden bg-gray-200 dark:bg-gray-700">
+                    @if($story->media_url && $story->media_type === 'image')
+                    <img src="{{ $story->media_url }}" alt="" class="w-full h-full object-cover">
+                    @elseif($story->media_url && $story->media_type === 'video')
+                    <div class="w-full h-full flex items-center justify-center text-xl bg-gray-900">🎥</div>
+                    @else
+                    <div class="w-full h-full bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center text-white font-bold">📰</div>
+                    @endif
+                </div>
+                <span class="text-[10px] text-gray-500 dark:text-gray-400 truncate w-full text-center">
+                    {{ \Carbon\Carbon::parse($story->expires_at)->diffForHumans(null, true) }}
+                </span>
+            </a>
+            @endforeach
+            @if($isOwn)
+            <a href="/stories" class="flex-shrink-0 flex flex-col items-center gap-1 w-16">
+                <div class="w-14 h-14 rounded-full border-2 border-dashed border-brand-300 hover:border-brand-500 flex items-center justify-center bg-gray-50 dark:bg-gray-800 transition-colors">
+                    <span class="text-xl text-brand-500">+</span>
+                </div>
+                <span class="text-[10px] text-gray-400 text-center">Add</span>
+            </a>
+            @endif
+        </div>
+    </div>
+    @elseif($isOwn)
+    <div class="px-6 py-3 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
+        <a href="/stories" class="flex items-center gap-2 text-sm text-brand-500 hover:text-brand-600 font-medium">
+            <span class="w-9 h-9 rounded-full border-2 border-dashed border-brand-300 flex items-center justify-center text-brand-400">+</span>
+            Share a story
+        </a>
+    </div>
+    @endif
+
+    {{-- ═══ STORY HIGHLIGHTS ═══════════════════════════════════ --}}
+    @if($highlights->count())
+    <div class="px-6 py-4 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
+        <h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Highlights</h3>
+        <div class="flex gap-4 overflow-x-auto pb-1 scrollbar-hide">
+            @foreach($highlights as $hl)
+            @php $first = $hl->stories->first(); @endphp
+            <div class="flex-shrink-0 flex flex-col items-center gap-1 w-16">
+                <div class="w-14 h-14 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600">
+                    @if($first && $first->media_url && $first->media_type === 'image')
+                    <img src="{{ $first->media_url }}" alt="" class="w-full h-full object-cover">
+                    @else
+                    <div class="w-full h-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center text-white text-lg">★</div>
+                    @endif
+                </div>
+                <span class="text-[10px] text-gray-600 dark:text-gray-400 truncate w-full text-center">{{ $hl->title }}</span>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
 
     {{-- ═══ MAIN CONTENT ════════════════════════════════════════ --}}
     <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
