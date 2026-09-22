@@ -163,6 +163,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     // Dashboard
     Route::get('/', [AdminDashboard::class, 'index']);
     Route::get('/analytics', [AdminDashboard::class, 'analytics']);
+    Route::get('/analytics/report', [AdminDashboard::class, 'analyticsReport']);
     Route::get('/search-analytics', [AdminDashboard::class, 'searchAnalytics']);
 
     // Users

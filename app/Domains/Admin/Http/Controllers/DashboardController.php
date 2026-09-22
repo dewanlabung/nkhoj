@@ -9,6 +9,7 @@ use App\Models\Core\NewsletterSubscriber;
 use App\Models\Blog\Post;
 use App\Models\Blog\Tag;
 use App\Models\UserEngagement\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends BaseAdminController
@@ -82,24 +83,46 @@ class DashboardController extends BaseAdminController
         return view('admin.search-analytics', compact('topQueries', 'zeroResults', 'dailyVolume', 'totalSearches', 'uniqueSearchers'));
     }
 
+    public function analyticsReport(Request $request)
+    {
+        $this->requireAdmin();
+
+        $days   = (int) $request->input('days', 30);
+        $days   = in_array($days, [7, 14, 30, 90]) ? $days : 30;
+        $labels = [];
+        $views  = [];
+        $users  = [];
+
+        for ($i = $days - 1; $i >= 0; $i--) {
+            $date     = now()->subDays($i)->toDateString();
+            $labels[] = now()->subDays($i)->format('d M');
+            $views[]  = (int) DB::table('posts')
+                ->whereDate('published_at', $date)
+                ->where('status', 'published')
+                ->sum('view_count');
+            $users[] = User::whereDate('created_at', $date)->count();
+        }
+
+        return response()->json(compact('labels', 'views', 'users'));
+    }
+
     public function analytics()
     {
         $this->requireAdmin();
 
-        try {
-            $dailyAnalytics = \App\Models\LoggingAnalytics\DailyAnalytic::getLast30Days();
-            $chartLabels    = $dailyAnalytics['labels'];
-            $chartViews     = $dailyAnalytics['views'];
-        } catch (\Throwable) {
-            $chartLabels = [];
-            $chartViews  = [];
-            for ($i = 29; $i >= 0; $i--) {
-                $chartLabels[] = now()->subDays($i)->format('d M');
-                $chartViews[]  = 0;
-            }
+        $days = 30;
+        $chartLabels = [];
+        $chartViews  = [];
+        for ($i = $days - 1; $i >= 0; $i--) {
+            $date          = now()->subDays($i)->toDateString();
+            $chartLabels[] = now()->subDays($i)->format('d M');
+            $chartViews[]  = (int) DB::table('posts')
+                ->whereDate('published_at', $date)
+                ->where('status', 'published')
+                ->sum('view_count');
         }
         $chartUsers = [];
-        for ($i = 29; $i >= 0; $i--) {
+        for ($i = $days - 1; $i >= 0; $i--) {
             $chartUsers[] = User::whereDate('created_at', now()->subDays($i)->toDateString())->count();
         }
 

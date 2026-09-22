@@ -1,5 +1,10 @@
 @extends('layouts.app')
-@section('title', ($category->name_ne ?? $category->name_en) . ' — nkhoj')
+@php
+    $__seo = app(\App\Services\SeoHelper::class);
+    $__catName = $category->name_ne ?? $category->name_en;
+@endphp
+@section('title', $__seo->title('category', ['category' => $__catName]))
+@section('description', $__seo->description('category', ['category' => $__catName]))
 
 @section('content')
 @php $activeTab = request('tab', 'posts'); @endphp

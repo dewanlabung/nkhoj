@@ -30,3 +30,15 @@
         @apply tag-pill bg-brand-50 text-brand-600;
     }
 }
+
+@layer utilities {
+    [x-cloak] { display: none !important; }
+
+    /* Ticker animation for breaking-news strip */
+    .ticker-track {
+        display: flex;
+        animation: ticker 28s linear infinite;
+        width: max-content;
+    }
+    .ticker-track:hover { animation-play-state: paused; }
+}

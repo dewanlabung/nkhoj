@@ -4,9 +4,30 @@
 @section('content')
 
 @php
-    $ap = $s['appearance'] ?? [];
-    $brandColor = $ap['brand_color'] ?? '#6366f1';
-    $customCss  = $ap['custom_css']  ?? '';
+    $ap          = $s['appearance'] ?? [];
+    $brandColor  = $ap['brand_color']   ?? '#6366f1';
+    $borderRadius= $ap['border_radius'] ?? '0.75rem';
+    $fontScale   = $ap['font_scale']    ?? '1';
+    $customCss   = $ap['custom_css']    ?? '';
+
+    $radiusOptions = [
+        '0'       => ['label' => 'None',   'preview' => '0'],
+        '0.25rem' => ['label' => 'Subtle', 'preview' => '4px'],
+        '0.375rem'=> ['label' => 'Small',  'preview' => '6px'],
+        '0.5rem'  => ['label' => 'Medium', 'preview' => '8px'],
+        '0.75rem' => ['label' => 'Default','preview' => '12px'],
+        '1rem'    => ['label' => 'Large',  'preview' => '16px'],
+        '1.5rem'  => ['label' => 'XLarge', 'preview' => '24px'],
+        '9999px'  => ['label' => 'Pill',   'preview' => '∞'],
+    ];
+    $scaleOptions = [
+        '0.9'  => 'XSmall',
+        '0.95' => 'Small',
+        '1'    => 'Normal',
+        '1.05' => 'Large',
+        '1.1'  => 'XLarge',
+        '1.15' => 'XXLarge',
+    ];
 @endphp
 
 <div class="max-w-3xl">
@@ -95,6 +116,70 @@
     </div>
 </div>
 
+{{-- Border Radius ────────────────────────────────── --}}
+<div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm mb-5 overflow-hidden"
+     x-data="{ radius: '{{ $borderRadius }}' }">
+    <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+        <h2 class="font-semibold text-gray-900 dark:text-white text-sm">Border Radius</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Controls the corner rounding on cards, buttons, and inputs across the site.</p>
+    </div>
+    <div class="px-5 py-5 space-y-4">
+        <input type="hidden" name="border_radius" :value="radius">
+        <div class="flex flex-wrap gap-2">
+            @foreach($radiusOptions as $val => $opt)
+            <button type="button"
+                @click="radius = '{{ $val }}'"
+                :class="radius === '{{ $val }}' ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400' : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-brand-300'"
+                class="px-3 py-2 border-2 rounded-lg text-xs font-semibold transition-all flex flex-col items-center gap-1 min-w-[58px]">
+                <span class="text-[10px] font-mono text-gray-400 dark:text-gray-500">{{ $opt['preview'] }}</span>
+                {{ $opt['label'] }}
+            </button>
+            @endforeach
+        </div>
+        {{-- Live preview --}}
+        <div>
+            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Preview</p>
+            <div class="flex flex-wrap gap-3 items-center p-4 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                <div class="px-4 py-2 bg-brand-500 text-white text-sm font-semibold shadow-sm transition-all" :style="'border-radius:' + radius">Button</div>
+                <div class="px-4 py-2 border-2 border-brand-500 text-brand-600 dark:text-brand-400 text-sm font-semibold transition-all" :style="'border-radius:' + radius">Outline</div>
+                <div class="w-32 h-16 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 shadow-sm transition-all" :style="'border-radius:' + radius"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Font Scale ────────────────────────────────────── --}}
+<div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm mb-5 overflow-hidden"
+     x-data="{ scale: '{{ $fontScale }}' }">
+    <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+        <h2 class="font-semibold text-gray-900 dark:text-white text-sm">Font Scale</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Scales all body text. Useful for accessibility or denser layouts.</p>
+    </div>
+    <div class="px-5 py-5 space-y-4">
+        <input type="hidden" name="font_scale" :value="scale">
+        <div class="flex flex-wrap gap-2">
+            @foreach($scaleOptions as $val => $label)
+            <button type="button"
+                @click="scale = '{{ $val }}'"
+                :class="scale === '{{ $val }}' ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400' : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-brand-300'"
+                class="px-3 py-2 border-2 rounded-lg text-xs font-semibold transition-all min-w-[64px] text-center">
+                {{ $label }}
+                <span class="block text-[10px] font-mono text-gray-400 dark:text-gray-500 mt-0.5">×{{ $val }}</span>
+            </button>
+            @endforeach
+        </div>
+        {{-- Live preview --}}
+        <div>
+            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Preview</p>
+            <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl space-y-1">
+                <p class="font-bold text-gray-900 dark:text-white transition-all" :style="'font-size: calc(18px * ' + scale + ')'">Heading text</p>
+                <p class="text-gray-500 dark:text-gray-400 transition-all" :style="'font-size: calc(14px * ' + scale + ')'">Body text — नेपालको अग्रणी समाचार र ब्लग प्लेटफर्म</p>
+                <p class="text-gray-400 dark:text-gray-500 transition-all" :style="'font-size: calc(12px * ' + scale + ')'">Caption / meta text</p>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{-- Custom CSS ───────────────────────────────────── --}}
 <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm mb-5 overflow-hidden">
     <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
@@ -105,7 +190,7 @@
         <textarea name="custom_css" rows="14" spellcheck="false"
             class="w-full font-mono text-xs border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-brand-500 outline-none resize-y leading-relaxed"
             placeholder="/* Add custom CSS here */&#10;&#10;/* Example: change link color */&#10;a { color: inherit; }&#10;&#10;/* Example: custom font size */&#10;body { font-size: 16px; }">{{ $customCss }}</textarea>
-        <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">This CSS is added after all other styles. Wrap selectors in <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">body</code> to increase specificity.</p>
+        <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">Added after all other styles. Available CSS vars: <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded text-[10px]">--be-primary</code> <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded text-[10px]">--be-radius</code> <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded text-[10px]">--be-font-scale</code></p>
     </div>
 </div>
 
