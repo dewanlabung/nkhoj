@@ -4,6 +4,8 @@ namespace App\Domains\Account\Http\Controllers;
 
 use App\Domains\Account\Services\FollowService;
 use App\Http\Controllers\Controller;
+use App\Models\MediaContent\Story;
+use App\Models\MediaContent\StoryHighlight;
 use App\Models\UserEngagement\User;
 use Illuminate\Http\Request;
 
@@ -31,6 +33,12 @@ class ProfileController extends Controller
         $followerUsers  = $user->followers()->select('users.id', 'users.name', 'users.username', 'users.avatar_url')->limit(6)->get();
         $followingUsers = $user->following()->select('users.id', 'users.name', 'users.username', 'users.avatar_url')->limit(6)->get();
 
+        $activeStories = Story::where('user_id', $user->id)->active()->latest()->get();
+        $highlights    = StoryHighlight::with(['stories' => fn($q) => $q->active()])
+            ->where('user_id', $user->id)
+            ->latest()
+            ->get();
+
         $categoryBreakdown = $user->posts()
             ->published()
             ->with('category')
@@ -42,7 +50,8 @@ class ProfileController extends Controller
 
         return view('profile.show', compact(
             'user', 'posts', 'followerCount', 'followingCount', 'totalViews',
-            'isFollowing', 'followerUsers', 'followingUsers', 'categoryBreakdown'
+            'isFollowing', 'followerUsers', 'followingUsers', 'categoryBreakdown',
+            'activeStories', 'highlights'
         ));
     }
 
