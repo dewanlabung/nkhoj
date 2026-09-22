@@ -62,7 +62,7 @@ class StoryController extends Controller
             $path = $file->store('stories', 'public');
             $mediaUrl = '/storage/' . $path;
         } else {
-            $mediaUrl = '/storage/' . $this->saveOptimizedThumbnail($file, 'stories');
+            $mediaUrl = $this->saveOptimizedThumbnail($file, 'stories');
         }
 
         Story::create([
