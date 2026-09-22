@@ -18,10 +18,10 @@ $sections = $homepageSections ?? $defaultSections;
 @endphp
 
 {{-- ══ TWO-PANEL WRAPPER — sidebar is always present ══ --}}
-<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+<div id="home-layout" class="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
     {{-- ══ MAIN COLUMN (sections rendered in configured order) ══ --}}
-    <div class="lg:col-span-3 space-y-0">
+    <div id="home-main" class="lg:col-span-3 space-y-0">
 
         @foreach($sections as $section)
         @if($section['enabled'] ?? true)
@@ -46,7 +46,7 @@ $sections = $homepageSections ?? $defaultSections;
     </div>
 
     {{-- ══ RIGHT SIDEBAR ══ --}}
-    <aside class="space-y-4">
+    <aside id="home-sidebar" class="space-y-4">
 
         @auth
         <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
