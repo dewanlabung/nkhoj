@@ -2,10 +2,11 @@
     $__s        = file_exists(storage_path('app/site_settings.json'))
                     ? (json_decode(file_get_contents(storage_path('app/site_settings.json')), true) ?? [])
                     : [];
-    $siteName   = $__s['site_name']   ?? config('app.name', 'nkhoj');
-    $taglineNe  = $__s['tagline_ne']  ?? 'नेपाली समाचार';
-    $taglineEn  = $__s['tagline_en']  ?? '';
-    $siteDesc   = $__s['site_description'] ?? 'नेपालको अग्रणी समाचार र ब्लग प्लेटफर्म';
+    $siteName      = $__s['site_name']   ?? config('app.name', 'nkhoj');
+    $taglineNe     = $__s['tagline_ne']  ?? 'नेपाली समाचार';
+    $taglineEn     = $__s['tagline_en']  ?? '';
+    $siteDesc      = $__s['site_description'] ?? 'नेपालको अग्रणी समाचार र ब्लग प्लेटफर्म';
+    $__activeTheme = $__s['active_theme'] ?? 'magazine';
     $showHome   = ($__s['nav_home_page_link'] ?? 'show') === 'show';
     try {
         $navItems = \App\Models\Core\NavigationItem::where('is_active', true)
@@ -149,6 +150,30 @@
         @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         .ticker-track { display:flex; animation: ticker 28s linear infinite; width:max-content; }
         .ticker-track:hover { animation-play-state: paused; }
+
+        /* ── Layout theme overrides ── */
+        /* minimal, news, grid: full-width content, hide sidebar */
+        [data-layout="minimal"] #home-sidebar,
+        [data-layout="news"]    #home-sidebar,
+        [data-layout="grid"]    #home-sidebar    { display: none !important; }
+        @media (min-width: 1024px) {
+            [data-layout="minimal"] #home-main,
+            [data-layout="news"]    #home-main,
+            [data-layout="grid"]    #home-main    { grid-column: span 4 / span 4; }
+        }
+        /* minimal: generous whitespace, readable type */
+        [data-layout="minimal"] #home-main { max-width: 760px; margin-inline: auto; }
+        /* news: compact no-gap cards */
+        [data-layout="news"] .rounded-xl { border-radius: 0 !important; }
+        [data-layout="news"] #home-main  { gap: 0; }
+        /* grid: 2-col post cards on wider screens */
+        @media (min-width: 768px) {
+            [data-layout="grid"] #posts-feed-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        }
+        /* classic: sidebar on the left */
+        @media (min-width: 1024px) {
+            [data-layout="classic"] #home-sidebar { order: -1; }
+        }
     </style>
     <script>
         (function() {
@@ -159,7 +184,7 @@
     </script>
     @stack('head')
 </head>
-<body class="bg-gray-50 dark:bg-gray-950 font-sans antialiased transition-colors duration-200"
+<body class="bg-gray-50 dark:bg-gray-950 font-sans antialiased transition-colors duration-200" data-layout="{{ $__activeTheme }}"
     x-data="{
         dark: localStorage.getItem('siteTheme') === 'dark',
         toggleDark() {

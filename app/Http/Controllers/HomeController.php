@@ -129,17 +129,18 @@ class HomeController extends Controller
             return view('partials.posts-feed', compact('posts'));
         }
 
-        // Load homepage section order from settings
+        // Load homepage section order and active theme from settings
         $settings = app(SiteSettingsService::class)->get();
         $homepageSections = !empty($settings['homepage_sections'])
             ? $settings['homepage_sections']
             : self::$defaultSections;
+        $activeTheme = $settings['active_theme'] ?? 'magazine';
 
         return view('home', compact(
             'heroStrip', 'editorsPick', 'posts',
             'trending', 'categories',
             'sidebarWidgets', 'homeTopWidgets', 'homeBottomWidgets',
-            'widgetData', 'homepageSections'
+            'widgetData', 'homepageSections', 'activeTheme'
         ));
     }
 

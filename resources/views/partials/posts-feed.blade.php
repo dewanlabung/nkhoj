@@ -1,5 +1,5 @@
 {{-- Posts grid partial — rendered standalone for AJAX tab switching --}}
-<div class="grid grid-cols-2 gap-3">
+<div id="posts-feed-list" class="grid grid-cols-2 gap-3">
     @forelse($posts as $post)
     <article class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden group flex flex-col">
 
