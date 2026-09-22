@@ -12,7 +12,21 @@ class PurgeExpiredStories extends Command
 
     public function handle(): void
     {
-        $count = Story::where('expires_at', '<', now())->delete();
-        $this->info("Purged {$count} expired stories.");
+        $expired = Story::where('expires_at', '<', now())->get();
+
+        $deleted = 0;
+        foreach ($expired as $story) {
+            // Only delete files we uploaded (not post thumbnail URLs)
+            if ($story->media_url && str_starts_with($story->media_url, '/uploads/')) {
+                $path = public_path(ltrim($story->media_url, '/'));
+                if (file_exists($path)) {
+                    @unlink($path);
+                }
+            }
+            $story->delete();
+            $deleted++;
+        }
+
+        $this->info("Purged {$deleted} expired stories.");
     }
 }
