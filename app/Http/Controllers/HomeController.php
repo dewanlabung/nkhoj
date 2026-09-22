@@ -9,11 +9,27 @@ use App\Models\Blog\Post;
 use App\Models\Blog\Tag;
 use App\Models\UserEngagement\User;
 use App\Models\Core\Widget;
+use App\Services\SiteSettingsService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 
 class HomeController extends Controller
 {
+    private static array $defaultSections = [
+        ['key' => 'hero_strip',          'label' => 'Hero Strip',     'enabled' => true],
+        ['key' => 'stories',             'label' => 'Stories',        'enabled' => true],
+        ['key' => 'home_top_widgets',    'label' => 'Top Widgets',    'enabled' => true],
+        ['key' => 'category_tabs',       'label' => 'Category Tabs',  'enabled' => true],
+        ['key' => 'editors_pick',        'label' => "Editor's Pick",  'enabled' => true],
+        ['key' => 'posts_feed',          'label' => 'Posts Feed',     'enabled' => true],
+        ['key' => 'home_bottom_widgets', 'label' => 'Bottom Widgets', 'enabled' => true],
+    ];
+
+    public static function getDefaultSections(): array
+    {
+        return self::$defaultSections;
+    }
+
     public function index()
     {
         // 3-card hero strip (featured or top 3 by views)
@@ -113,11 +129,15 @@ class HomeController extends Controller
             return view('partials.posts-feed', compact('posts'));
         }
 
+        // Load homepage section order from settings
+        $settings = app(SiteSettingsService::class)->get();
+        $homepageSections = $settings['homepage_sections'] ?? self::$defaultSections;
+
         return view('home', compact(
             'heroStrip', 'editorsPick', 'posts',
             'trending', 'categories',
             'sidebarWidgets', 'homeTopWidgets', 'homeBottomWidgets',
-            'widgetData'
+            'widgetData', 'homepageSections'
         ));
     }
 

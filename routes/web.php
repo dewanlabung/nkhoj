@@ -368,6 +368,10 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::put('/pages/{id}',                [\App\Http\Controllers\PageController::class, 'update']);
     Route::delete('/pages/{id}',             [\App\Http\Controllers\PageController::class, 'destroy']);
 
+    // Homepage section configurator
+    Route::get('/homepage',  [\App\Http\Controllers\Admin\HomepageController::class, 'index']);
+    Route::post('/homepage', [\App\Http\Controllers\Admin\HomepageController::class, 'update']);
+
     // Themes
     Route::get('/themes',                    [\App\Http\Controllers\ThemeController::class, 'index']);
     Route::post('/themes/{theme}/activate',  [\App\Http\Controllers\ThemeController::class, 'activate']);

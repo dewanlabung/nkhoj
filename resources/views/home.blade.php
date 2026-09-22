@@ -3,265 +3,51 @@
 
 @section('content')
 
-{{-- ══ HERO STRIP: 3 cards like Naver Blog ══ --}}
-@if($heroStrip->count())
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
-    @foreach($heroStrip as $i => $hero)
-    <a href="/posts/{{ $hero->slug }}" class="group relative rounded-xl overflow-hidden block {{ $i === 0 ? 'sm:col-span-1' : '' }}" style="min-height:200px;">
-        {{-- Bg image or gradient --}}
-        @if($hero->thumbnail_url)
-        <img src="{{ $hero->thumbnail_url }}" alt="{{ $hero->title }}"
-            class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-        @else
-        <div class="absolute inset-0 bg-gradient-to-br
-            {{ $i === 0 ? 'from-brand-500 to-indigo-700' : ($i === 1 ? 'from-teal-500 to-cyan-700' : 'from-orange-500 to-pink-700') }}">
-        </div>
-        @endif
-        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-        <div class="relative flex flex-col justify-end h-full p-4" style="min-height:200px;">
-            @if($hero->is_featured)
-            <span class="text-xs font-bold text-brand-300 uppercase tracking-widest mb-1">Featured</span>
-            @endif
-            <span class="text-xs text-white/60 font-nepali mb-1">{{ $hero->category->name_ne ?? $hero->category->name_en }}</span>
-            <h2 class="text-sm font-bold text-white line-clamp-2 leading-snug font-nepali group-hover:text-brand-200 transition-colors">{{ $hero->title }}</h2>
-            <div class="flex items-center gap-2 mt-2 text-xs text-white/50">
-                <div class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-xs">{{ strtoupper(substr($hero->author->name,0,1)) }}</div>
-                <span>{{ $hero->author->name }}</span>
-                <span>·</span>
-                <span>{{ $hero->published_at->diffForHumans() }}</span>
-            </div>
-        </div>
-    </a>
-    @endforeach
-</div>
-@endif
-
-{{-- ══ STORIES CAROUSEL (Facebook-style) ══ --}}
 @php
-$activeStories = \App\Models\MediaContent\Story::with(['user', 'post'])
-    ->active()
-    ->latest()
-    ->get()
-    ->groupBy('user_id');
-$storyHighlights = \App\Models\MediaContent\StoryHighlight::with(['stories' => fn($q) => $q->active()])
-    ->whereHas('stories', fn($q) => $q->active())
-    ->latest()
-    ->limit(5)
-    ->get();
+// Default section order — admin can reorder/toggle via /admin/homepage
+$defaultSections = [
+    ['key' => 'hero_strip',          'label' => 'Hero Strip',      'enabled' => true],
+    ['key' => 'stories',             'label' => 'Stories',         'enabled' => true],
+    ['key' => 'home_top_widgets',    'label' => 'Top Widgets',     'enabled' => true],
+    ['key' => 'category_tabs',       'label' => 'Category Tabs',   'enabled' => true],
+    ['key' => 'editors_pick',        'label' => 'Editor\'s Pick',  'enabled' => true],
+    ['key' => 'posts_feed',          'label' => 'Posts Feed',      'enabled' => true],
+    ['key' => 'home_bottom_widgets', 'label' => 'Bottom Widgets',  'enabled' => true],
+];
+$sections = $homepageSections ?? $defaultSections;
 @endphp
 
-@if($activeStories->count() || $storyHighlights->count())
-<div class="mb-8">
-    <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Stories</h3>
-        <a href="/stories" class="text-sm text-brand-500 hover:text-brand-600 font-medium">View all</a>
-    </div>
-
-    <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-        {{-- Create story button (authenticated) --}}
-        @auth
-        <a href="/stories/create" class="flex-shrink-0 w-24 rounded-xl overflow-hidden border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-brand-500 transition-colors flex items-center justify-center cursor-pointer bg-gray-50 dark:bg-gray-700/50 group">
-            <div class="text-center">
-                <div class="text-2xl mb-1">+</div>
-                <p class="text-xs font-semibold text-gray-600 dark:text-gray-400 group-hover:text-brand-500">Post</p>
-            </div>
-        </a>
-        @endauth
-
-        {{-- Story Highlights --}}
-        @foreach($storyHighlights as $highlight)
-        <div class="flex-shrink-0 w-24">
-            <a href="#" class="group relative block rounded-xl overflow-hidden border-2 border-gray-200 dark:border-gray-700 hover:border-brand-500 transition-colors" style="aspect-ratio:9/16;">
-                @php $firstStory = $highlight->stories->first(); @endphp
-                @if($firstStory->media_type === 'video')
-                <video src="{{ $firstStory->media_url }}" class="w-full h-full object-cover" muted></video>
-                @else
-                <img src="{{ $firstStory->media_url }}" alt="{{ $highlight->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
-                @endif
-                <div class="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors"></div>
-                <div class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent">
-                    <p class="text-white text-xs font-semibold truncate">{{ $highlight->title }}</p>
-                </div>
-            </a>
-        </div>
-        @endforeach
-
-        {{-- User Stories --}}
-        @foreach($activeStories->take(6) as $userId => $userStories)
-        @php
-            $user = $userStories->first()->user;
-            $firstStory = $userStories->first();
-            $storyLink = ($firstStory->post_id && $firstStory->post)
-                ? '/posts/' . $firstStory->post->slug
-                : '/stories/' . $firstStory->id;
-        @endphp
-        <div class="flex-shrink-0 w-24">
-            <a href="{{ $storyLink }}" class="group relative block rounded-xl overflow-hidden border-2 border-gray-200 dark:border-gray-700 hover:border-brand-500 transition-colors" style="aspect-ratio:9/16;">
-                @if($firstStory->media_type === 'video')
-                <video src="{{ $firstStory->media_url }}" class="w-full h-full object-cover" muted></video>
-                <div class="absolute top-2 right-2 bg-white/90 rounded-full p-1">
-                    <svg class="w-3 h-3 text-gray-900" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                </div>
-                @else
-                <img src="{{ $firstStory->media_url }}" alt="Story" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
-                @endif
-                <div class="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors"></div>
-                @if($firstStory->post_id)
-                <div class="absolute top-1.5 left-1.5 bg-brand-500 rounded-full px-1.5 py-0.5 text-[9px] font-bold text-white leading-none">📰</div>
-                @endif
-                <div class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent">
-                    <p class="text-white text-xs font-semibold truncate">{{ $user->name }}</p>
-                </div>
-                @if($userStories->count() > 1)
-                <div class="absolute top-2 right-2 bg-white/90 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold text-gray-900">{{ $userStories->count() }}</div>
-                @endif
-            </a>
-        </div>
-        @endforeach
-    </div>
-</div>
-@endif
-
-{{-- ══ CATEGORY PILLS (AJAX tab switching) ══ --}}
-<div x-data="{
-        activeTab: '/',
-        loading: false,
-        async switchTab(url, el) {
-            if (this.activeTab === url) return;
-            this.activeTab = url;
-            this.loading = true;
-            try {
-                const res = await fetch(url + (url.includes('?') ? '&' : '?') + 'ajax=1', {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                });
-                const html = await res.text();
-                window.dispatchEvent(new CustomEvent('tab-switched', { detail: { tab: url, html } }));
-                window.scrollTo({ top: document.getElementById('posts-feed').offsetTop - 120, behavior: 'smooth' });
-            } catch(e) {
-                window.location.href = url;
-            }
-            this.loading = false;
-        }
-    }"
-    class="relative">
-
-    <div class="flex items-center gap-1.5 overflow-x-auto py-2 mb-6 border-b border-gray-200 dark:border-gray-700 scrollbar-hide">
-        <button @click="switchTab('/', $el)"
-            :class="activeTab === '/' ? 'bg-brand-500 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
-            class="whitespace-nowrap px-4 py-1.5 text-sm font-semibold rounded-full transition-colors">
-            सम्पूर्ण
-        </button>
-        @foreach(\App\Models\Blog\Category::orderBy('sort_order')->get() as $cat)
-        <button @click="switchTab('/category/{{ $cat->slug }}', $el)"
-            :class="activeTab === '/category/{{ $cat->slug }}' ? 'bg-brand-500 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
-            class="whitespace-nowrap px-4 py-1.5 text-sm font-medium rounded-full transition-colors font-nepali">
-            {{ $cat->name_ne ?? $cat->name_en }}
-        </button>
-        @endforeach
-    </div>
-
-    {{-- Loading bar --}}
-    <div x-show="loading" x-cloak class="absolute top-0 left-0 right-0 h-0.5 bg-gray-100 dark:bg-gray-700 overflow-hidden rounded">
-        <div class="h-full bg-brand-500 animate-pulse w-2/3"></div>
-    </div>
-</div>
-
-{{-- ══ MAIN TWO-PANEL LAYOUT ══ --}}
+{{-- ══ TWO-PANEL WRAPPER — sidebar is always present ══ --}}
 <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
-    {{-- ══ FEED: Google Plus card grid (3 cols within the 3/4 space) ══ --}}
-    <div class="lg:col-span-3">
+    {{-- ══ MAIN COLUMN (sections rendered in configured order) ══ --}}
+    <div class="lg:col-span-3 space-y-0">
 
-        {{-- Editor's Pick row --}}
-        @if($editorsPick->count())
-        <div class="mb-7">
-            <div class="flex items-center gap-2 mb-3">
-                <span class="text-xs font-bold text-brand-600 uppercase tracking-widest">सम्पादकको छनोट</span>
-                <div class="flex-1 h-px bg-gray-100"></div>
-                <span class="text-xs text-gray-400">Editor's Pick</span>
-            </div>
-            <div class="grid grid-cols-3 gap-3">
-                @foreach($editorsPick as $pick)
-                <a href="/posts/{{ $pick->slug }}" class="group bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden block">
-                    <div class="relative" style="aspect-ratio:16/9; overflow:hidden;">
-                        @if($pick->thumbnail_url)
-                        <img src="{{ $pick->thumbnail_url }}" loading="lazy" alt="{{ $pick->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                        @else
-                        <div class="w-full h-full bg-gradient-to-br from-brand-100 to-indigo-100 flex items-center justify-center">
-                            <span class="text-3xl font-black text-brand-200">{{ strtoupper(substr($pick->title,0,1)) }}</span>
-                        </div>
-                        @endif
-                        <div class="absolute top-2 left-2">
-                            <span class="text-xs px-2 py-0.5 bg-brand-500 text-white rounded-full font-semibold">{{ $pick->category->name_ne ?? $pick->category->name_en }}</span>
-                        </div>
-                    </div>
-                    <div class="p-3">
-                        <h3 class="text-sm font-bold text-gray-900 group-hover:text-brand-600 transition-colors line-clamp-2 font-nepali leading-snug">{{ $pick->title }}</h3>
-                        <div class="flex items-center gap-1.5 mt-1.5 text-xs text-gray-400">
-                            <div class="w-4 h-4 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 font-bold text-xs">{{ strtoupper(substr($pick->author->name,0,1)) }}</div>
-                            <span>{{ $pick->author->name }}</span>
-                            <span>·</span>
-                            <span>{{ number_format($pick->view_count) }} views</span>
-                        </div>
-                    </div>
-                </a>
-                @endforeach
-            </div>
-        </div>
+        @foreach($sections as $section)
+        @if($section['enabled'] ?? true)
+            @if($section['key'] === 'hero_strip')
+                @include('homepage._hero_strip')
+            @elseif($section['key'] === 'stories')
+                @include('homepage._stories')
+            @elseif($section['key'] === 'home_top_widgets')
+                @include('homepage._widgets_zone', ['zoneWidgets' => $homeTopWidgets])
+            @elseif($section['key'] === 'category_tabs')
+                @include('homepage._category_tabs')
+            @elseif($section['key'] === 'editors_pick')
+                @include('homepage._editors_pick')
+            @elseif($section['key'] === 'posts_feed')
+                @include('homepage._posts_feed')
+            @elseif($section['key'] === 'home_bottom_widgets')
+                @include('homepage._widgets_zone', ['zoneWidgets' => $homeBottomWidgets])
+            @endif
         @endif
-
-        {{-- ══ Posts feed (AJAX-swappable) ══ --}}
-        <div class="flex items-center gap-2 mb-4">
-            <h2 class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest">नवीनतम</h2>
-            <div class="flex-1 h-px bg-gray-100 dark:bg-gray-700"></div>
-            <span class="text-xs text-gray-400">Latest posts</span>
-        </div>
-
-        <div id="posts-feed"
-            x-data="{
-                page: {{ $posts->currentPage() }},
-                hasMore: {{ $posts->hasMorePages() ? 'true' : 'false' }},
-                tab: '/',
-                loading: false,
-                async loadMore() {
-                    if (this.loading || !this.hasMore) return;
-                    this.loading = true;
-                    this.page++;
-                    const sep = this.tab.includes('?') ? '&' : '?';
-                    const res = await fetch(this.tab + sep + 'ajax=1&page=' + this.page);
-                    const html = await res.text();
-                    const tmp = document.createElement('div');
-                    tmp.innerHTML = html;
-                    const newCards = Array.from(tmp.querySelectorAll('article'));
-                    const grid = this.$el.querySelector('.grid');
-                    if (grid && newCards.length) newCards.forEach(c => grid.appendChild(c));
-                    const meta = tmp.querySelector('[data-feed-meta]');
-                    this.hasMore = meta?.dataset.hasMore === 'true';
-                    this.loading = false;
-                },
-                afterTabSwitch(html) {
-                    this.$el.innerHTML = html;
-                    const meta = this.$el.querySelector('[data-feed-meta]');
-                    this.page = parseInt(meta?.dataset.currentPage || '1');
-                    this.hasMore = meta?.dataset.hasMore === 'true';
-                }
-            }"
-            @tab-switched.window="tab = $event.detail.tab; afterTabSwitch($event.detail.html)">
-            @include('partials.posts-feed')
-
-            {{-- Infinite scroll sentinel --}}
-            <div x-intersect.threshold.10="loadMore" class="h-4 mt-2"></div>
-            <div x-show="loading" class="flex justify-center py-4">
-                <div class="w-5 h-5 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-        </div>
+        @endforeach
 
     </div>
 
     {{-- ══ RIGHT SIDEBAR ══ --}}
     <aside class="space-y-4">
 
-        {{-- User panel: always shown, not a widget --}}
         @auth
         <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
             <div class="bg-gradient-to-r from-brand-500 to-indigo-600 px-4 py-3 flex items-center justify-between">
@@ -312,16 +98,13 @@ $storyHighlights = \App\Models\MediaContent\StoryHighlight::with(['stories' => f
         </div>
         @endauth
 
-        {{-- Newsletter Widget --}}
         <x-newsletter-widget class="mb-6" />
 
-        {{-- Dynamic sidebar widgets from admin --}}
         @if($sidebarWidgets->isNotEmpty())
             @foreach($sidebarWidgets as $widget)
                 @include('partials._widget', ['widget' => $widget, 'data' => $widgetData])
             @endforeach
         @else
-            {{-- Fallback: hardcoded trending + categories when no widgets are configured --}}
             <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-4">
                 <h3 class="font-bold text-gray-900 dark:text-white mb-3 text-sm flex items-center gap-1.5">
                     <span class="text-red-500">🔥</span> ट्रेन्डिङ
