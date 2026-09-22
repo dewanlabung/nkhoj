@@ -85,7 +85,7 @@
     @endif
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @php
         $__brandHex = $__s['appearance']['brand_color'] ?? '#6366f1';
         // Generate shade palette from base hex
@@ -131,35 +131,24 @@
             --be-primary-600: {{ $__brand[600] }};
             --be-primary-700: {{ $__brand[700] }};
         }
-        /* apply --be-radius to all Tailwind rounded-* classes */
-        .rounded-xl { border-radius: var(--be-radius) !important; }
-        .rounded-lg { border-radius: calc(var(--be-radius) * 0.8) !important; }
-        .rounded-md { border-radius: calc(var(--be-radius) * 0.6) !important; }
+        /* override Tailwind static colors with runtime brand vars */
+        .bg-brand-500,.hover\:bg-brand-500:hover { background-color: var(--be-primary-500) !important; }
+        .bg-brand-600,.hover\:bg-brand-600:hover { background-color: var(--be-primary-600) !important; }
+        .bg-brand-50  { background-color: var(--be-primary-50)  !important; }
+        .bg-brand-100 { background-color: var(--be-primary-100) !important; }
+        .text-brand-500,.hover\:text-brand-500:hover,.group-hover\:text-brand-600 { color: var(--be-primary-500) !important; }
+        .text-brand-600 { color: var(--be-primary-600) !important; }
+        .border-brand-500,.hover\:border-brand-500:hover { border-color: var(--be-primary-500) !important; }
+        .ring-brand-500,.focus\:ring-brand-500:focus { --tw-ring-color: var(--be-primary-500); }
+        /* override rounded-* with radius var */
+        .rounded-xl  { border-radius: var(--be-radius) !important; }
+        .rounded-lg  { border-radius: calc(var(--be-radius) * 0.8) !important; }
+        .rounded-md  { border-radius: calc(var(--be-radius) * 0.6) !important; }
         .rounded-2xl { border-radius: calc(var(--be-radius) * 1.5) !important; }
         .rounded-full { border-radius: 9999px !important; }
-        /* apply --be-font-scale to body text */
+        /* scale body text */
         body { font-size: calc(14px * var(--be-font-scale)); }
     </style>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                        nepali: ['Noto Sans Devanagari', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            50:'{{ $__brand[50] }}',100:'{{ $__brand[100] }}',200:'{{ $__brand[200] }}',
-                            500:'{{ $__brand[500] }}',600:'{{ $__brand[600] }}',700:'{{ $__brand[700] }}',900:'{{ $__brand[900] }}'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
     @if($__customCss)
     <style id="site-custom-css">{!! $__customCss !!}</style>
     @endif
@@ -167,15 +156,7 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ $__s['ga_id'] }}"></script>
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','{{ $__s['ga_id'] }}');</script>
     @endif
-    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/intersect@3.x.x/dist/cdn.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
-        [x-cloak] { display: none !important; }
-        .line-clamp-2 { display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; }
-        .line-clamp-3 { display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden; }
-        @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-        .ticker-track { display:flex; animation: ticker 28s linear infinite; width:max-content; }
-        .ticker-track:hover { animation-play-state: paused; }
 
         /* ── Layout theme overrides ── */
         /* minimal, news, grid: full-width content, hide sidebar */

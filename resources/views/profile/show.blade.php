@@ -1,5 +1,7 @@
 @extends('layouts.app')
-@section('title', $user->name . ' — nkhoj')
+@php $__seo = app(\App\Services\SeoHelper::class); @endphp
+@section('title', $__seo->title('author', ['author' => $user->name]))
+@section('description', $__seo->description('author', ['author' => $user->name]))
 
 @section('content')
 @php

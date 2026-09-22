@@ -1,6 +1,17 @@
 @extends('layouts.app')
-@section('title', $post->seo_title ?? $post->title)
-@section('description', $post->seo_desc ?? $post->excerpt)
+@php
+    $__seo = app(\App\Services\SeoHelper::class);
+    $__postTitle = $post->seo_title ?: $__seo->title('post', [
+        'title'    => $post->title,
+        'category' => $post->category?->name_en ?? '',
+        'author'   => $post->author?->name ?? '',
+    ]);
+    $__postDesc = $post->seo_desc ?: $__seo->description('post', [
+        'excerpt' => strip_tags($post->excerpt ?? ''),
+    ]);
+@endphp
+@section('title', $__postTitle)
+@section('description', $__postDesc)
 @section('og_type', 'article')
 @if($post->thumbnail_url)
 @section('og_image', $post->thumbnail_url)

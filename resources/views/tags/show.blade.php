@@ -1,5 +1,7 @@
 @extends('layouts.app')
-@section('title', '#' . $tag->name_en . ' — nkhoj')
+@php $__seo = app(\App\Services\SeoHelper::class); @endphp
+@section('title', $__seo->title('tag', ['tag' => $tag->name_en]))
+@section('description', $__seo->description('tag', ['tag' => $tag->name_en]))
 
 @section('content')
 <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
