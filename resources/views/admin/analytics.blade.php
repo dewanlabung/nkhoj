@@ -2,20 +2,29 @@
 @section('title', 'Analytics')
 
 @section('content')
-<div class="mb-6">
+<div class="mb-6" x-data="analyticsRange()" x-init="init()">
     <nav class="text-xs text-gray-400 flex items-center gap-1.5 mb-1">
         <a href="/admin" class="hover:text-brand-500">Home</a><span>›</span><span>Analytics</span>
     </nav>
-    <div class="flex items-center justify-between">
+    <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
             <h1 class="text-xl font-bold text-gray-900 dark:text-white">Analytics</h1>
             <p class="text-xs text-gray-400 mt-0.5">Live data from your database · Last updated {{ now()->format('d M Y, H:i') }}</p>
         </div>
-        <span class="flex items-center gap-1.5 text-xs text-green-500 font-medium bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-full">
-            <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>Live
-        </span>
+        <div class="flex items-center gap-2">
+            <div class="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5 text-xs font-semibold">
+                @foreach([7 => '7d', 14 => '14d', 30 => '30d', 90 => '90d'] as $d => $label)
+                <button type="button" @click="setRange({{ $d }})"
+                    :class="days === {{ $d }} ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'"
+                    class="px-3 py-1.5 rounded-md transition-all">{{ $label }}</button>
+                @endforeach
+            </div>
+            <span class="flex items-center gap-1.5 text-xs text-green-500 font-medium bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-full">
+                <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>Live
+            </span>
+        </div>
     </div>
-</div>
+</div>{{-- end x-data=analyticsRange --}}
 
 {{-- ── Metric tiles ── --}}
 <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
@@ -46,7 +55,7 @@
     <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
             <h3 class="font-bold text-gray-900 dark:text-white text-sm">Traffic Overview</h3>
-            <p class="text-xs text-gray-400 mt-0.5">Page views & new user registrations · Last 30 days</p>
+            <p class="text-xs text-gray-400 mt-0.5" id="chart-subtitle">Page views & new user registrations · Last 30 days</p>
         </div>
         <div class="flex items-center gap-5 text-xs text-gray-500 dark:text-gray-400">
             <span class="flex items-center gap-1.5">
@@ -255,14 +264,15 @@ const isDark = document.documentElement.classList.contains('dark');
 const gridColor  = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
 const labelColor = isDark ? '#9ca3af' : '#6b7280';
 
-// Traffic area chart with gradient fill
+// Traffic area chart — kept in outer scope so Alpine can update it
+let trafficChart;
 (function(){
     const ctx = document.getElementById('trafficChart').getContext('2d');
     const gradViews = ctx.createLinearGradient(0,0,0,200);
     gradViews.addColorStop(0, 'rgba(99,102,241,0.25)');
     gradViews.addColorStop(1, 'rgba(99,102,241,0)');
 
-    new Chart(ctx, {
+    trafficChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: @json($chartLabels),
@@ -331,6 +341,28 @@ const labelColor = isDark ? '#9ca3af' : '#6b7280';
         }
     });
 })();
+
+function analyticsRange() {
+    return {
+        days: 30,
+        init() {},
+        setRange(d) {
+            this.days = d;
+            fetch(`/admin/analytics/report?days=${d}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                trafficChart.data.labels          = data.labels;
+                trafficChart.data.datasets[0].data = data.views;
+                trafficChart.data.datasets[1].data = data.users;
+                trafficChart.update();
+                const sub = document.getElementById('chart-subtitle');
+                if (sub) sub.textContent = `Page views & new user registrations · Last ${d} days`;
+            });
+        }
+    };
+}
 
 // Status donut with center count
 @php $statusColors2 = ['published'=>'#22c55e','draft'=>'#f59e0b','scheduled'=>'#6366f1','archived'=>'#6b7280']; @endphp

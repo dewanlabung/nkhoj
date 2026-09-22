@@ -163,6 +163,10 @@
     @if($__customCss)
     <style id="site-custom-css">{!! $__customCss !!}</style>
     @endif
+    @if(!empty($__s['ga_id']))
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ $__s['ga_id'] }}"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','{{ $__s['ga_id'] }}');</script>
+    @endif
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/intersect@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
