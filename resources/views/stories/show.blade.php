@@ -4,11 +4,15 @@
 <div class="max-w-sm mx-auto relative bg-black rounded-2xl overflow-hidden" style="height: 85vh; max-height: 720px;"
      x-data="{paused: false, showShare: false}">
 
-    @if($story->media_type === 'video')
+    @if($story->media_url && $story->media_type === 'video')
     <video src="{{ $story->media_url }}" class="w-full h-full object-cover" autoplay playsinline loop
            x-ref="vid" @click="$refs.vid.paused ? $refs.vid.play() : $refs.vid.pause(); paused = $refs.vid.paused"></video>
-    @else
+    @elseif($story->media_url)
     <img src="{{ $story->media_url }}" alt="" class="w-full h-full object-cover">
+    @else
+    <div class="w-full h-full bg-gradient-to-br from-brand-500 to-indigo-700 flex items-center justify-center p-6">
+        <p class="text-white text-lg font-bold font-nepali text-center leading-snug">{{ $story->caption }}</p>
+    </div>
     @endif
 
     {{-- Progress bar (auto-advance disabled since we don't have JS routing) --}}
@@ -25,6 +29,14 @@
             <p class="text-white text-sm font-bold">{{ $story->user->name }}</p>
             <p class="text-white/70 text-xs">{{ $story->created_at->diffForHumans() }}</p>
         </div>
+        @auth
+        @if(auth()->id() === $story->user_id || auth()->user()->isAdmin())
+        <form method="POST" action="/stories/{{ $story->id }}" onsubmit="return confirm('Delete this story?')" class="inline">
+            @csrf @method('DELETE')
+            <button type="submit" class="text-white/70 hover:text-red-400 text-lg" title="Delete story">🗑</button>
+        </form>
+        @endif
+        @endauth
         <div class="relative">
             <button @click="showShare = !showShare" class="text-white/70 hover:text-white text-xl">📤</button>
 

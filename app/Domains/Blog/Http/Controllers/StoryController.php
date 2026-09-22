@@ -62,7 +62,7 @@ class StoryController extends Controller
             $path = $file->store('stories', 'public');
             $mediaUrl = '/storage/' . $path;
         } else {
-            $mediaUrl = '/storage/' . $this->saveOptimizedThumbnail($file, 'stories');
+            $mediaUrl = $this->saveOptimizedThumbnail($file, 'stories');
         }
 
         Story::create([
@@ -92,9 +92,10 @@ class StoryController extends Controller
 
     public function destroy(Story $story)
     {
-        abort_unless(auth()->id() === $story->user_id, 403);
+        $user = auth()->user();
+        abort_unless($user->id === $story->user_id || $user->isAdmin(), 403);
         $story->delete();
-        return back();
+        return redirect('/stories')->with('success', 'Story deleted.');
     }
 
     // Highlight management
