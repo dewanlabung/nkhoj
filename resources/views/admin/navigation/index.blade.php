@@ -2,13 +2,15 @@
 @section('title', 'Navigation')
 
 @section('content')
-<div class="mb-6">
-    <h1 class="text-xl font-bold text-gray-900 dark:text-white">Navigation</h1>
-    <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-        <a href="/admin" class="hover:text-brand-500">Home</a>
-        <span class="mx-1.5 text-gray-300 dark:text-gray-600">›</span>
-        Navigation
-    </p>
+<div class="mb-5 flex items-center justify-between">
+    <div>
+        <h1 class="text-xl font-bold text-gray-900 dark:text-white">Navigation</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            <a href="/admin" class="hover:text-brand-500">Home</a>
+            <span class="mx-1.5 text-gray-300 dark:text-gray-600">›</span>
+            Navigation
+        </p>
+    </div>
 </div>
 
 @if(session('success'))
@@ -18,6 +20,23 @@
 <div class="mb-4 px-4 py-3 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-sm rounded-xl border border-red-100 dark:border-red-800/40">{{ session('error') }}</div>
 @endif
 
+{{-- Tab switcher --}}
+<div x-data="{ tab: window.location.hash === '#mobile-nav' ? 'mobile' : 'desktop' }" id="nav-tabs">
+<div class="flex gap-1 mb-6 border-b border-gray-200 dark:border-gray-700">
+    <button @click="tab = 'desktop'" :class="tab === 'desktop' ? 'border-b-2 border-brand-500 text-brand-600 dark:text-brand-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
+        class="px-4 py-2.5 text-sm font-semibold transition-colors flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>
+        Header Navigation
+    </button>
+    <button @click="tab = 'mobile'" :class="tab === 'mobile' ? 'border-b-2 border-brand-500 text-brand-600 dark:text-brand-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
+        class="px-4 py-2.5 text-sm font-semibold transition-colors flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+        Mobile Bottom Nav
+    </button>
+</div>
+
+{{-- DESKTOP NAV TAB --}}
+<div x-show="tab === 'desktop'">
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" x-data="{ addType: 'custom' }">
 
     {{-- Left panel --}}
@@ -285,6 +304,108 @@
         </div>
     </div>
 </div>
+</div>{{-- /desktop tab --}}
+
+{{-- MOBILE BOTTOM NAV TAB --}}
+<div x-show="tab === 'mobile'" id="mobile-nav" x-data="{
+    slots: @json($mobileNav),
+    iconPaths: @json($mobileNavIconPaths)
+}">
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+        {{-- Left: phone preview --}}
+        <div class="lg:col-span-2">
+            <div class="sticky top-6">
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
+                    <h3 class="font-bold text-gray-900 dark:text-white text-sm mb-4">Preview</h3>
+                    <div class="mx-auto" style="width:200px">
+                        <div class="relative bg-gray-900 rounded-3xl border-4 border-gray-700 overflow-hidden shadow-2xl" style="height:380px">
+                            <div class="absolute inset-x-0 top-0 h-8 bg-black flex items-center justify-center">
+                                <div class="w-16 h-1.5 bg-gray-700 rounded-full"></div>
+                            </div>
+                            <div class="absolute inset-x-0 top-8 bg-white dark:bg-gray-800 flex items-center justify-center" style="height:calc(100% - 92px)">
+                                <span class="text-xs text-gray-300 dark:text-gray-600">Page content</span>
+                            </div>
+                            <div class="absolute inset-x-0 bottom-0 h-[60px] bg-white border-t border-gray-100 flex items-center px-0" style="padding-bottom:6px">
+                                <template x-for="(slot, idx) in slots" :key="idx">
+                                    <div class="flex-1 flex flex-col items-center justify-end pb-1" :class="idx === 2 ? 'relative -top-3' : ''">
+                                        <template x-if="idx === 2">
+                                            <div class="w-11 h-11 rounded-full bg-brand-600 shadow-lg flex items-center justify-center">
+                                                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" x-html="iconPaths[slot.icon] || ''"></svg>
+                                            </div>
+                                        </template>
+                                        <template x-if="idx !== 2">
+                                            <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" x-html="iconPaths[slot.icon] || ''"></svg>
+                                        </template>
+                                        <span class="text-[8px] text-gray-500 mt-0.5 truncate" style="max-width:38px;text-align:center" x-text="slot.label" x-show="idx !== 2"></span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-3 text-center">Updates as you edit slots</p>
+                </div>
+            </div>
+        </div>
+
+        {{-- Right: slot editors --}}
+        <div class="lg:col-span-3 space-y-4">
+            <form method="POST" action="/admin/navigation/mobile-nav">
+                @csrf
+                <div class="space-y-3">
+                    @foreach($mobileNav as $i => $slot)
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
+                        <div class="flex items-center gap-2 mb-4">
+                            <div class="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-600 dark:text-gray-300 flex-shrink-0">{{ $i + 1 }}</div>
+                            @if($slot['type'] === 'center')
+                            <span class="text-xs font-semibold px-2 py-0.5 bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400 rounded-full border border-brand-100 dark:border-brand-800/40">Center (elevated button)</span>
+                            @else
+                            <span class="text-xs font-semibold px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full">Slot {{ $i + 1 }}</span>
+                            @endif
+                        </div>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="text-xs font-semibold text-gray-600 dark:text-gray-400 block mb-1.5">Icon</label>
+                                <select name="slots[{{ $i }}][icon]"
+                                    x-on:change="slots[{{ $i }}] = { ...slots[{{ $i }}], icon: $event.target.value }"
+                                    class="w-full text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                    @foreach($mobileNavIcons as $iconName)
+                                    <option value="{{ $iconName }}" {{ $slot['icon'] === $iconName ? 'selected' : '' }}>{{ ucfirst($iconName) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-gray-600 dark:text-gray-400 block mb-1.5">Label</label>
+                                <input type="text" name="slots[{{ $i }}][label]" value="{{ $slot['label'] }}" maxlength="30"
+                                    x-on:input="slots[{{ $i }}] = { ...slots[{{ $i }}], label: $event.target.value }"
+                                    class="w-full text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-gray-600 dark:text-gray-400 block mb-1.5">URL</label>
+                                <input type="text" name="slots[{{ $i }}][url]" value="{{ $slot['url'] }}" maxlength="255"
+                                    class="w-full text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+                <div class="mt-4">
+                    <button class="w-full py-3 bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold rounded-xl transition-colors">
+                        Save Mobile Navigation
+                    </button>
+                </div>
+            </form>
+
+            <div class="flex items-start gap-3 px-4 py-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/40 rounded-xl text-sm text-blue-700 dark:text-blue-400">
+                <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>Slot 3 is always shown as an <strong>elevated circular button</strong>. Set its icon, label, and URL as desired. Changes take effect immediately on save.</span>
+            </div>
+        </div>
+
+    </div>
+</div>{{-- /mobile tab --}}
+
+</div>{{-- /nav-tabs --}}
 
 {{-- Edit modal --}}
 <div id="edit-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden" x-data="{ editType: 'custom' }">

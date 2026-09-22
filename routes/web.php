@@ -357,6 +357,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::post('/navigation/settings',      [\App\Http\Controllers\NavigationController::class, 'updateSettings']);
     Route::post('/navigation/reorder',       [\App\Http\Controllers\NavigationController::class, 'reorder']);
     Route::post('/navigation/quick-add',     [\App\Http\Controllers\NavigationController::class, 'quickAdd']);
+    Route::post('/navigation/mobile-nav',    [\App\Http\Controllers\NavigationController::class, 'updateMobileNav']);
     Route::put('/navigation/{id}',           [\App\Http\Controllers\NavigationController::class, 'update']);
     Route::delete('/navigation/{id}',        [\App\Http\Controllers\NavigationController::class, 'destroy']);
 

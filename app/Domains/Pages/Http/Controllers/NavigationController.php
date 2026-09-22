@@ -33,9 +33,12 @@ class NavigationController extends Controller
         $pages      = Page::where('status', 'active')->orderBy('title')->get();
         $tags       = Tag::orderBy('name_en')->get();
 
-        $settings = $this->getSettings();
+        $settings  = $this->getSettings();
+        $mobileNav = $settings['mobile_nav'] ?? self::$defaultMobileNav;
+        $mobileNavIcons = array_keys(self::$mobileNavIcons);
+        $mobileNavIconPaths = self::$mobileNavIcons;
 
-        return view('admin.navigation.index', compact('items', 'categories', 'pages', 'tags', 'lang', 'settings'));
+        return view('admin.navigation.index', compact('items', 'categories', 'pages', 'tags', 'lang', 'settings', 'mobileNav', 'mobileNavIcons', 'mobileNavIconPaths'));
     }
 
     public function store(Request $request)
@@ -144,6 +147,59 @@ class NavigationController extends Controller
         $s['nav_home_page_link'] = $data['home_page_link'] ?? 'show';
         $this->saveSettings($s);
         return back()->with('success', 'Navigation settings saved.');
+    }
+
+    // ── Mobile Bottom Nav ──────────────────────────────────────
+
+    public static array $mobileNavIcons = [
+        'home'       => '<path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>',
+        'search'     => '<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>',
+        'compass'    => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/><circle cx="12" cy="11" r="3"/>',
+        'bell'       => '<path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>',
+        'bookmark'   => '<path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>',
+        'fire'       => '<path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"/>',
+        'grid'       => '<path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/>',
+        'user'       => '<path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>',
+        'story'      => '<path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.069A1 1 0 0121 8.87v6.26a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/>',
+        'trending'   => '<path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>',
+        'write'      => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>',
+    ];
+
+    public static array $defaultMobileNav = [
+        ['slot' => 0, 'icon' => 'home',     'label' => 'Home',    'url' => '/',              'type' => 'regular'],
+        ['slot' => 1, 'icon' => 'search',   'label' => 'Explore', 'url' => '/search',        'type' => 'regular'],
+        ['slot' => 2, 'icon' => 'write',    'label' => 'Write',   'url' => '/write',         'type' => 'center'],
+        ['slot' => 3, 'icon' => 'bell',     'label' => 'Inbox',   'url' => '/notifications', 'type' => 'regular'],
+        ['slot' => 4, 'icon' => 'user',     'label' => 'Me',      'url' => '/profile',       'type' => 'regular'],
+    ];
+
+    public function updateMobileNav(Request $request)
+    {
+        $this->requireAdmin();
+
+        $incoming = $request->input('slots', []);
+        $nav = [];
+
+        foreach ($incoming as $i => $slot) {
+            $type = ($i == 2) ? 'center' : 'regular';
+            $nav[] = [
+                'slot'  => (int) $i,
+                'icon'  => $slot['icon']  ?? 'home',
+                'label' => substr(trim($slot['label'] ?? ''), 0, 30),
+                'url'   => substr(trim($slot['url']   ?? '/'), 0, 255),
+                'type'  => $type,
+            ];
+        }
+
+        if (count($nav) !== 5) {
+            return back()->with('error', 'Mobile nav must have exactly 5 slots.');
+        }
+
+        $s = $this->getSettings();
+        $s['mobile_nav'] = $nav;
+        $this->saveSettings($s);
+
+        return back()->with('success', 'Mobile navigation saved.')->withFragment('mobile-nav');
     }
 
     private function getSettings(): array
