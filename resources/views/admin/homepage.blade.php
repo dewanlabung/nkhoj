@@ -15,18 +15,18 @@
     {{-- Section ordering panel --}}
     <div class="lg:col-span-2">
         <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+            <form method="POST" action="/admin/homepage" id="homepage-form">
+            @csrf
             <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
                 <div>
                     <h2 class="font-semibold text-gray-900 dark:text-white text-sm">Section Order & Visibility</h2>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Drag rows to reorder. Toggle to show or hide each section.</p>
                 </div>
-                <form method="POST" action="/admin/homepage" id="homepage-form">
-                    @csrf
-                    <button type="submit"
-                        class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm">
-                        Save Layout
-                    </button>
-                </form>
+                <button type="submit" id="save-btn"
+                    class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm flex items-center gap-2">
+                    <svg id="save-spinner" class="hidden w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    Save Layout
+                </button>
             </div>
 
             <div id="sections-list" class="divide-y divide-gray-50 dark:divide-gray-700">
@@ -76,6 +76,7 @@
 
             {{-- Hidden form fields — populated by JS before submit --}}
             <div id="form-fields"></div>
+            </form>
         </div>
     </div>
 
@@ -187,13 +188,23 @@ list.querySelectorAll('.section-row').forEach(row => {
 
 // Build hidden fields on form submit
 document.getElementById('homepage-form').addEventListener('submit', function() {
+    // Show spinner
+    const btn = document.getElementById('save-btn');
+    const spinner = document.getElementById('save-spinner');
+    if (btn) btn.disabled = true;
+    if (spinner) spinner.classList.remove('hidden');
+
     const container = document.getElementById('form-fields');
     container.innerHTML = '';
     list.querySelectorAll('.section-row').forEach((row, i) => {
         const key     = row.dataset.key;
         const label   = row.dataset.label;
         const enabled = row.dataset.enabled === '1' ? '1' : '0';
-        const mk = (n, v) => { const f = document.createElement('input'); f.type = 'hidden'; f.name = n; f.value = v; container.appendChild(f); };
+        const mk = (n, v) => {
+            const f = document.createElement('input');
+            f.type = 'hidden'; f.name = n; f.value = v;
+            container.appendChild(f);
+        };
         mk(`sections[${i}][key]`,     key);
         mk(`sections[${i}][label]`,   label);
         mk(`sections[${i}][enabled]`, enabled);

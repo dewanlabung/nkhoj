@@ -131,7 +131,9 @@ class HomeController extends Controller
 
         // Load homepage section order from settings
         $settings = app(SiteSettingsService::class)->get();
-        $homepageSections = $settings['homepage_sections'] ?? self::$defaultSections;
+        $homepageSections = !empty($settings['homepage_sections'])
+            ? $settings['homepage_sections']
+            : self::$defaultSections;
 
         return view('home', compact(
             'heroStrip', 'editorsPick', 'posts',

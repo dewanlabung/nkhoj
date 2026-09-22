@@ -53,13 +53,19 @@ class HomepageController extends Controller
             ];
         }
 
+        if (empty($sections)) {
+            return back()->with('error', 'No sections received — layout not saved.');
+        }
+
         $s = $this->settings->get();
         $s['homepage_sections'] = $sections;
         $this->settings->save($s);
 
-        // Bust homepage caches so changes are reflected immediately
-        Cache::forget('home_hero_strip');
-        Cache::forget('home_editors_pick');
+        // Bust all homepage caches so changes are reflected immediately
+        foreach (['home_hero_strip', 'home_editors_pick', 'home_trending', 'home_categories',
+                  'widgets_sidebar', 'widgets_home_top', 'widgets_home_bottom'] as $key) {
+            Cache::forget($key);
+        }
 
         return back()->with('success', 'Homepage layout saved.');
     }
