@@ -107,9 +107,20 @@ class StoryController extends Controller
 
     private function deleteStoryMedia(string $mediaUrl): void
     {
-        // Handle /storage/ URLs (direct file uploads)
-        if (str_contains($mediaUrl, '/storage/')) {
-            $path = public_path(str_replace('/storage/', 'storage/', $mediaUrl));
+        // Handle /uploads/ URLs (images processed via saveOptimizedThumbnail)
+        if (str_starts_with($mediaUrl, '/uploads/')) {
+            $path = public_path(ltrim($mediaUrl, '/'));
+            if (File::exists($path)) {
+                try {
+                    File::delete($path);
+                } catch (\Exception $e) {
+                    \Log::warning("Failed to delete story media: {$path}", ['error' => $e->getMessage()]);
+                }
+            }
+        }
+        // Handle /storage/ URLs (videos uploaded via store())
+        elseif (str_contains($mediaUrl, '/storage/')) {
+            $path = storage_path('app/public/' . ltrim(str_replace('/storage/', '', $mediaUrl), '/'));
             if (File::exists($path)) {
                 try {
                     File::delete($path);
