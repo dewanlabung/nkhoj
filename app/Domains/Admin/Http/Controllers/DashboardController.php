@@ -8,6 +8,7 @@ use App\Models\Core\ContactMessage;
 use App\Models\Core\NewsletterSubscriber;
 use App\Models\Blog\Post;
 use App\Models\Blog\Tag;
+use App\Models\EmailCampaign;
 use App\Models\UserEngagement\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -40,6 +41,8 @@ class DashboardController extends BaseAdminController
                 'contacts'         => ContactMessage::whereNull('read_at')->count(),
                 'subscribers'      => NewsletterSubscriber::where('is_active', true)->count(),
                 'pending_comments' => Comment::where('is_approved', false)->count(),
+                'email_campaigns'  => EmailCampaign::count(),
+                'sending_campaigns' => EmailCampaign::where('status', 'sending')->count(),
             ],
             'recentPosts'    => Post::with('author')->latest()->limit(15)->get(),
             'recentComments' => Comment::with(['post', 'author'])->latest()->limit(6)->get(),
