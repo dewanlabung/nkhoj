@@ -1,7 +1,7 @@
 /node_modules
 /public/hot
 /public/storage
-/public/build
+# public/build committed to repo — built locally, avoids Rolldown crash on cPanel
 /public/tinymce
 /storage/*.key
 /storage/app/public/*
