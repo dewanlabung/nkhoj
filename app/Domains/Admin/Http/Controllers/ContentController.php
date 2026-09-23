@@ -263,9 +263,16 @@ class ContentController extends BaseAdminController
     public function deleteMedia(Request $request, string $filename)
     {
         $this->requireAdmin();
-        // $filename may include a subfolder prefix like "posts/abc.webp"
+        // $filename may include a subfolder prefix like "posts/abc.webp" or "stories/video.mp4"
         $rel  = ltrim(str_replace(['..', '//'], '', $filename), '/\\');
+
+        // Try to delete from /public/uploads/ first (images, documents)
         $path = public_path('uploads/' . $rel);
+
+        // If not found in uploads, check /storage/app/public/ (videos stored via store())
+        if (!File::exists($path) && str_contains($rel, 'stories/')) {
+            $path = storage_path('app/public/' . $rel);
+        }
 
         if (!File::exists($path)) {
             return back()->with('error', 'File not found.');
