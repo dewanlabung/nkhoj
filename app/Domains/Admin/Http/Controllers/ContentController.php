@@ -266,8 +266,22 @@ class ContentController extends BaseAdminController
         // $filename may include a subfolder prefix like "posts/abc.webp"
         $rel  = ltrim(str_replace(['..', '//'], '', $filename), '/\\');
         $path = public_path('uploads/' . $rel);
-        if (File::exists($path)) File::delete($path);
-        return back()->with('success', 'File deleted.');
+
+        if (!File::exists($path)) {
+            return back()->with('error', 'File not found.');
+        }
+
+        try {
+            if (File::isDirectory($path)) {
+                File::deleteDirectory($path);
+            } else {
+                File::delete($path);
+            }
+            return back()->with('success', 'File deleted successfully.');
+        } catch (\Exception $e) {
+            \Log::error("Media deletion failed: {$path}", ['error' => $e->getMessage()]);
+            return back()->with('error', 'Failed to delete file. Check server permissions.');
+        }
     }
 
     // ── Contacts ───────────────────────────────────────────────

@@ -9,6 +9,7 @@ use App\Models\MediaContent\Story;
 use App\Models\MediaContent\StoryHighlight;
 use App\Traits\SavesOptimizedThumbnail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 
 class StoryController extends Controller
 {
@@ -94,8 +95,29 @@ class StoryController extends Controller
     {
         $user = auth()->user();
         abort_unless($user->id === $story->user_id || $user->isAdmin(), 403);
+
+        // Delete physical media file if it's a direct upload (not linked to a blog post)
+        if ($story->media_url && !$story->post_id) {
+            $this->deleteStoryMedia($story->media_url);
+        }
+
         $story->delete();
         return redirect('/stories')->with('success', 'Story deleted.');
+    }
+
+    private function deleteStoryMedia(string $mediaUrl): void
+    {
+        // Handle /storage/ URLs (direct file uploads)
+        if (str_contains($mediaUrl, '/storage/')) {
+            $path = public_path(str_replace('/storage/', 'storage/', $mediaUrl));
+            if (File::exists($path)) {
+                try {
+                    File::delete($path);
+                } catch (\Exception $e) {
+                    \Log::warning("Failed to delete story media: {$path}", ['error' => $e->getMessage()]);
+                }
+            }
+        }
     }
 
     // Highlight management

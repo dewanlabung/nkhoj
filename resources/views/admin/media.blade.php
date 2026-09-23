@@ -79,11 +79,11 @@
         {{-- Thumbnail --}}
         <div class="aspect-square bg-gray-100 dark:bg-gray-700 overflow-hidden relative flex items-center justify-center">
             @if($isImg)
-            <img src="/uploads/{{ $file['name'] }}" alt="{{ $file['name'] }}"
+            <img src="/uploads/{{ $file['rel_path'] }}" alt="{{ $file['name'] }}"
                 class="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105">
             @elseif($isVideo)
             <div class="relative w-full h-full bg-gray-800 flex items-center justify-center">
-                <video src="/uploads/{{ $file['name'] }}" class="w-full h-full object-cover opacity-70" preload="metadata" muted></video>
+                <video src="/uploads/{{ $file['rel_path'] }}" class="w-full h-full object-cover opacity-70" preload="metadata" muted></video>
                 <div class="absolute inset-0 flex items-center justify-center">
                     <div class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
                         <svg class="w-5 h-5 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
@@ -115,13 +115,13 @@
 
             {{-- Hover overlay --}}
             <div class="media-overlay absolute inset-0 bg-black/50 flex items-center justify-center gap-2">
-                <button @click="navigator.clipboard.writeText('{{ config('app.url') }}/uploads/{{ $file['name'] }}'); copied=true; setTimeout(()=>copied=false,2000)"
+                <button @click="navigator.clipboard.writeText('{{ config('app.url') }}/uploads/{{ $file['rel_path'] }}'); copied=true; setTimeout(()=>copied=false,2000)"
                     class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white"
                     :title="copied ? 'Copied!' : 'Copy URL'">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                 </button>
                 @if($isImg)
-                <a href="/uploads/{{ $file['name'] }}" target="_blank"
+                <a href="/uploads/{{ $file['rel_path'] }}" target="_blank"
                     class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                 </a>
