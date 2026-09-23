@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Domains\Blog\Models\Story;
+use App\Domains\Blog\Observers\StoryObserver;
 use App\Listeners\OutgoingEmailLogSubscriber;
 use App\Services\Mail\GmailApiMailTransport;
 use App\Services\Mail\GmailClient;
@@ -18,6 +20,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Story::observe(StoryObserver::class);
+
         Relation::morphMap([
             'App\Models\Question'          => \App\Models\QnA\Question::class,
             'App\Models\Category'          => \App\Models\Blog\Category::class,
