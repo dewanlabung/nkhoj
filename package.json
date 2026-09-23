@@ -3,7 +3,7 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "npm run copy-tinymce && ROLLUP_NATIVE_PURE_JS=true vite build",
+        "build": "npm run copy-tinymce && cross-env ROLLUP_NATIVE_PURE_JS=true vite build",
         "copy-tinymce": "node scripts/copy-tinymce.js"
     },
     "devDependencies": {
@@ -11,6 +11,7 @@
         "@tailwindcss/typography": "^0.5.15",
         "autoprefixer": "^10.4.20",
         "axios": "^1.7.4",
+        "cross-env": "^10.1.0",
         "laravel-vite-plugin": "^1.0.0",
         "tailwindcss": "^3.4.13",
         "vite": "^5.4.11"
