@@ -46,7 +46,8 @@
             @foreach([
                 ['Pending Posts',    $stats['pending_posts'] ?? 0,   '/admin/posts?status=draft'],
                 ['Contact Messages', $stats['contacts'] ?? 0,        '/admin/contacts'],
-                ['Newsletter',       $stats['subscribers'] ?? 0,     '/admin/newsletter'],
+                ['Newsletter',       $stats['subscribers'] ?? 0,     '/admin/newsletter/campaigns'],
+                ['Email Campaigns',  $stats['email_campaigns'] ?? 0, '/admin/newsletter/campaigns'],
                 ['Pending Comments', $stats['pending_comments'] ?? 0,'/admin/comments'],
             ] as [$label, $count, $href])
             <a href="{{ $href }}" class="flex items-center justify-between py-2.5 border-b border-dashed border-gray-100 dark:border-gray-700/60 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group">
