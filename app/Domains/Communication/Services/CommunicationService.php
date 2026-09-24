@@ -271,9 +271,9 @@ class CommunicationService
 
         // Check channel-specific preferences
         foreach ($campaign->channels as $channel) {
-            $prefKey = $channel === 'in_app' ? 'in_app_notifications' :
-                       $channel === 'email' ? 'email_newsletters' :
-                       $channel === 'push' ? 'push_notifications' : null;
+            $prefKey = ($channel === 'in_app' ? 'in_app_notifications' :
+                       ($channel === 'email' ? 'email_newsletters' :
+                       ($channel === 'push' ? 'push_notifications' : null)));
 
             if ($prefKey && !$prefs->{$prefKey}) {
                 return false;
