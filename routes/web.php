@@ -258,13 +258,13 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::put('/newsletter/templates/{id}', [AdminContent::class, 'updateTemplate']);
     Route::delete('/newsletter/templates/{id}', [AdminContent::class, 'deleteTemplate']);
 
-    // Newsletter Campaigns
-    Route::get('/newsletter/campaigns',                  [\App\Http\Controllers\NewsletterAdminController::class, 'index'])->name('admin.newsletter.campaigns');
-    Route::post('/newsletter/campaigns',                 [\App\Http\Controllers\NewsletterAdminController::class, 'create'])->name('admin.newsletter.campaigns.create');
-    Route::post('/newsletter/campaigns/{campaign}/send', [\App\Http\Controllers\NewsletterAdminController::class, 'send'])->name('admin.newsletter.campaigns.send');
-    Route::post('/newsletter/campaigns/{campaign}/send-batch', [\App\Http\Controllers\NewsletterAdminController::class, 'sendBatch'])->name('admin.newsletter.campaigns.send-batch');
-    Route::get('/newsletter/campaigns/{campaign}/status', [\App\Http\Controllers\NewsletterAdminController::class, 'status'])->name('admin.newsletter.campaigns.status');
-    Route::delete('/newsletter/campaigns/{campaign}',    [\App\Http\Controllers\NewsletterAdminController::class, 'delete'])->name('admin.newsletter.campaigns.delete');
+    // Newsletter Campaigns (Enhanced)
+    Route::get('/newsletter/campaigns', [\App\Domains\Newsletter\Http\Controllers\Admin\NewsletterAdminController::class, 'campaigns'])->name('admin.newsletter.campaigns');
+    Route::post('/newsletter/campaigns', [\App\Domains\Newsletter\Http\Controllers\Admin\NewsletterAdminController::class, 'createCampaign'])->name('admin.newsletter.campaigns.create');
+    Route::post('/newsletter/campaigns/{id}/send', [\App\Domains\Newsletter\Http\Controllers\Admin\NewsletterAdminController::class, 'sendCampaign'])->name('admin.newsletter.campaigns.send');
+    Route::post('/newsletter/campaigns/{id}/send-batch', [\App\Domains\Newsletter\Http\Controllers\Admin\NewsletterAdminController::class, 'sendNextBatch'])->name('admin.newsletter.campaigns.send-batch');
+    Route::get('/newsletter/campaigns/{id}/status', [\App\Domains\Newsletter\Http\Controllers\Admin\NewsletterAdminController::class, 'campaignStatus'])->name('admin.newsletter.campaigns.status');
+    Route::delete('/newsletter/campaigns/{id}', [\App\Domains\Newsletter\Http\Controllers\Admin\NewsletterAdminController::class, 'deleteCampaign'])->name('admin.newsletter.campaigns.delete');
 
     // Content Settings
     Route::get('/content-settings',          [AdminSettings::class, 'contentSettings']);
