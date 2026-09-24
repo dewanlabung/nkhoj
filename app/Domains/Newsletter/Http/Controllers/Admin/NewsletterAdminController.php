@@ -13,14 +13,15 @@ class NewsletterAdminController extends Controller
 {
     public function campaigns(): View
     {
-        $campaigns = EmailCampaign::orderBy('created_at', 'desc')->get();
+        $campaigns = EmailCampaign::orderBy('created_at', 'desc')->paginate(15);
 
+        $allCampaigns = EmailCampaign::get();
         $stats = [
-            'total' => $campaigns->count(),
-            'draft' => $campaigns->where('status', 'draft')->count(),
-            'sending' => $campaigns->where('status', 'sending')->count(),
-            'completed' => $campaigns->where('status', 'completed')->count(),
-            'failed' => $campaigns->where('status', 'failed')->count(),
+            'total' => $allCampaigns->count(),
+            'draft' => $allCampaigns->where('status', 'draft')->count(),
+            'sending' => $allCampaigns->where('status', 'sending')->count(),
+            'completed' => $allCampaigns->where('status', 'completed')->count(),
+            'failed' => $allCampaigns->where('status', 'failed')->count(),
         ];
 
         return view('admin.newsletter-campaigns', compact('campaigns', 'stats'));
