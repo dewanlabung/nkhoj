@@ -8,7 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('ai_post_topics', function (Blueprint $table) {
+        if (!Schema::hasTable('ai_post_topics')) {
+            Schema::create('ai_post_topics', function (Blueprint $table) {
             $table->id();
             $table->string('keyword');
             $table->string('language')->default('both'); // 'en', 'ne', 'both'

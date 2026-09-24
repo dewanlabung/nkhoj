@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('notification_activity_logs', function (Blueprint $table) {
+        if (!Schema::hasTable('notification_activity_logs')) {
+            Schema::create('notification_activity_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->string('notif_type'); // 'comment_replied', 'system_error', etc.

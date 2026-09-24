@@ -8,7 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('daily_analytics', function (Blueprint $table) {
+        if (!Schema::hasTable('daily_analytics')) {
+            Schema::create('daily_analytics', function (Blueprint $table) {
             $table->date('date');
             $table->unsignedBigInteger('page_views')->default(0);
             $table->unsignedBigInteger('unique_visitors')->default(0);

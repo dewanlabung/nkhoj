@@ -8,20 +8,22 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('user_sessions', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('session_id', 191)->unique();
-            $table->string('ip', 45)->nullable();
-            $table->text('user_agent')->nullable();
-            $table->string('device_type', 20)->default('desktop'); // desktop|mobile|tablet
-            $table->string('country', 3)->nullable();
-            $table->string('city', 100)->nullable();
-            $table->timestamp('last_active_at')->nullable();
-            $table->timestamp('created_at')->nullable();
+        if (!Schema::hasTable('user_sessions')) {
+            Schema::create('user_sessions', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+                $table->string('session_id', 191)->unique();
+                $table->string('ip', 45)->nullable();
+                $table->text('user_agent')->nullable();
+                $table->string('device_type', 20)->default('desktop'); // desktop|mobile|tablet
+                $table->string('country', 3)->nullable();
+                $table->string('city', 100)->nullable();
+                $table->timestamp('last_active_at')->nullable();
+                $table->timestamp('created_at')->nullable();
 
-            $table->index(['user_id', 'last_active_at']);
-        });
+                $table->index(['user_id', 'last_active_at']);
+            });
+        }
     }
 
     public function down(): void

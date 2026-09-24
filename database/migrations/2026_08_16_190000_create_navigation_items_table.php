@@ -7,7 +7,8 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('navigation_items', function (Blueprint $table) {
+        if (!Schema::hasTable('navigation_items')) {
+            Schema::create('navigation_items', function (Blueprint $table) {
             $table->id();
             $table->string('label');
             $table->string('url')->nullable();

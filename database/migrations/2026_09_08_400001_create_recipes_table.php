@@ -7,7 +7,8 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('recipes', function (Blueprint $table) {
+        if (!Schema::hasTable('recipes')) {
+            Schema::create('recipes', function (Blueprint $table) {
             $table->id();
             $table->string('uuid')->unique();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();

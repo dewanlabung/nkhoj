@@ -18,7 +18,8 @@ return new class extends Migration
         });
 
         // Block users from interacting with a page
-        Schema::create('page_blocks', function (Blueprint $table) {
+        if (!Schema::hasTable('page_blocks')) {
+            Schema::create('page_blocks', function (Blueprint $table) {
             $table->id();
             $table->foreignId('social_page_id')->constrained('social_pages')->cascadeOnDelete();
             $table->foreignId('blocked_user_id')->constrained('users')->cascadeOnDelete();

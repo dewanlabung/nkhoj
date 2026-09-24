@@ -8,7 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('page_post_comments', function (Blueprint $table) {
+        if (!Schema::hasTable('page_post_comments')) {
+            Schema::create('page_post_comments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('page_post_id')->constrained('page_posts')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();

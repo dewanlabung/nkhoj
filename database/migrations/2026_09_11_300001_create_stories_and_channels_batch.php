@@ -9,7 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         // ── Stories ──────────────────────────────────────────
-        Schema::create('stories', function (Blueprint $table) {
+        if (!Schema::hasTable('stories')) {
+            Schema::create('stories', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('media_url');

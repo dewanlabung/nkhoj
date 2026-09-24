@@ -9,7 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         // ── Users ────────────────────────────────────────
-        Schema::create('users', function (Blueprint $table) {
+        if (!Schema::hasTable('users')) {
+            Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
             $table->string('name');

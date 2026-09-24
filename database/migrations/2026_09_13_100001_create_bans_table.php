@@ -8,7 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('bans', function (Blueprint $table) {
+        if (!Schema::hasTable('bans')) {
+            Schema::create('bans', function (Blueprint $table) {
             $table->id();
             $table->morphs('bannable');               // bannable_type, bannable_id (User, etc.)
             $table->string('comment')->nullable();

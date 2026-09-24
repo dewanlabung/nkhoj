@@ -8,7 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('login_histories', function (Blueprint $table) {
+        if (!Schema::hasTable('login_histories')) {
+            Schema::create('login_histories', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('provider', 30)->default('email'); // email, google, facebook

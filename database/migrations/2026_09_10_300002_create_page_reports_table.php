@@ -7,7 +7,8 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('page_reports', function (Blueprint $table) {
+        if (!Schema::hasTable('page_reports')) {
+            Schema::create('page_reports', function (Blueprint $table) {
             $table->id();
             $table->foreignId('social_page_id')->constrained('social_pages')->cascadeOnDelete();
             $table->morphs('reportable'); // reportable_type + reportable_id

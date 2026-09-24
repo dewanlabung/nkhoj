@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('otps', function (Blueprint $table) {
+        if (!Schema::hasTable('otps')) {
+            Schema::create('otps', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('email');

@@ -7,7 +7,8 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('badges', function (Blueprint $table) {
+        if (!Schema::hasTable('badges')) {
+            Schema::create('badges', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('name_ne')->nullable();

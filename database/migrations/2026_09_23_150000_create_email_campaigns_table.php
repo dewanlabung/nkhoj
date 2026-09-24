@@ -8,7 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('email_campaigns', function (Blueprint $table) {
+        if (!Schema::hasTable('email_campaigns')) {
+            Schema::create('email_campaigns', function (Blueprint $table) {
             $table->id();
             $table->string('subject');
             $table->longText('html_content');

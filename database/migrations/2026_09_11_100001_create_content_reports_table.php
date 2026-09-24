@@ -7,7 +7,8 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('content_reports', function (Blueprint $table) {
+        if (!Schema::hasTable('content_reports')) {
+            Schema::create('content_reports', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('reporter_id');
             $table->string('reportable_type'); // post, comment

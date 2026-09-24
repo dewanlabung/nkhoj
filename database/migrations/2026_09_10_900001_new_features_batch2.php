@@ -8,7 +8,8 @@ return new class extends Migration {
     public function up(): void
     {
         // Search logs for trending searches
-        Schema::create('search_logs', function (Blueprint $table) {
+        if (!Schema::hasTable('search_logs')) {
+            Schema::create('search_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->string('query', 255);

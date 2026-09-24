@@ -7,7 +7,8 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('page_verification_requests', function (Blueprint $table) {
+        if (!Schema::hasTable('page_verification_requests')) {
+            Schema::create('page_verification_requests', function (Blueprint $table) {
             $table->id();
             $table->foreignId('social_page_id')->constrained()->cascadeOnDelete();
             $table->text('reason')->nullable();

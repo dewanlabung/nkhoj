@@ -8,7 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('otp_codes', function (Blueprint $table) {
+        if (!Schema::hasTable('otp_codes')) {
+            Schema::create('otp_codes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('code', 6);
