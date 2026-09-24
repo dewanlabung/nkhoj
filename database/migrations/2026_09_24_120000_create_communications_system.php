@@ -131,8 +131,8 @@ return new class extends Migration
                 $table->text('title')->nullable();
                 $table->string('type')->default('info');
                 $table->longText('code'); // HTML content
-                $table->timestamp('start_date');
-                $table->timestamp('end_date');
+                $table->timestamp('start_date')->useCurrent();
+                $table->timestamp('end_date')->nullable();
                 $table->timestamps();
 
                 $table->index(['start_date', 'end_date']);
