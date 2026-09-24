@@ -18,12 +18,15 @@ class EmailCampaign extends Model
         'total_recipients',
         'sent_count',
         'status',
+        'recipient_filter',
         'template_id',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'sent_at' => 'datetime',
+        'completed_at' => 'datetime',
     ];
 
     public function getProgressPercentage(): float
@@ -43,12 +46,14 @@ class EmailCampaign extends Model
     public function markAsSending(): void
     {
         $this->status = 'sending';
+        $this->sent_at = now();
         $this->save();
     }
 
     public function markAsCompleted(): void
     {
         $this->status = 'completed';
+        $this->completed_at = now();
         $this->save();
     }
 
@@ -56,5 +61,22 @@ class EmailCampaign extends Model
     {
         $this->status = 'failed';
         $this->save();
+    }
+
+    public function getFilterLabel(): string
+    {
+        return match($this->recipient_filter) {
+            'all' => 'All Users',
+            'activated' => 'Activated Users',
+            'inactive' => 'Inactive Users',
+            'week' => 'Inactive (1 week)',
+            'month' => 'Inactive (1 month)',
+            '3months' => 'Inactive (3 months)',
+            '6months' => 'Inactive (6 months)',
+            '9months' => 'Inactive (9 months)',
+            'year' => 'Inactive (1 year)',
+            'newsletter' => 'Newsletter Subscribers',
+            default => 'Unknown',
+        };
     }
 }
