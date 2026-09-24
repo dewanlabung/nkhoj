@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('notification_subscriptions', function (Blueprint $table) {
+        if (!Schema::hasTable('notification_subscriptions')) {
+            Schema::create('notification_subscriptions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('notif_id')->index(); // 'comment_replied', 'post_commented'
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');

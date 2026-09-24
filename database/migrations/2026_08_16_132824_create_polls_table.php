@@ -8,7 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('polls', function (Blueprint $table) {
+        if (!Schema::hasTable('polls')) {
+            Schema::create('polls', function (Blueprint $table) {
             $table->id();
             $table->foreignId('post_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('author_id')->constrained('users')->cascadeOnDelete();

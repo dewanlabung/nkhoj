@@ -20,7 +20,8 @@ return new class extends Migration {
         });
 
         // Poll options
-        Schema::create('page_poll_options', function (Blueprint $table) {
+        if (!Schema::hasTable('page_poll_options')) {
+            Schema::create('page_poll_options', function (Blueprint $table) {
             $table->id();
             $table->foreignId('page_post_id')->constrained()->cascadeOnDelete();
             $table->string('text', 200);

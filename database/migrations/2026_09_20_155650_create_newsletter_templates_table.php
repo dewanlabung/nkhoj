@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('newsletter_templates', function (Blueprint $table) {
+        if (!Schema::hasTable('newsletter_templates')) {
+            Schema::create('newsletter_templates', function (Blueprint $table) {
             $table->id();
             $table->string('name', 150);
             $table->string('subject', 255);

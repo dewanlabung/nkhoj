@@ -7,7 +7,8 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('page_posts', function (Blueprint $table) {
+        if (!Schema::hasTable('page_posts')) {
+            Schema::create('page_posts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('social_page_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();

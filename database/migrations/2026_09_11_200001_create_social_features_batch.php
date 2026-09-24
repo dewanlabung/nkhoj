@@ -8,7 +8,8 @@ return new class extends Migration {
     public function up(): void
     {
         // ─── Feature 1: Live Streaming ────────────────────────────────────────────
-        Schema::create('live_streams', function (Blueprint $table) {
+        if (!Schema::hasTable('live_streams')) {
+            Schema::create('live_streams', function (Blueprint $table) {
             $table->id();
             $table->string('uuid', 36)->unique();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();

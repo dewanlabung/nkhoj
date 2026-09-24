@@ -8,7 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('ad_zones', function (Blueprint $table) {
+        if (!Schema::hasTable('ad_zones')) {
+            Schema::create('ad_zones', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('position'); // header|sidebar|footer|in_content|after_post

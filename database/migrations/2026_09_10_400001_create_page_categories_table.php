@@ -10,7 +10,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('page_categories', function (Blueprint $table) {
+        if (!Schema::hasTable('page_categories')) {
+            Schema::create('page_categories', function (Blueprint $table) {
             $table->id();
             $table->string('name', 100)->unique();
             $table->string('slug', 100)->unique();

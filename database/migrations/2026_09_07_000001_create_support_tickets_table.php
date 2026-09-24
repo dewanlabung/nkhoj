@@ -8,7 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('support_tickets', function (Blueprint $table) {
+        if (!Schema::hasTable('support_tickets')) {
+            Schema::create('support_tickets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('requester_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('agent_id')->nullable()->constrained('users')->nullOnDelete();

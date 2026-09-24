@@ -9,7 +9,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('prompts', function (Blueprint $table) {
+        if (!Schema::hasTable('prompts')) {
+            Schema::create('prompts', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();   // e.g. 'author_assistant'
             $table->string('description')->nullable();

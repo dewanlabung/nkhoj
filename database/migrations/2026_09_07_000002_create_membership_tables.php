@@ -12,7 +12,8 @@ return new class extends Migration
             $table->boolean('is_pro')->default(false)->after('is_featured');
         });
 
-        Schema::create('membership_plans', function (Blueprint $table) {
+        if (!Schema::hasTable('membership_plans')) {
+            Schema::create('membership_plans', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('slug', 80)->unique();
