@@ -4,7 +4,7 @@ namespace App\Domains\Communication\Services;
 
 use App\Domains\Communication\Models\CommunicationCampaign;
 use App\Domains\Communication\Models\CommunicationRecipient;
-use App\Models\User;
+use App\Models\UserEngagement\User;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
 use Carbon\Carbon;
