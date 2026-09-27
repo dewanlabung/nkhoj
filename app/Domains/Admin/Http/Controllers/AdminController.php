@@ -1471,23 +1471,37 @@ class AdminController extends Controller
         }
 
         $composerBin = trim(shell_exec('which composer 2>/dev/null') ?: 'composer');
-        $commands = [
+
+        $required = [
             'git fetch origin master',
             'git reset --hard origin/master',
-            'HOME=/tmp ' . $composerBin . ' install --optimize-autoloader --no-interaction',
+            'HOME=/tmp ' . $composerBin . ' install --no-dev --optimize-autoloader --no-interaction',
             PHP_BINARY . ' artisan migrate --force',
             PHP_BINARY . ' artisan cache:clear',
             PHP_BINARY . ' artisan config:clear',
+            PHP_BINARY . ' artisan route:clear',
             PHP_BINARY . ' artisan config:cache',
-            PHP_BINARY . ' artisan view:clear',
             PHP_BINARY . ' artisan route:cache',
         ];
 
-        foreach ($commands as $cmd) {
-            exec('cd ' . base_path() . ' && ' . $cmd . ' 2>&1');
+        $optional = [
+            PHP_BINARY . ' artisan view:clear',
+        ];
+
+        $success = true;
+        foreach ($required as $cmd) {
+            $code = 0;
+            exec('cd ' . base_path() . ' && ' . $cmd . ' 2>&1', $out, $code);
+            if ($code !== 0) { $success = false; break; }
         }
 
-        return response('OK', 200);
+        if ($success) {
+            foreach ($optional as $cmd) {
+                exec('cd ' . base_path() . ' && ' . $cmd . ' 2>&1');
+            }
+        }
+
+        return response($success ? 'OK' : 'Deploy partially failed', $success ? 200 : 500);
     }
 
     // ── Memberships ───────────────────────────────────────

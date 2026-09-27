@@ -4,7 +4,7 @@ namespace App\Domains\Newsletter\Http\Controllers\Admin;
 
 use App\Models\EmailCampaign;
 use App\Models\Core\NewsletterSubscriber;
-use App\Models\User;
+use App\Models\UserEngagement\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
