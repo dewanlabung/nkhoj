@@ -1401,30 +1401,42 @@ class AdminController extends Controller
         $success = true;
 
         $composerBin = trim(shell_exec('which composer 2>/dev/null') ?: 'composer');
-        $commands = [
+
+        // Commands that must succeed — deploy stops on first failure
+        $required = [
             'git fetch origin master',
             'git reset --hard origin/master',
             'HOME=/tmp ' . $composerBin . ' install --no-dev --optimize-autoloader --no-interaction',
             PHP_BINARY . ' artisan migrate --force',
             PHP_BINARY . ' artisan cache:clear',
             PHP_BINARY . ' artisan config:clear',
+            PHP_BINARY . ' artisan route:clear',
             PHP_BINARY . ' artisan config:cache',
-            PHP_BINARY . ' artisan view:clear',
             PHP_BINARY . ' artisan route:cache',
         ];
 
-        foreach ($commands as $cmd) {
+        // Best-effort commands — failures are logged but do not stop deploy
+        $optional = [
+            PHP_BINARY . ' artisan view:clear',
+        ];
+
+        foreach ($required as $cmd) {
             $output = [];
             $code = 0;
             exec('cd ' . base_path() . ' && ' . $cmd . ' 2>&1', $output, $code);
-            $log[] = [
-                'cmd'    => $cmd,
-                'output' => implode("\n", $output),
-                'ok'     => $code === 0,
-            ];
+            $log[] = ['cmd' => $cmd, 'output' => implode("\n", $output), 'ok' => $code === 0];
             if ($code !== 0) {
                 $success = false;
                 break;
+            }
+        }
+
+        if ($success) {
+            foreach ($optional as $cmd) {
+                $output = [];
+                $code = 0;
+                exec('cd ' . base_path() . ' && ' . $cmd . ' 2>&1', $output, $code);
+                $log[] = ['cmd' => $cmd, 'output' => implode("\n", $output), 'ok' => $code === 0, 'optional' => true];
             }
         }
 
